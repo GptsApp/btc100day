@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { CandleData, MarketStats } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY || '' });
 
 export const generateMarketInsight = async (stats: MarketStats, recentCandles: CandleData[]): Promise<string> => {
   try {
