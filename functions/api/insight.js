@@ -2,6 +2,18 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
+    // Debug: Check if API_KEY exists
+    console.log('Available env vars:', Object.keys(env || {}));
+    console.log('API_KEY exists:', !!env?.API_KEY);
+
+    if (!env?.API_KEY) {
+      return new Response(JSON.stringify({
+        insight: "API密钥未配置，请检查环境变量设置。"
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const { stats, recentCandles } = await request.json();
 
     const lastClose = recentCandles[recentCandles.length - 1]?.close || stats.currentPrice;
