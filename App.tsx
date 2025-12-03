@@ -43,8 +43,8 @@ const App = () => {
 
     initData();
 
-    // Update price every 5 seconds
-    const interval = setInterval(updatePrice, 5000);
+    // Update price every 10 seconds to reduce load
+    const interval = setInterval(updatePrice, 10000);
 
     return () => clearInterval(interval);
   }, []);
