@@ -220,7 +220,7 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
             type="monotone"
             dataKey="close"
             stroke="#ff8c00"
-            strokeWidth={3}
+            strokeWidth={window.innerWidth < 768 ? 2 : 3}
             fillOpacity={1}
             fill="url(#colorPrice)"
             isAnimationActive={true}
