@@ -37,12 +37,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
   return (
     <div className="min-h-screen flex flex-col font-sans text-white relative" style={{ backgroundColor: 'rgb(6, 0, 16)' }}>
       <div className="fixed inset-0 z-0">
-        <Aurora
-          colorStops={["#7cff67", "#b19eef", "#5227ff"]}
-          blend={0.4}
-          amplitude={1.6}
-          speed={0.5}
-        />
+        <div className="hidden md:block">
+          <Aurora
+            colorStops={["#7cff67", "#b19eef", "#5227ff"]}
+            blend={0.4}
+            amplitude={1.6}
+            speed={0.5}
+          />
+        </div>
+        <div className="md:hidden bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-green-900/20 w-full h-full"></div>
       </div>
       {/* Top Navigation Bar (Fixed) */}
       <header className="fixed top-0 left-0 right-0 h-[68px] bg-black/60 backdrop-blur-2xl z-50 border-b border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] supports-[backdrop-filter]:bg-black/60">

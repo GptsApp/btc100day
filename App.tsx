@@ -53,7 +53,12 @@ const App = () => {
   const isPositive = stats ? stats.change24hPercent >= 0 : true;
 
   // Ensure we show data from 2023-01-01 to match user request
-  const chartData = candles.filter(c => c.time >= new Date('2023-01-01').getTime());
+  // Reduce data points on mobile for better performance
+  const chartData = useMemo(() => {
+    const filtered = candles.filter(c => c.time >= new Date('2023-01-01').getTime());
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? filtered.filter((_, i) => i % 2 === 0) : filtered;
+  }, [candles]);
 
   // Defined from User Request for the Chart
   const highlightPeriods: HighlightPeriod[] = useMemo(() => {
