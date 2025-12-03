@@ -106,42 +106,6 @@
         }
       }
       
-      /* AI Studio Glowing Border Effect */
-      .ai-border-glow {
-        position: relative;
-        background: #ffffff;
-        border-radius: 1rem; /* rounded-2xl */
-        z-index: 0;
-      }
-
-      /* The gradient border layer */
-      .ai-border-glow::before {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        border-radius: inherit;
-        padding: 2px; /* Border width */
-        background: conic-gradient(
-          from var(--border-angle),
-          #4285f4,
-          #9b72cb,
-          #d96570,
-          #4285f4
-        );
-        -webkit-mask: 
-          linear-gradient(#fff 0 0) content-box, 
-          linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        z-index: -1;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        animation: border-rotate 4s linear infinite;
-      }
-
-      .ai-border-glow:hover::before {
-        opacity: 1;
-      }
 
       /* Remove Recharts Focus Outline */
       .recharts-wrapper:focus,
@@ -174,18 +138,6 @@
         background: #bdc1c6;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
-  }
-}
-</script>
 <link rel="stylesheet" href="/index.css">
 </head>
   <body>

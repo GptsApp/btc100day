@@ -1,20 +1,57 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# BTC 100-Day Bull Run Theory Dashboard
 
-# Run and deploy your AI Studio app
+A real-time Bitcoin analysis dashboard based on the "100-Day Bull Run Theory" with AI-powered market insights.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1HuovYPDFaQGhlZYJI5xHyC0oOsqKqUBU
+- 📈 Real-time BTC price updates (every 5 seconds)
+- 📊 Interactive candlestick chart with EMA15 indicator
+- 🤖 AI-powered market analysis using DeepSeek V3.2
+- 🌐 Bilingual support (English/Chinese)
+- 📱 Responsive design for all devices
+- ⚡ Fast deployment with Cloudflare Pages
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+   ```bash
+   npm install
+   ```
+
+2. Set the `API_KEY` in `.env` to your DeepSeek API key:
+   ```bash
+   API_KEY=your_deepseek_api_key_here
+   ```
+
 3. Run the app:
-   `npm run dev`
+   ```bash
+   npm run dev
+   ```
+
+## Deployment
+
+This project is configured for automatic deployment to Cloudflare Pages via GitHub Actions.
+
+### Environment Variables
+
+Set the following in Cloudflare Pages:
+- `API_KEY`: Your DeepSeek API key
+
+## Theory Overview
+
+The 100-Day Bull Run Theory identifies four phases:
+1. **Observation (Day 0-30)**: Watch for breakout signals
+2. **Confirmation (Day 30-70)**: Best entry window
+3. **Warning (Day 70-100)**: Prepare for exit
+4. **Rest (Day 100+)**: Wait for next cycle
+
+## Tech Stack
+
+- React 19 + TypeScript
+- Vite for build tooling
+- Recharts for data visualization
+- Tailwind CSS for styling
+- DeepSeek API for AI analysis
+- Binance API for price data
