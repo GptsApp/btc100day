@@ -4,5 +4,5 @@ compatibility_date = "2024-12-03"
 [assets]
 directory = "./dist"
 
-# For static sites, environment variables must be prefixed with VITE_
-# Set VITE_API_KEY in Cloudflare Pages build environment variables
+# API_KEY environment variable will be set in Cloudflare Pages
+# and used by the serverless function
