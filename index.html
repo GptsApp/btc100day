@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>BTC100DAY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              primary: '#1a73e8',
+            },
+            animation: {
+              'border-rotate': 'border-rotate 4s linear infinite',
+            },
+            keyframes: {
+              'border-rotate': {
+                '0%': { '--border-angle': '0deg' },
+                '100%': { '--border-angle': '360deg' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      @property --border-angle {
+        syntax: '<angle>';
+        initial-value: 0deg;
+        inherits: false;
+      }
+
+      body {
+        background-color: #f0f4f9;
+        color: #1f1f1f;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Unified text shadow for text content only */
+      .text-shadow {
+        text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8) !important;
+      }
+
+      /* Animated border light */
+      .animated-border::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        padding: 4px;
+        background: conic-gradient(from var(--angle), transparent 50%, rgba(124,255,103,0.4) 65%, rgba(177,158,239,0.8) 70%, rgba(82,39,255,0.4) 75%, transparent 90%);
+        border-radius: inherit;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        -webkit-mask-composite: xor;
+        filter: blur(8px);
+        box-shadow: 0 0 20px #60a5fa, 0 0 40px #a855f7, 0 0 60px #60a5fa;
+        opacity: 0;
+        animation: borderLight 4s linear infinite;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+      }
+
+      .animated-border::after {
+        content: '';
+        position: absolute;
+        inset: -30px;
+        background: conic-gradient(from var(--angle), transparent 60%, rgba(124,255,103,0.3) 68%, rgba(177,158,239,0.6) 70%, rgba(82,39,255,0.3) 72%, transparent 80%);
+        border-radius: 24px;
+        mask:
+          radial-gradient(ellipse at center, transparent 0%, transparent calc(100% - 30px), black calc(100% - 29px), black calc(100% - 1px), transparent 100%),
+          linear-gradient(black, black);
+        mask-composite: subtract;
+        -webkit-mask-composite: subtract;
+        filter: blur(40px);
+        opacity: 0;
+        animation: borderLight 4s linear infinite;
+        transition: opacity 0.3s ease;
+        z-index: -2;
+      }
+
+      .animated-border:hover::before,
+      .animated-border:hover::after {
+        opacity: 1;
+      }
+
+      @property --angle {
+        syntax: '<angle>';
+        initial-value: 0deg;
+        inherits: false;
+      }
+
+      @keyframes borderLight {
+        to {
+          --angle: 360deg;
+        }
+      }
+      
+      /* AI Studio Glowing Border Effect */
+      .ai-border-glow {
+        position: relative;
+        background: #ffffff;
+        border-radius: 1rem; /* rounded-2xl */
+        z-index: 0;
+      }
+
+      /* The gradient border layer */
+      .ai-border-glow::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        padding: 2px; /* Border width */
+        background: conic-gradient(
+          from var(--border-angle),
+          #4285f4,
+          #9b72cb,
+          #d96570,
+          #4285f4
+        );
+        -webkit-mask: 
+          linear-gradient(#fff 0 0) content-box, 
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        animation: border-rotate 4s linear infinite;
+      }
+
+      .ai-border-glow:hover::before {
+        opacity: 1;
+      }
+
+      /* Remove Recharts Focus Outline */
+      .recharts-wrapper:focus,
+      .recharts-surface:focus,
+      .recharts-wrapper *:focus,
+      .recharts-surface *:focus {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      .recharts-wrapper,
+      .recharts-surface {
+        outline: none !important;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #dadce0;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #bdc1c6;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

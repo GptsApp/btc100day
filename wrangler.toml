@@ -1,0 +1,5 @@
+name = "btc100day"
+compatibility_date = "2024-12-03"
+
+[env.production.vars]
+API_KEY = "sk-836d86442a244dfc8b1189b992307a75"

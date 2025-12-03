@@ -1,0 +1,5 @@
+{
+  "name": "BTC100DAY",
+  "description": "A minimalist, high-performance Bitcoin analytics dashboard featuring 100-day trend analysis, AI-powered market insights, and interactive K-line charting.",
+  "requestFramePermissions": []
+}
