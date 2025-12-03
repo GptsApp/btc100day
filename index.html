@@ -95,6 +95,14 @@
         opacity: 1;
       }
 
+      /* Disable hover effects on mobile */
+      @media (max-width: 768px) {
+        .animated-border:hover::before,
+        .animated-border:hover::after {
+          opacity: 0 !important;
+        }
+      }
+
       @property --angle {
         syntax: '<angle>';
         initial-value: 0deg;
