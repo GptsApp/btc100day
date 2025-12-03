@@ -24,8 +24,6 @@ jobs:
 
     - name: Build
       run: npm run build
-      env:
-        API_KEY: ${{ secrets.API_KEY }}
 
     - name: Deploy to Cloudflare Pages
       uses: cloudflare/pages-action@v1
