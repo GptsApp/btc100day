@@ -148,13 +148,15 @@ const App = () => {
            <AnalysisPanel candles={candles} currentPrice={stats?.currentPrice || 0} lang={lang} />
         </div>
 
-        <div className="h-[350px] sm:h-[400px] md:h-[500px] w-full min-w-0 min-h-0 p-2 md:p-4 relative overflow-hidden">
+        <div className="h-[350px] sm:h-[400px] md:h-[500px] w-full p-2 md:p-4 relative">
            {loading && candles.length === 0 ? (
              <div className="absolute inset-0 flex items-center justify-center z-10">
                <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
              </div>
            ) : (
-             <ModernChart data={chartData} highlights={highlightPeriods} />
+             <div className="w-full h-full">
+               <ModernChart data={chartData} highlights={highlightPeriods} />
+             </div>
            )}
         </div>
       </div>

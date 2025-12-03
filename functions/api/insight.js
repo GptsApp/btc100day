@@ -41,11 +41,18 @@ export async function onRequestPost(context) {
       })
     });
 
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
     const data = await response.json();
     const insight = data.choices?.[0]?.message?.content || "暂时无法生成分析。";
 
     return new Response(JSON.stringify({ insight }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   } catch (error) {
     return new Response(JSON.stringify({ insight: "AI 分析服务暂时不可用。" }), {
