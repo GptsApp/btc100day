@@ -14,7 +14,7 @@ export const generateMarketInsight = async (stats: MarketStats, recentCandles: C
     } else if (change30d > 5) {
       analysis = "市场处于温和上涨阶段，可能正在进入100天牛市周期的观察期。成交量和价格走势需要进一步确认，建议耐心观察突破信号。";
     } else if (change30d < -10) {
-      analysis = "当前市场处于调整阶段，符合100天理论中的"休息期"特征。建议等待下一轮周期机会，避免盲目抄底操作。";
+      analysis = "当前市场处于调整阶段，符合100天理论中的\"休息期\"特征。建议等待下一轮周期机会，避免盲目抄底操作。";
     } else {
       analysis = "市场处于横盘整理状态，暂未出现明确的100天牛市信号。建议保持观望，等待价格突破关键阻力位后再做决策。";
     }
