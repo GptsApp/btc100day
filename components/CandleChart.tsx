@@ -111,6 +111,7 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
    return (
     <div
       className="w-full h-full font-sans select-none touch-none outline-none focus:outline-none relative"
+      style={{ minWidth: '300px', minHeight: '400px' }}
     >
       {/* Watermark */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
@@ -118,7 +119,7 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
           BTC100.DAY
         </div>
       </div>
-      <ResponsiveContainer width="100%" height="100%" className="focus:outline-none">
+      <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={400} className="focus:outline-none">
         <ComposedChart
           data={chartData}
           margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
