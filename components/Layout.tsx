@@ -36,7 +36,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-white relative overflow-x-hidden" style={{ backgroundColor: 'rgb(6, 0, 16)' }}>
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0" style={{ height: '120vh' }}>
         <div className="hidden md:block">
           <Aurora
             colorStops={["#7cff67", "#b19eef", "#5227ff"]}
