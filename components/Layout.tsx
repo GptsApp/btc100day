@@ -80,7 +80,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-             <span className="text-xs text-white/60 font-mono">v1.2.0</span>
+             <span className="text-xs text-white/60 font-mono">v1.2.1</span>
              <button
                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-medium text-white/90 hover:text-[#7cff67] hover:border-[#7cff67] hover:bg-white/20 transition-all cursor-pointer shadow-sm text-shadow"
@@ -96,7 +96,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
       {isMenuOpen && (
         <div className="md:hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsMenuOpen(false)}>
           <div
-            className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl rounded-t-3xl p-6 animate-in slide-in-from-bottom duration-300 border-t border-white/20"
+            className="fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur-2xl rounded-t-3xl p-6 animate-in slide-in-from-bottom duration-300 border-t border-white/10 shadow-[0_-8px_32px_rgba(0,0,0,0.4)] supports-[backdrop-filter]:bg-black/60"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-6"></div>
