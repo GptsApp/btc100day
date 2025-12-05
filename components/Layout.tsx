@@ -80,7 +80,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-             <span className="text-xs text-white/60 font-mono">v1.2.5</span>
+             <span className="text-xs text-white/60 font-mono">v1.2.6</span>
              <button
                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-medium text-white/90 hover:text-[#7cff67] hover:border-[#7cff67] hover:bg-white/20 transition-all cursor-pointer shadow-sm text-shadow"
@@ -133,8 +133,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
         
       <footer className="py-8 bg-black/20 backdrop-blur-2xl border-t border-white/10 relative z-10">
          <div className="max-w-7xl mx-auto px-4 md:px-8 text-center space-y-3">
-            <p className="text-xs font-semibold text-white text-shadow">2025 © 100DAY.WS. All rights reserved.</p>
-            <p className="text-xs text-white/70 text-shadow">Theory from <a href="https://x.com/coolish" target="_blank" rel="noreferrer" className="hover:text-[#7cff67] hover:underline font-medium">@Paulwei</a> • Built with ❤️ by <a href="#" className="hover:text-[#7cff67] hover:underline font-medium">@Rocky</a></p>
+            <p className="text-xs font-semibold text-white text-shadow">2025 © BTC100.DAY. All rights reserved.</p>
+            <p className="text-xs text-white/70 text-shadow">Theory from <a href="https://x.com/coolish" target="_blank" rel="noreferrer" className="hover:text-[#7cff67] hover:underline font-medium">@Paulwei</a> • Built with ❤️ by <a href="https://x.com/WeWill_Rocky" target="_blank" rel="noreferrer" className="hover:text-[#7cff67] hover:underline font-medium">@Rocky</a></p>
          </div>
       </footer>
     </div>
