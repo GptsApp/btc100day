@@ -80,30 +80,37 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
 
    const padding = (maxPrice - minPrice) * 0.1;
 
-   const referenceAreas = useMemo(() => highlights.flatMap(h => {
+   const referenceAreas = useMemo(() => highlights.flatMap((h, index) => {
      const start = new Date(h.startDate).getTime();
      const dayMs = 24 * 60 * 60 * 1000;
      const mid = start + (50 * dayMs);
-     const end = start + (100 * dayMs); 
-     
+     const end = start + (100 * dayMs);
+     const cycleNum = index + 1;
+
      return [
        {
          id: `${h.label}-part1`,
          x1: start,
          x2: mid,
          label: '50d',
+         cycleLabel: `C${cycleNum}`,
          color: '#00ff88',
          bgOpacity: 0.25,
-         strokeOpacity: 1.0
+         strokeOpacity: 1.0,
+         showLabel: true,
+         labelX: start + (25 * dayMs)
        },
        {
          id: `${h.label}-part2`,
          x1: mid,
          x2: end,
          label: '50d',
+         cycleLabel: '',
          color: '#ff3366',
          bgOpacity: 0.25,
-         strokeOpacity: 1.0
+         strokeOpacity: 1.0,
+         showLabel: false,
+         labelX: 0
        }
      ];
    }), [highlights]);
@@ -201,6 +208,14 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
               strokeDasharray="3 3"
               strokeOpacity={ref.strokeOpacity}
               strokeWidth={1}
+              label={ref.showLabel ? {
+                value: ref.cycleLabel,
+                position: 'insideTopLeft',
+                fill: '#ffffff',
+                fontSize: 14,
+                fontWeight: 'bold',
+                offset: 10
+              } : undefined}
             />
           ))}
 
