@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { ComposedChart, Area, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceArea, ReferenceLine, Line } from 'recharts';
 import { CandleData, HighlightPeriod } from '../types';
 import { calculateEMA } from '../services/cryptoService';
@@ -65,44 +65,14 @@ const CustomTooltip = ({ active, payload, label, highlights }: any) => {
 };
 
 export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] }) => {
-   const [animatedDataLength, setAnimatedDataLength] = useState(0);
-   const [currentTime, setCurrentTime] = useState(0);
-
    const emaData = useMemo(() => calculateEMA(data, 15), [data]);
-
-   const fullChartData = useMemo(() => {
+   
+   const chartData = useMemo(() => {
      return data.map((d, i) => ({
        ...d,
        ema: emaData[i]?.ema
      }));
    }, [data, emaData]);
-
-   const chartData = useMemo(() => {
-     return fullChartData.slice(0, animatedDataLength);
-   }, [fullChartData, animatedDataLength]);
-
-   useEffect(() => {
-     if (fullChartData.length === 0) return;
-
-     const totalDuration = 5000; // 5 seconds
-     const totalPoints = fullChartData.length;
-     const interval = totalDuration / totalPoints;
-
-     let currentIndex = 0;
-     const timer = setInterval(() => {
-       currentIndex++;
-       setAnimatedDataLength(currentIndex);
-       if (currentIndex < fullChartData.length) {
-         setCurrentTime(fullChartData[currentIndex - 1]?.time || 0);
-       }
-
-       if (currentIndex >= totalPoints) {
-         clearInterval(timer);
-       }
-     }, interval);
-
-     return () => clearInterval(timer);
-   }, [fullChartData]);
 
    const minPrice = useMemo(() => Math.min(...data.map(d => d.low)), [data]);
    const maxPrice = useMemo(() => Math.max(...data.map(d => d.high)), [data]);
@@ -117,11 +87,8 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
      const end = start + (100 * dayMs);
      const cycleNum = index + 1;
 
-     // Only show areas if current time has reached them
-     const areas = [];
-
-     if (currentTime >= start) {
-       areas.push({
+     return [
+       {
          id: `${h.label}-part1`,
          x1: start,
          x2: mid,
@@ -132,11 +99,8 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
          strokeOpacity: 1.0,
          showLabel: true,
          labelX: start + (25 * dayMs)
-       });
-     }
-
-     if (currentTime >= mid) {
-       areas.push({
+       },
+       {
          id: `${h.label}-part2`,
          x1: mid,
          x2: end,
@@ -147,11 +111,9 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
          strokeOpacity: 1.0,
          showLabel: false,
          labelX: 0
-       });
-     }
-
-     return areas;
-   }), [highlights, currentTime]);
+       }
+     ];
+   }), [highlights]);
 
    return (
     <div
