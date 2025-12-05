@@ -95,11 +95,11 @@ void main() {
 
   float height = snoise(vec2(uv.x * 2.0 + uTime * 0.1, uTime * 0.25)) * 0.5 * uAmplitude;
   height = exp(height);
-  height = (uv.y * 1.5 - height + 0.5);
-  float intensity = 0.5 * height;
+  height = (uv.y * 1.75 - height + 0.35);
+  float intensity = 0.55 * height;
 
-  float midPoint = 0.25;
-  float auroraAlpha = smoothstep(midPoint - uBlend * 1.0, midPoint + uBlend * 1.0, intensity);
+  float midPoint = 0.30;
+  float auroraAlpha = smoothstep(midPoint - uBlend * 0.65, midPoint + uBlend * 0.65, intensity);
 
   vec3 auroraColor = intensity * rampColor;
 
