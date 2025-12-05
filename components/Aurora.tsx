@@ -95,7 +95,7 @@ void main() {
 
   float height = snoise(vec2(uv.x * 2.0 + uTime * 0.1, uTime * 0.25)) * 0.5 * uAmplitude;
   height = exp(height);
-  height = (uv.y * 1.75 - height + 0.35);
+  height = (uv.y * 1.0 - height + 0.35);
   float intensity = 0.55 * height;
 
   float midPoint = 0.30;
