@@ -98,8 +98,8 @@ void main() {
   height = (uv.y * 2.0 - height + 0.2);
   float intensity = 0.6 * height;
 
-  float midPoint = 0.20;
-  float auroraAlpha = smoothstep(midPoint - uBlend * 0.5, midPoint + uBlend * 0.5, intensity);
+  float midPoint = 0.35;
+  float auroraAlpha = smoothstep(midPoint - uBlend * 0.8, midPoint + uBlend * 0.8, intensity);
 
   vec3 auroraColor = intensity * rampColor;
 
@@ -168,8 +168,17 @@ export default function Aurora(props: any) {
     ctn.appendChild(gl.canvas);
 
     let animateId = 0;
+    let lastTime = 0;
+    const targetFPS = 30; // Limit to 30 FPS for better performance
+    const frameInterval = 1000 / targetFPS;
+
     const update = (t: number) => {
       animateId = requestAnimationFrame(update);
+
+      // Throttle to target FPS
+      if (t - lastTime < frameInterval) return;
+      lastTime = t;
+
       const { time = t * 0.01, speed = 1.0 } = propsRef.current;
       program.uniforms.uTime.value = time * speed * 0.1;
       program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0;
