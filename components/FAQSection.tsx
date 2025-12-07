@@ -62,7 +62,7 @@ const contentData = {
     items: [
       {
         q: "1. What is the BTC 100-Day Cycle Theory?",
-        a: "The BTC 100-Day Cycle Theory identifies a recurring pattern: when Bitcoin enters a 'single-sided rapid rise' (continuous strong upward movement with minimal pullbacks), this explosive momentum typically lasts around 100 days before reaching a peak and entering a 'rest period.' The theory is rooted in market psychology - after about 3 months of intense rallying, investor emotions shift from FOMO (fear of missing out) to exhaustion, and early investors begin taking profits. This isn't about mechanically counting days, but rather using dynamic probability assessment as the cycle progresses. Discovered by @coolish through deep analysis of sociology, behavioral psychology, and game theory, this method has successfully predicted 4 major BTC cycle tops with remarkable accuracy, making it a powerful risk management tool for understanding market timing."
+        a: "The BTC 100-Day Cycle Theory identifies a recurring pattern: when Bitcoin enters a 'single-sided rapid rise' (continuous strong upward movement with minimal pullbacks), this explosive momentum typically lasts around 100 days before reaching a peak and entering a 'rest period.' The theory is rooted in market psychology - after about 3 months of intense rallying, investor emotions shift from FOMO (fear of missing out) to exhaustion, and early investors begin taking profits. This isn't about mechanically counting days, but rather using dynamic probability assessment as the cycle progresses. Discovered by @Paulwei through deep analysis of sociology, behavioral psychology, and game theory, this method has successfully predicted 4 major BTC cycle tops with remarkable accuracy, making it a powerful risk management tool for understanding market timing."
       },
       {
         q: "2. How to judge the starting point of the 100-day cycle?",
@@ -107,7 +107,7 @@ const contentData = {
     items: [
       {
         q: "1. 什么是 BTC 100天周期理论？",
-        a: "BTC 100天周期理论揭示了一个重复出现的规律：当比特币进入'单边快速上涨'状态（持续强劲上升，回调极少）时，这种爆发性动能通常会持续约100天左右达到峰值，然后进入'休息期'。该理论基于市场心理学——经过约3个月的激烈上涨后，投资者情绪会从FOMO（害怕错过）转向疲惫，早期投资者开始获利了结。这不是机械地数日子，而是随着周期进展动态评估概率。由@coolish通过社会学、行为心理学和博弈论的深度分析发现，该方法已成功预测4次重大BTC周期顶部，准确率惊人，是理解市场时机的强大风险管理工具。"
+        a: "BTC 100天周期理论揭示了一个重复出现的规律：当比特币进入'单边快速上涨'状态（持续强劲上升，回调极少）时，这种爆发性动能通常会持续约100天左右达到峰值，然后进入'休息期'。该理论基于市场心理学——经过约3个月的激烈上涨后，投资者情绪会从FOMO（害怕错过）转向疲惫，早期投资者开始获利了结。这不是机械地数日子，而是随着周期进展动态评估概率。由@Paulwei通过社会学、行为心理学和博弈论的深度分析发现，该方法已成功预测4次重大BTC周期顶部，准确率惊人，是理解市场时机的强大风险管理工具。"
       },
       {
         q: "2. 如何判断 100天周期的起点？",
