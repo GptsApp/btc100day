@@ -62,11 +62,11 @@ const contentData = {
     items: [
       {
         q: "1. What is the BTC 100-Day Cycle Theory?",
-        a: "Simply put: When BTC starts going crazy upward (like a rocket, rising continuously with few major drops), this kind of explosive rise usually lasts about 100 days before reaching a peak, then starts pulling back for a rest. For example, rising from $10k to $70k with almost no significant drops - this 'rapid unilateral rise' should be watched carefully after about 100 days. This is a pattern Wei God (@coolish) discovered through years of observation, successfully predicting 4 BTC cyclical tops."
+        a: "The BTC 100-Day Cycle Theory identifies a recurring pattern: when Bitcoin enters a 'single-sided rapid rise' (continuous strong upward movement with minimal pullbacks), this explosive momentum typically lasts around 100 days before reaching a peak and entering a 'rest period.' The theory is rooted in market psychology - after about 3 months of intense rallying, investor emotions shift from FOMO (fear of missing out) to exhaustion, and early investors begin taking profits. This isn't about mechanically counting days, but rather using dynamic probability assessment as the cycle progresses. Discovered by @coolish through deep analysis of sociology, behavioral psychology, and game theory, this method has successfully predicted 4 major BTC cycle tops with remarkable accuracy, making it a powerful risk management tool for understanding market timing."
       },
       {
         q: "2. How to judge the starting point of the 100-day cycle?",
-        a: "Look at the white line (EMA15) on the chart: When BTC price breaks above the white line and stays above it consistently, while volume increases significantly and there are many consecutive up days, this could be the start of a new cycle. Important reminder: Don't be 100% certain from the start - gradually increase confidence during the rise. First 30 days: just observe (10% confidence), Days 30-70: start confirming (50%+ confidence), Days 70-100: high alert (highest confidence)."
+        a: "Key criteria for identifying cycle start: 1) Price breaks above and consistently stays above EMA15 (white line) 2) Single-sided rapid rise with minimal deep pullbacks 3) Volume expansion supporting the move 4) High proportion of consecutive up days. Use Bayesian thinking for dynamic confirmation - don't mechanically count days. Gradually increase confidence: Days 0-30 observe (10% confidence), Days 30-70 confirm trend (50%+ confidence), Days 70-100 high alert (maximum confidence). The key is weekly-level confirmation, not getting distracted by daily fluctuations."
       },
       {
         q: "3. What do 'Fast Start, Slow End' and 'Slow Start, Fast End' mean?",
@@ -74,15 +74,15 @@ const contentData = {
       },
       {
         q: "4. How accurate is this theory?",
-        a: "Currently 100% accurate! Wei God's 4 publicly predicted cycles all hit: successfully warned of tops around 100 days (±10 days error). But be rational: 1) Sample size still small, needs more validation 2) May fail as more people know about it 3) Can't rely on this method alone, combine with other indicators 4) Past success doesn't guarantee future effectiveness."
+        a: "Currently 100% accurate! @Paulwei's 4 publicly predicted cycles all hit: successfully warned of tops around 100 days (±10 days error). But be rational: 1) Sample size still small, needs more validation 2) May fail as more people know about it 3) Can't rely on this method alone, combine with other indicators 4) Past success doesn't guarantee future effectiveness."
       },
       {
         q: "5. What if I missed the first 50 days?",
-        a: "No worries at all! Wei God emphasizes: Even if you completely miss the first 50 days, the last 50 days still offer substantial profits. Best strategy: Days 30-70 are the golden entry period - trend is confirmed yet sufficient upside remains. Never FOMO (Fear of Missing Out) and chase blindly in the first 30 days when risk is highest and certainty lowest."
+        a: "No worries at all! @Paulwei emphasizes: Even if you completely miss the first 50 days, the last 50 days still offer substantial profits. Best strategy: Days 30-70 are the golden entry period - trend is confirmed yet sufficient upside remains. Never FOMO (Fear of Missing Out) and chase blindly in the first 30 days when risk is highest and certainty lowest."
       },
       {
         q: "6. Why hasn't this method failed yet?",
-        a: "Wei God's interesting explanation: 99% of market methods are garbage, and these garbage methods actually protect the truly effective 1%. Additionally, this method requires extreme patience and firm conviction to execute - most people can't do it. For example, on day 80 when everyone is celebrating, do you dare believe there are only 20 days left to the top? This anti-human-nature operation is itself a barrier."
+        a: "@Paulwei's interesting explanation: 99% of market methods are garbage, and these garbage methods actually protect the truly effective 1%. Additionally, this method requires extreme patience and firm conviction to execute - most people can't do it. For example, on day 80 when everyone is celebrating, do you dare believe there are only 20 days left to the top? This anti-human-nature operation is itself a barrier."
       },
       {
         q: "7. What's the scientific basis of this theory?",
@@ -107,11 +107,11 @@ const contentData = {
     items: [
       {
         q: "1. 什么是 BTC 100天周期理论？",
-        a: "简单说：当BTC开始疯狂上涨（像火箭一样连续涨，很少大跌），这种疯涨通常持续约100天就会到顶，然后开始回调休息。比如从1万涨到7万，中间几乎不怎么跌，这种'单边快速上涨'大概100天后就该小心了。这是魏神(@coolish)通过多年观察总结的规律，已经成功预测了4次BTC的阶段性顶部。"
+        a: "BTC 100天周期理论揭示了一个重复出现的规律：当比特币进入'单边快速上涨'状态（持续强劲上升，回调极少）时，这种爆发性动能通常会持续约100天左右达到峰值，然后进入'休息期'。该理论基于市场心理学——经过约3个月的激烈上涨后，投资者情绪会从FOMO（害怕错过）转向疲惫，早期投资者开始获利了结。这不是机械地数日子，而是随着周期进展动态评估概率。由@coolish通过社会学、行为心理学和博弈论的深度分析发现，该方法已成功预测4次重大BTC周期顶部，准确率惊人，是理解市场时机的强大风险管理工具。"
       },
       {
         q: "2. 如何判断 100天周期的起点？",
-        a: "看图表上的白线（EMA15）：当BTC价格突破白线并且一直在白线上方运行，同时成交量明显增加，连续上涨天数很多，这就可能是一个新周期的开始。重要提醒：不要一开始就100%确定，要在上涨过程中逐步增加信心。前30天只是观察（信心10%），30-70天开始确认（信心50%+），70-100天高度警惕（信心最高）。"
+        a: "判断周期起点的关键标准：1) 价格突破并持续在EMA15白线上方运行 2) 单边快速上涨，少有深度回调 3) 成交量配合放大 4) 连续上涨天数占比高。采用贝叶斯思维动态确认，而不是机械数日子。逐步增加信心：0-30天观察期（信心10%），30-70天确认期（信心50%+），70-100天预警期（信心最高）。关键是周级别确认，不被日线波动干扰。"
       },
       {
         q: "3. 前快后慢和前慢后快是什么意思？",
