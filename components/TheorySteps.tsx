@@ -121,7 +121,7 @@ const translations = {
         day: "Day 30-70",
         icon: <CheckCircle2 className="w-5 h-5" />,
         iconColor: "text-emerald-400",
-        check: "连续在EMA15上方，涨幅>20%，回撤<15%。",
+        check: "连续在EMA15上方，涨幅>20%，回撤<15%，成交量持续放大",
         action: "最佳入场时机！即使前50天踏空，后50天仍有肉吃。"
       },
       {
@@ -130,7 +130,7 @@ const translations = {
         icon: <AlertTriangle className="w-5 h-5" />,
         iconColor: "text-amber-400",
         check: "接近100天，FOMO情绪高涨，高位震荡。",
-        action: "逐步减仓，锁定利润！Day 80-100清仓。"
+        action: "逐步减仓，锁定利润！例如：Day 80减30%，Day 90减30%，Day 100清仓。或者换小额账户轻仓参与。"
       },
       {
         title: "Step 4: 休息期",
