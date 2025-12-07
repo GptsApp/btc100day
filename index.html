@@ -41,12 +41,20 @@
       }
 
       html, body {
-        background-color: #f0f4f9;
+        background-color: #f0f4f9 !important;
         color: #1f1f1f;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         -webkit-tap-highlight-color: transparent;
         overscroll-behavior: none;
+        -webkit-overscroll-behavior: none;
+        height: 100%;
+        min-height: 100vh;
+      }
+
+      #root {
+        background-color: #f0f4f9;
+        min-height: 100vh;
       }
 
       /* Unified text shadow for text content only */
