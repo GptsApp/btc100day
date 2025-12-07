@@ -2,10 +2,6 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    // Debug: Check if API_KEY exists
-    console.log('Available env vars:', Object.keys(env || {}));
-    console.log('API_KEY exists:', !!env?.API_KEY);
-
     if (!env?.API_KEY) {
       return new Response(JSON.stringify({
         insight: "API密钥未配置，请检查环境变量设置。"
@@ -14,31 +10,43 @@ export async function onRequestPost(context) {
       });
     }
 
-    const { stats, recentCandles } = await request.json();
+    const { analysis, stats } = await request.json();
 
-    const lastClose = recentCandles[recentCandles.length - 1]?.close || stats.currentPrice;
-    const thirtyDaysAgo = recentCandles[recentCandles.length - 30]?.close || lastClose;
-    const change30d = ((lastClose - thirtyDaysAgo) / thirtyDaysAgo) * 100;
+    const stageNames = {
+      observation: '观察期 (0-30天)',
+      confirmation: '确认期 (30-70天)',
+      warning: '预警期 (70-100天)',
+      rest: '休息期'
+    };
 
-    const prompt = `
-      Act as an expert crypto analyst specializing in the "BTC 100-Day Bull Run Theory".
+    const prompt = `你是BTC 100天周期理论的专家分析师。
 
-      The Theory:
-      - A rapid, unilateral rise typically lasts ~100 days.
-      - Phases: Observation (0-30d), Confirmation (30-70d), Warning (70-100d).
+**理论核心**：
+- 单边快速上涨通常持续约100天达到峰值
+- 四个阶段：观察期(0-30天)、确认期(30-70天)、预警期(70-100天)、休息期
+- 基于贝叶斯思维动态评估概率，不机械数日子
 
-      Current Data:
-      - Price: $${stats.currentPrice.toLocaleString()}
-      - 24h Change: ${stats.change24hPercent.toFixed(2)}%
-      - 30d Trend: ${change30d.toFixed(2)}%
+**当前市场数据**（已处理完毕，无需计算）：
+- BTC价格: $${stats.currentPrice.toLocaleString()}
+- 24小时涨跌: ${stats.change24hPercent.toFixed(2)}%
 
-      Task:
-      Analyze if we are currently in a potential "100-day cycle".
-      If trending up strongly, estimate which phase we might be in.
-      If trending down or sideways, mention we are likely in a "Rest" phase.
+**技术分析结果**：
+- 当前阶段: ${stageNames[analysis.stage]}
+- 概率评估: ${analysis.probability}%
+- 周期天数: ${analysis.daysInCycle}天
 
-      IMPORTANT: Please reply in Chinese (Simplified). Keep it concise (max 3 sentences). Professional tone.
-    `;
+**关键指标**：
+- EMA15突破: ${analysis.criteria.emaBreakout ? '已突破' : '未突破'} (距离${analysis.metrics.emaDistance}%)
+- 单边上涨: ${analysis.criteria.singleSidedRise ? '是' : '否'} (最大回撤${analysis.metrics.maxDrawdown}%)
+- 成交量放大: ${analysis.criteria.volumeExpansion ? '是' : '否'} (比率${analysis.metrics.volumeRatio})
+- 连续天数: ${analysis.criteria.consecutiveDays}天在EMA15上方
+- 近期涨幅: 7天${analysis.metrics.gain7d}%, 30天${analysis.metrics.gain30d}%
+
+**任务**：
+基于以上数据分析当前市场状态，给出专业的投资建议。请用中文回答，保持简洁专业（最多4句话）。重点说明：
+1. 对当前阶段判断的确认
+2. 基于数据的风险评估
+3. 具体的操作建议`;
 
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',

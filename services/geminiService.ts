@@ -11,15 +11,37 @@ interface CycleAnalysis {
     volumeExpansion: boolean;
     consecutiveDays: number;
   };
+  metrics: {
+    emaDistance: number;
+    maxDrawdown: number;
+    volumeRatio: number;
+    gain30d: number;
+    gain7d: number;
+  };
 }
 
 export const generateMarketInsight = async (stats: MarketStats, recentCandles: CandleData[]): Promise<string> => {
   try {
     const analysis = analyzeCycleStage(stats, recentCandles);
-    return formatAnalysisReport(analysis);
+
+    // Call DeepSeek AI with processed data
+    const response = await fetch('/api/insight', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ analysis, stats })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.insight || formatAnalysisReport(analysis);
+    } else {
+      // Fallback to local analysis
+      return formatAnalysisReport(analysis);
+    }
   } catch (error) {
     console.error("Error generating insight:", error);
-    return "AI 分析服务暂时不可用，请稍后重试。";
+    const analysis = analyzeCycleStage(stats, recentCandles);
+    return formatAnalysisReport(analysis);
   }
 };
 
@@ -29,7 +51,8 @@ function analyzeCycleStage(stats: MarketStats, candles: CandleData[]): CycleAnal
       stage: 'rest',
       probability: 0,
       daysInCycle: 0,
-      criteria: { emaBreakout: false, singleSidedRise: false, volumeExpansion: false, consecutiveDays: 0 }
+      criteria: { emaBreakout: false, singleSidedRise: false, volumeExpansion: false, consecutiveDays: 0 },
+      metrics: { emaDistance: 0, maxDrawdown: 0, volumeRatio: 1, gain30d: 0, gain7d: 0 }
     };
   }
 
@@ -69,12 +92,21 @@ function analyzeCycleStage(stats: MarketStats, candles: CandleData[]): CycleAnal
   const volRatio = last20Vol > 0 ? (last5Vol / last20Vol) : 1;
   const volumeExpansion = volRatio > 1.2;
 
-  // 5. Calculate 30-day gain for momentum assessment
+  // 5. Calculate 30-day and 7-day gains
   const thirtyDaysAgo = candles[candles.length - 30]?.close || currentPrice;
+  const sevenDaysAgo = candles[candles.length - 7]?.close || currentPrice;
   const gain30d = ((currentPrice - thirtyDaysAgo) / thirtyDaysAgo) * 100;
+  const gain7d = ((currentPrice - sevenDaysAgo) / sevenDaysAgo) * 100;
 
   // Determine cycle stage and probability
   const criteria = { emaBreakout, singleSidedRise, volumeExpansion, consecutiveDays };
+  const metrics = {
+    emaDistance: Number(emaDistance.toFixed(2)),
+    maxDrawdown: Number((maxDrawdown * 100).toFixed(2)),
+    volumeRatio: Number(volRatio.toFixed(2)),
+    gain30d: Number(gain30d.toFixed(2)),
+    gain7d: Number(gain7d.toFixed(2))
+  };
   const criteriaScore = (emaBreakout ? 1 : 0) + (singleSidedRise ? 1 : 0) + (volumeExpansion ? 1 : 0) + (consecutiveDays > 10 ? 1 : 0);
 
   let stage: CycleAnalysis['stage'];
@@ -99,7 +131,7 @@ function analyzeCycleStage(stats: MarketStats, candles: CandleData[]): CycleAnal
     daysInCycle = 0;
   }
 
-  return { stage, probability, daysInCycle, criteria };
+  return { stage, probability, daysInCycle, criteria, metrics };
 }
 
 function formatAnalysisReport(analysis: CycleAnalysis): string {
