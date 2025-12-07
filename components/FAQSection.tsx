@@ -62,27 +62,27 @@ const contentData = {
     items: [
       {
         q: "1. What is the BTC 100-Day Cycle Theory?",
-        a: "Wei God (@coolish) observed that when BTC starts a rapid unilateral rise, it often peaks around 100 days. This isn't about mechanically counting days, but a probabilistic judgment method based on behavioral psychology and market laws."
+        a: "Simply put: When BTC starts going crazy upward (like a rocket, rising continuously with few major drops), this kind of explosive rise usually lasts about 100 days before reaching a peak, then starts pulling back for a rest. For example, rising from $10k to $70k with almost no significant drops - this 'rapid unilateral rise' should be watched carefully after about 100 days. This is a pattern Wei God (@coolish) discovered through years of observation, successfully predicting 4 BTC cyclical tops."
       },
       {
         q: "2. How to judge the starting point of the 100-day cycle?",
-        a: "Key criteria: 1) Price breaks and sustains above the EMA15 white line. 2) Rapid unilateral rise with few deep pullbacks. 3) Volume increases. 4) High percentage of consecutive up days. This needs to be dynamically confirmed using a Bayesian perspective, not just counting days."
+        a: "Look at the white line (EMA15) on the chart: When BTC price breaks above the white line and stays above it consistently, while volume increases significantly and there are many consecutive up days, this could be the start of a new cycle. Important reminder: Don't be 100% certain from the start - gradually increase confidence during the rise. First 30 days: just observe (10% confidence), Days 30-70: start confirming (50%+ confidence), Days 70-100: high alert (highest confidence)."
       },
       {
         q: "3. What do 'Fast Start, Slow End' and 'Slow Start, Fast End' mean?",
-        a: "These are distribution patterns of gains within the 100 days. 'Fast Start, Slow End': Big gains in the first 50 days, oscillation later. 'Slow Start, Fast End': Accumulation in the first 50 days, acceleration later. 'Uniform Distribution': Balanced gains. History shows these patterns tend to alternate."
+        a: "These describe how gains are distributed within the 100 days: Fast Start, Slow End = first 50 days rise aggressively (e.g., +50%), last 50 days rise slowly (e.g., +20%); Slow Start, Fast End = first 50 days rise slowly (e.g., +20%), last 50 days accelerate (e.g., +50%); Uniform Distribution = similar gains in both halves. Wei God observed these patterns rotate, helping identify current cycle characteristics."
       },
       {
         q: "4. How accurate is this theory?",
-        a: "According to the 4 cycles publicly predicted by Wei God, all successfully identified peak time windows (within ±10 days error). However, note: 1) Small sample size. 2) Effectiveness may decrease as it becomes public. 3) Must be used with other analysis tools."
+        a: "Currently 100% accurate! Wei God's 4 publicly predicted cycles all hit: successfully warned of tops around 100 days (±10 days error). But be rational: 1) Sample size still small, needs more validation 2) May fail as more people know about it 3) Can't rely on this method alone, combine with other indicators 4) Past success doesn't guarantee future effectiveness."
       },
       {
         q: "5. What if I missed the first 50 days?",
-        a: "Don't worry! Even if you miss the first 50 days, the second 50 days often offer enough profit. Days 30-70 are the best entry window—offering both trend confirmation and sufficient remaining space. Don't FOMO in blindly during Days 0-30."
+        a: "No worries at all! Wei God emphasizes: Even if you completely miss the first 50 days, the last 50 days still offer substantial profits. Best strategy: Days 30-70 are the golden entry period - trend is confirmed yet sufficient upside remains. Never FOMO (Fear of Missing Out) and chase blindly in the first 30 days when risk is highest and certainty lowest."
       },
       {
         q: "6. Why hasn't this method failed yet?",
-        a: "Wei God believes: 'Ineffective methods are camouflage for effective ones.' There is too much market noise. Truly understanding and executing this method requires patience and conviction, which acts as a moat. However, as public awareness grows, its future effectiveness may diminish."
+        a: "Wei God's interesting explanation: 99% of market methods are garbage, and these garbage methods actually protect the truly effective 1%. Additionally, this method requires extreme patience and firm conviction to execute - most people can't do it. For example, on day 80 when everyone is celebrating, do you dare believe there are only 20 days left to the top? This anti-human-nature operation is itself a barrier."
       },
       {
         q: "7. What's the scientific basis of this theory?",
@@ -107,27 +107,27 @@ const contentData = {
     items: [
       {
         q: "1. 什么是 BTC 100天周期理论？",
-        a: "魏神(@coolish)通过观察发现，BTC在单边快速上涨时，往往能在约100天左右拉出阶段性高点。这不是机械数日子，而是一种基于行为心理学和市场规律的概率判断方法。"
+        a: "简单说：当BTC开始疯狂上涨（像火箭一样连续涨，很少大跌），这种疯涨通常持续约100天就会到顶，然后开始回调休息。比如从1万涨到7万，中间几乎不怎么跌，这种'单边快速上涨'大概100天后就该小心了。这是魏神(@coolish)通过多年观察总结的规律，已经成功预测了4次BTC的阶段性顶部。"
       },
       {
         q: "2. 如何判断 100天周期的起点？",
-        a: "关键标准：1) 价格突破并持续在EMA15白线上方运行 2) 单边快速上涨，少有深度回调 3) 成交量配合放大 4) 连续上涨天数占比高。需要用贝叶斯视角动态确认，而不是机械数日子。"
+        a: "看图表上的白线（EMA15）：当BTC价格突破白线并且一直在白线上方运行，同时成交量明显增加，连续上涨天数很多，这就可能是一个新周期的开始。重要提醒：不要一开始就100%确定，要在上涨过程中逐步增加信心。前30天只是观察（信心10%），30-70天开始确认（信心50%+），70-100天高度警惕（信心最高）。"
       },
       {
         q: "3. 前快后慢和前慢后快是什么意思？",
-        a: "这是100天周期内涨幅分布的模式。前快后慢：前50天涨幅大，后50天震荡；前慢后快：前50天蓄力，后50天加速；均匀分布：前后50天涨幅相当。历史显示这些模式会交替出现。"
+        a: "这是涨幅在100天内的分配方式：前快后慢=前50天涨得猛（比如涨50%），后50天涨得慢（比如只涨20%）；前慢后快=前50天涨得慢（比如涨20%），后50天突然加速（比如涨50%）；均匀分布=前后50天涨幅差不多。魏神观察发现这些模式会轮流出现，帮助判断当前周期的特征。"
       },
       {
         q: "4. 这个理论的准确率如何？",
-        a: "根据魏神公开的4个周期，都成功预测了高点时间窗口（误差在±10天内）。但要注意：1) 样本量较小 2) 随着公开程度提高，有效性可能递减 3) 需要结合其他分析工具综合判断。"
+        a: "目前100%准确！魏神公开预测的4个周期全部命中：都在100天左右成功预警了顶部（误差±10天）。但要理性看待：1) 样本还不够多，需要更多验证 2) 随着越来越多人知道，可能会失效 3) 不能只靠这一个方法，要结合其他指标 4) 过去的成功不代表未来一定有效。"
       },
       {
         q: "5. 如果错过了前50天怎么办？",
-        a: "不要紧！即使前50天踏空，后50天仍有足够的肉吃。Day 30-70是最佳入场时机，既有确认度，又有足够上涨空间。不要因为FOMO而在Day 0-30盲目入场。"
+        a: "完全不用担心！魏神强调：即使前50天完全踏空，后50天依然有丰厚利润。最佳策略：Day 30-70是黄金入场期，这时既确认了趋势，又有足够上涨空间。千万别因为FOMO（害怕错过）在前30天盲目追高，那时风险最大、确定性最低。"
       },
       {
         q: "6. 为什么这个方法还没失效？",
-        a: "魏神认为：效果差的方法是效果好方法的'保护色'。市场噪音太多，真正理解并执行这个方法需要耐心和信念，这个门槛本身就是护城河。但随着公开程度提高，未来有效性可能递减。"
+        a: "魏神的解释很有趣：市场上99%的方法都是垃圾，这些垃圾方法反而保护了真正有效的1%方法。另外，这个方法需要极大耐心和坚定信念才能执行，大多数人做不到。比如在第80天，所有人都在狂欢时，你敢相信还有20天就要见顶吗？这种反人性的操作本身就是门槛。"
       },
       {
         q: "7. 这个理论的科学基础是什么？",
