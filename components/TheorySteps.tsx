@@ -51,7 +51,9 @@ export const TheorySteps: React.FC<TheoryStepsProps> = ({ lang }) => {
          <div className="grid md:grid-cols-2 gap-y-3 gap-x-8">
             {t.takeaways.map((item, i) => (
                 <div key={i} className="flex items-start gap-3 p-2 hover:bg-black/20 hover:rounded-lg transition-colors duration-200 backdrop-blur-sm">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#7cff67] mt-2 shrink-0 shadow-[0_0_8px_rgba(124,255,103,0.5)]"></div>
+                    <div className="w-6 h-6 rounded-full bg-[#7cff67] mt-0.5 shrink-0 shadow-[0_0_8px_rgba(124,255,103,0.5)] flex items-center justify-center">
+                        <span className="text-xs font-bold text-black">{i + 1}</span>
+                    </div>
                     <p className="text-sm text-white text-shadow leading-relaxed font-medium">{item}</p>
                 </div>
             ))}
