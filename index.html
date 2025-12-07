@@ -40,7 +40,13 @@
         inherits: false;
       }
 
-      html, body {
+      html {
+        background-color: #f0f4f9 !important;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
         background-color: #f0f4f9 !important;
         color: #1f1f1f;
         -webkit-font-smoothing: antialiased;
@@ -50,11 +56,22 @@
         -webkit-overscroll-behavior: none;
         height: 100%;
         min-height: 100vh;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
       }
 
       #root {
-        background-color: #f0f4f9;
-        min-height: 100vh;
+        background-color: #f0f4f9 !important;
+        height: 100vh;
+        height: 100dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
       }
 
       /* Unified text shadow for text content only */
