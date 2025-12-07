@@ -113,7 +113,7 @@ const translations = {
         day: "Day 0-30",
         icon: <Search className="w-5 h-5" />,
         iconColor: "text-blue-400",
-        check: "价格突破EMA15？成交量放大？连续上涨？",
+        check: "价格是否突破EMA15白线？成交量是否放大？连续上涨天数是否增加？观察价格在EMA15上方的天数。看成交量柱状图是否明显增加",
         action: "不要急着入场！概率不确定，耐心观察。"
       },
       {

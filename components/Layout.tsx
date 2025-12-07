@@ -80,7 +80,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-             <span className="text-xs text-white/60 font-mono">v1.2.7</span>
+             <span className="text-xs text-white/60 font-mono">v1.2.8</span>
              <button
                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-medium text-white/90 hover:text-[#7cff67] hover:border-[#7cff67] hover:bg-white/20 transition-all cursor-pointer shadow-sm text-shadow"
