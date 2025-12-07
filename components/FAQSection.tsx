@@ -83,6 +83,22 @@ const contentData = {
       {
         q: "6. Why hasn't this method failed yet?",
         a: "Wei God believes: 'Ineffective methods are camouflage for effective ones.' There is too much market noise. Truly understanding and executing this method requires patience and conviction, which acts as a moat. However, as public awareness grows, its future effectiveness may diminish."
+      },
+      {
+        q: "7. What's the scientific basis of this theory?",
+        a: "Wei God states this theory integrates sociology, behavioral psychology, communication theory, and game theory. 100 days equals a complete emotional cycle: from FOMO inception, peak to exhaustion; a market narrative propagation cycle; and the critical point of smart money vs retail investor game theory."
+      },
+      {
+        q: "8. How to avoid mechanically counting days?",
+        a: "Use 'Bayesian thinking': Observation phase (0-30 days) 10% confidence, Confirmation phase (30-70 days) 50%+ confidence, Warning phase (70-100 days) highest confidence. Focus on weekly-level confirmation, not daily fluctuations, and dynamically adjust probability assessments."
+      },
+      {
+        q: "9. What are the historical success cases?",
+        a: "Wei God's 4 publicly predicted cycles: 2023.10.14-2024.1.22 (85-day warning), 2024.1.22-2024.4.29 (60-day warning), 2024.9.7-2024.12.16 (90-day warning), 2025.4.9-2025.7.18 (94-day warning). All successfully issued risk alerts before cycle ends."
+      },
+      {
+        q: "10. Will this theory remain effective in the future?",
+        a: "Wei God warns: As the method becomes public and BTC market structure changes (ETFs, institutional participation), effectiveness may decline. Suggestions: 1) Use as auxiliary tool, not sole basis 2) Stay flexible, prepare to iterate strategies 3) Cherish current effectiveness while it lasts."
       }
     ]
   },
@@ -112,6 +128,22 @@ const contentData = {
       {
         q: "6. 为什么这个方法还没失效？",
         a: "魏神认为：效果差的方法是效果好方法的'保护色'。市场噪音太多，真正理解并执行这个方法需要耐心和信念，这个门槛本身就是护城河。但随着公开程度提高，未来有效性可能递减。"
+      },
+      {
+        q: "7. 这个理论的科学基础是什么？",
+        a: "魏神表示这个理论融合了社会学、行为心理学、传播学和博弈论。100天约等于一个完整的情绪周期：从FOMO发酵、高潮到疲惫；一个市场叙事的传播周期；以及聪明钱与散户博弈的临界点。"
+      },
+      {
+        q: "8. 如何避免机械数日子的错误？",
+        a: "正确做法是采用'贝叶斯思维'：观察期(0-30天)信心10%，确认期(30-70天)信心50%+，预警期(70-100天)信心最高。重点是周级别确认，不被日线波动干扰，动态调整概率判断。"
+      },
+      {
+        q: "9. 历史上有哪些成功案例？",
+        a: "魏神公开预测的4个周期：2023.10.14-2024.1.22(85天预警)、2024.1.22-2024.4.29(60天预警)、2024.9.7-2024.12.16(90天预警)、2025.4.9-2025.7.18(94天预警)。都在周期结束前成功发出风险提示。"
+      },
+      {
+        q: "10. 未来这个理论还会有效吗？",
+        a: "魏神警告：随着方法公开和BTC市场结构变化(ETF、机构参与)，有效性可能递减。建议：1)作为辅助工具，不是唯一依据 2)保持灵活性，准备迭代战法 3)且用且珍惜当下的有效性。"
       }
     ]
   }
