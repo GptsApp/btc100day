@@ -17,15 +17,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
     const element = document.getElementById(id);
     if (element) {
       const offset = 80; // height of sticky header
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = element.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
-      const offsetPosition = elementPosition - offset;
+      const rootElement = document.getElementById('root');
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      if (rootElement) {
+        // Since body is fixed, we need to scroll the root element
+        const elementRect = element.getBoundingClientRect();
+        const rootRect = rootElement.getBoundingClientRect();
+        const scrollTop = rootElement.scrollTop;
+        const targetPosition = scrollTop + elementRect.top - rootRect.top - offset;
+
+        rootElement.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
     }
   };
 
@@ -62,7 +67,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                 <Menu className="w-6 h-6" />
               </button>
 
-             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+             <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
+               const rootElement = document.getElementById('root');
+               if (rootElement) {
+                 rootElement.scrollTo({ top: 0, behavior: 'smooth' });
+               }
+             }}>
                 <div className="w-12 h-12 border-2 border-white/60 rounded-full flex items-center justify-center text-white shadow-sm hover:shadow-md transition-shadow">
                    <span className="font-mono font-black text-lg flex items-center justify-center gap-1"><span className="mt-[1px]">1</span><span className="inline-block -rotate-90 text-2xl">B</span></span>
                 </div>
@@ -81,7 +91,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-             <span className="text-xs text-white/60 font-mono">v1.3.3</span>
+             <span className="text-xs text-white/60 font-mono">v1.3.4</span>
              <button
                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-medium text-white/90 hover:text-[#7cff67] hover:border-[#7cff67] hover:bg-white/20 transition-all cursor-pointer shadow-sm text-shadow"
