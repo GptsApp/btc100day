@@ -143,7 +143,12 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
           
           <XAxis
             dataKey="time"
-            tickFormatter={(t) => new Date(t).toLocaleDateString(undefined, { year: '2-digit', month:'2-digit'})}
+            tickFormatter={(t) => {
+              const date = new Date(t);
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              return `${year}${month}`;
+            }}
             axisLine={false}
             tickLine={true}
             tick={{ fill: '#ffffff', fontSize: 10, fontFamily: 'Inter' }}

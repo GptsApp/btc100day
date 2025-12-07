@@ -2,15 +2,15 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
+    const { analysis, stats, lang = 'zh' } = await request.json();
+
     if (!env?.API_KEY) {
       return new Response(JSON.stringify({
-        insight: "API密钥未配置，请检查环境变量设置。"
+        insight: lang === 'en' ? "API key not configured, please check environment variables." : "API密钥未配置，请检查环境变量设置。"
       }), {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
-    const { analysis, stats, lang = 'zh' } = await request.json();
 
     const stageNames = lang === 'en' ? {
       observation: 'Observation (0-30 days)',
@@ -100,7 +100,7 @@ Based on the above data, analyze the current market state and provide profession
     }
 
     const data = await response.json();
-    const insight = data.choices?.[0]?.message?.content || "暂时无法生成分析。";
+    const insight = data.choices?.[0]?.message?.content || (lang === 'en' ? "Unable to generate analysis at the moment." : "暂时无法生成分析。");
 
     return new Response(JSON.stringify({ insight }), {
       headers: {
@@ -109,7 +109,7 @@ Based on the above data, analyze the current market state and provide profession
       }
     });
   } catch (error) {
-    return new Response(JSON.stringify({ insight: "AI 分析服务暂时不可用。" }), {
+    return new Response(JSON.stringify({ insight: lang === 'en' ? "AI analysis service is temporarily unavailable." : "AI 分析服务暂时不可用。" }), {
       headers: { 'Content-Type': 'application/json' }
     });
   }
