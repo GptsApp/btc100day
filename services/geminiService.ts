@@ -75,16 +75,39 @@ function analyzeCycleStage(stats: MarketStats, candles: CandleData[]): CycleAnal
     }
   }
 
-  // 3. Single-Sided Rise Check (Max Drawdown < 15% in last 30 days)
+  // 3. Single-Sided Rise Check (Focus on EMA15 breaks, not just drawdown)
   const recentCandles = candles.slice(-30);
   let maxDrawdown = 0;
   let peak = recentCandles[0].high;
-  recentCandles.forEach(c => {
+  let daysBelowEMA = 0;
+  let maxDaysBelowEMA = 0;
+
+  let maxEmaBreakDepth = 0;
+
+  recentCandles.forEach((c, i) => {
     if (c.high > peak) peak = c.high;
     const drawdown = (peak - c.low) / peak;
     if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+
+    // Check if close price is below EMA15
+    const emaVal = emaData[emaData.length - 30 + i]?.ema;
+    if (emaVal && c.close < emaVal) {
+      daysBelowEMA++;
+      maxDaysBelowEMA = Math.max(maxDaysBelowEMA, daysBelowEMA);
+
+      // Track how deep below EMA15
+      const emaBreakDepth = (emaVal - c.close) / emaVal;
+      maxEmaBreakDepth = Math.max(maxEmaBreakDepth, emaBreakDepth);
+    } else {
+      daysBelowEMA = 0;
+    }
   });
-  const singleSidedRise = maxDrawdown < 0.15;
+
+  // Single-sided rise: comprehensive EMA15 break analysis
+  const singleSidedRise =
+    maxDaysBelowEMA <= 3 || // No significant break
+    (maxDaysBelowEMA <= 7 && maxEmaBreakDepth < 0.08) || // Brief shallow break (<8%)
+    (maxDaysBelowEMA <= 5 && maxEmaBreakDepth < 0.12); // Short moderate break (<12%)
 
   // 4. Volume Expansion Check
   const last5Vol = candles.slice(-5).reduce((acc, c) => acc + (c.volume || 0), 0) / 5;
@@ -155,7 +178,7 @@ function formatAnalysisReport(analysis: CycleAnalysis): string {
 
   report += `\n🔍 **关键指标分析**:\n`;
   report += `• EMA15突破: ${criteria.emaBreakout ? '✅ 已突破' : '❌ 未突破'}\n`;
-  report += `• 单边上涨: ${criteria.singleSidedRise ? '✅ 回调<15%' : '❌ 回调>15%'}\n`;
+  report += `• 单边上涨: ${criteria.singleSidedRise ? '✅ 未跌破EMA15或快速收复' : '❌ 长期跌破EMA15'}\n`;
   report += `• 成交量放大: ${criteria.volumeExpansion ? '✅ 近期放量' : '❌ 成交量平淡'}\n`;
   report += `• 连续上涨: ${criteria.consecutiveDays}天在EMA15上方\n`;
 

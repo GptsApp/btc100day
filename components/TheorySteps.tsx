@@ -80,7 +80,7 @@ const translations = {
         day: "Day 30-70",
         icon: <CheckCircle2 className="w-5 h-5" />,
         iconColor: "text-emerald-400",
-        check: "Sustained > EMA15, +20% gain, <15% drawdown.",
+        check: "Sustained > EMA15, +20% gain, no prolonged deep EMA15 breaks (consider depth & duration).",
         action: "Best Entry! Even if missed first 50d, still profitable."
       },
       {
@@ -123,7 +123,7 @@ const translations = {
         day: "Day 30-70",
         icon: <CheckCircle2 className="w-5 h-5" />,
         iconColor: "text-emerald-400",
-        check: "连续在EMA15上方，涨幅>20%，回撤<15%，成交量持续放大",
+        check: "连续在EMA15上方，涨幅>20%，未长期深度跌破EMA15（考虑跌破幅度和持续时长），成交量持续放大",
         action: "最佳入场时机！即使前50天踏空，后50天仍有肉吃。"
       },
       {
