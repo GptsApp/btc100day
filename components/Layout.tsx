@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from 'react';
-import { Sparkles, BarChart2, BookOpen, Languages, Command, Menu, X } from 'lucide-react';
+import { Sparkles, BarChart2, BookOpen, Languages, Command, Menu, X, ExternalLink } from 'lucide-react';
 import { Language } from '../types';
 import Aurora from './Aurora';
 
@@ -76,6 +76,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
             <button onClick={() => scrollToSection('theory-steps')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.steps}</button>
             <button onClick={() => scrollToSection('insight')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.ai}</button>
             <button onClick={() => scrollToSection('faq')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.faq}</button>
+            <a href="https://wsnb.online/" target="_blank" rel="dofollow" className="text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors text-shadow">Bitmex实盘看板</a>
           </nav>
 
           {/* Right Actions */}
@@ -94,9 +95,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
 
       {/* Mobile Menu Bottom Sheet */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsMenuOpen(false)}>
+        <div className="md:hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm transition-opacity duration-200" onClick={() => setIsMenuOpen(false)}>
           <div
-            className="fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur-2xl rounded-t-3xl p-6 animate-in slide-in-from-bottom duration-300 border-t border-white/10 shadow-[0_-8px_32px_rgba(0,0,0,0.4)] supports-[backdrop-filter]:bg-black/60"
+            className="fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur-2xl rounded-t-3xl p-6 transform translate-y-0 transition-transform duration-300 border-t border-white/10 shadow-[0_-8px_32px_rgba(0,0,0,0.4)] supports-[backdrop-filter]:bg-black/60"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-6"></div>
@@ -119,6 +120,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                 <span className="text-sm font-medium text-white text-shadow">{t.nav.faq}</span>
               </button>
             </div>
+
+            <a
+              href="https://wsnb.online/"
+              target="_blank"
+              rel="dofollow"
+              className="flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-2xl border border-orange-400/30 hover:from-orange-500/30 hover:to-yellow-500/30 transition-all"
+            >
+              <ExternalLink className="w-5 h-5 text-orange-400" />
+              <span className="text-sm font-medium text-orange-400 text-shadow">Bitmex实盘看板</span>
+            </a>
 
           </div>
         </div>
