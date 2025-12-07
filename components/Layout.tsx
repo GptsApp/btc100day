@@ -86,12 +86,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
             <button onClick={() => scrollToSection('theory-steps')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.steps}</button>
             <button onClick={() => scrollToSection('insight')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.ai}</button>
             <button onClick={() => scrollToSection('faq')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.faq}</button>
-            <a href="https://wsnb.online/" target="_blank" rel="dofollow" className="text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors text-shadow">Bitmex实盘看板</a>
+            <a href="https://wsnb.online/" target="_blank" rel="dofollow" className="text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors text-shadow">{t.nav.bitmex}</a>
           </nav>
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-             <span className="text-xs text-white/60 font-mono">v1.3.4</span>
+             <span className="text-xs text-white/60 font-mono">v1.3.5</span>
              <button
                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-medium text-white/90 hover:text-[#7cff67] hover:border-[#7cff67] hover:bg-white/20 transition-all cursor-pointer shadow-sm text-shadow"
@@ -138,7 +138,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
               className="flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-2xl border border-orange-400/30 hover:from-orange-500/30 hover:to-yellow-500/30 transition-all"
             >
               <ExternalLink className="w-5 h-5 text-orange-400" />
-              <span className="text-sm font-medium text-orange-400 text-shadow">Bitmex实盘看板</span>
+              <span className="text-sm font-medium text-orange-400 text-shadow">{t.nav.bitmex}</span>
             </a>
 
           </div>
@@ -177,9 +177,9 @@ const NavItem = ({ onClick, icon, label, active = false }: { onClick: () => void
 
 const translations = {
   en: {
-    nav: { chart: 'Chart & Data', steps: 'Methodology', ai: 'AI Analyst', faq: 'FAQ' },
+    nav: { chart: 'Chart & Data', steps: 'Methodology', ai: 'AI Analyst', faq: 'FAQ', bitmex: 'Bitmex Dashboard' },
   },
   zh: {
-    nav: { chart: '市场数据', steps: '操作指南', ai: 'AI 分析', faq: '常见问题' },
+    nav: { chart: '市场数据', steps: '操作指南', ai: 'AI 分析', faq: '常见问题', bitmex: 'Bitmex实盘看板' },
   }
 };

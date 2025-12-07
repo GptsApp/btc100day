@@ -20,7 +20,7 @@ interface CycleAnalysis {
   };
 }
 
-export const generateMarketInsight = async (stats: MarketStats, recentCandles: CandleData[]): Promise<string> => {
+export const generateMarketInsight = async (stats: MarketStats, recentCandles: CandleData[], lang: string = 'zh'): Promise<string> => {
   try {
     const analysis = analyzeCycleStage(stats, recentCandles);
 
@@ -28,7 +28,7 @@ export const generateMarketInsight = async (stats: MarketStats, recentCandles: C
     const response = await fetch('/api/insight', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ analysis, stats })
+      body: JSON.stringify({ analysis, stats, lang })
     });
 
     if (response.ok) {

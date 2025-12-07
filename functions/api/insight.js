@@ -10,16 +10,50 @@ export async function onRequestPost(context) {
       });
     }
 
-    const { analysis, stats } = await request.json();
+    const { analysis, stats, lang = 'zh' } = await request.json();
 
-    const stageNames = {
+    const stageNames = lang === 'en' ? {
+      observation: 'Observation (0-30 days)',
+      confirmation: 'Confirmation (30-70 days)',
+      warning: 'Warning (70-100 days)',
+      rest: 'Rest Period'
+    } : {
       observation: '观察期 (0-30天)',
       confirmation: '确认期 (30-70天)',
       warning: '预警期 (70-100天)',
       rest: '休息期'
     };
 
-    const prompt = `你是BTC 100天周期理论的专家分析师。
+    const prompt = lang === 'en' ?
+      `You are an expert analyst of the BTC 100-Day Cycle Theory.
+
+**Core Theory**:
+- Unilateral rapid rises typically last about 100 days to reach peaks
+- Four stages: Observation (0-30 days), Confirmation (30-70 days), Warning (70-100 days), Rest Period
+- Based on Bayesian thinking for dynamic probability assessment, not mechanical day counting
+
+**Current Market Data** (processed, no calculation needed):
+- BTC Price: $${stats.currentPrice.toLocaleString()}
+- 24h Change: ${stats.change24hPercent.toFixed(2)}%
+
+**Technical Analysis Results**:
+- Current Stage: ${stageNames[analysis.stage]}
+- Probability Assessment: ${analysis.probability}%
+- Cycle Days: ${analysis.daysInCycle} days
+
+**Key Indicators**:
+- EMA15 Breakout: ${analysis.criteria.emaBreakout ? 'Broken' : 'Not Broken'} (Distance ${analysis.metrics.emaDistance}%)
+- Unilateral Rise: ${analysis.criteria.singleSidedRise ? 'Yes' : 'No'} (Max Drawdown ${analysis.metrics.maxDrawdown}%)
+- Volume Expansion: ${analysis.criteria.volumeExpansion ? 'Yes' : 'No'} (Ratio ${analysis.metrics.volumeRatio})
+- Consecutive Days: ${analysis.criteria.consecutiveDays} days above EMA15
+- Recent Gains: 7d ${analysis.metrics.gain7d}%, 30d ${analysis.metrics.gain30d}%
+
+**Task**:
+Based on the above data, analyze the current market state and provide professional investment advice. Please respond in English, keep it concise and professional (max 4 sentences). Focus on:
+1. Confirmation of current stage assessment
+2. Data-based risk evaluation
+3. Specific operational recommendations` :
+      `你是BTC 100天周期理论的专家分析师。
 
 **理论核心**：
 - 单边快速上涨通常持续约100天达到峰值

@@ -18,7 +18,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({ stats, history, lang }
   const handleGenerate = async () => {
     if (!stats || history.length === 0) return;
     setLoading(true);
-    const result = await generateMarketInsight(stats, history); 
+    const result = await generateMarketInsight(stats, history, lang); 
     setInsight(result);
     setLoading(false);
   };
