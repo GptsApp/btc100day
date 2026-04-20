@@ -1,7 +1,8 @@
-import React, { ReactNode, useState } from 'react';
-import { Sparkles, BarChart2, BookOpen, Languages, Command, Menu, X, ExternalLink } from 'lucide-react';
+import React, { ReactNode, useState, lazy, Suspense } from 'react';
+import { Sparkles, BarChart2, BookOpen, Languages, Command, Menu, ExternalLink } from 'lucide-react';
 import { Language } from '../types';
-import Aurora from './Aurora';
+
+const Aurora = lazy(() => import('./Aurora'));
 
 interface LayoutProps {
   children: ReactNode;
@@ -43,12 +44,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
     <div className="min-h-screen flex flex-col font-sans text-white relative overflow-x-hidden" style={{ backgroundColor: 'rgb(6, 0, 16)' }}>
       <div className="fixed inset-0 z-0" style={{ height: '150vh' }}>
         <div className="hidden md:block w-full h-full">
-          <Aurora
-            colorStops={["#7cff67", "#b19eef", "#5227ff"]}
-            blend={0.5}
-            amplitude={1.0}
-            speed={0.5}
-          />
+          <Suspense fallback={null}>
+            <Aurora
+              colorStops={["#7cff67", "#b19eef", "#5227ff"]}
+              blend={0.5}
+              amplitude={1.0}
+              speed={0.5}
+            />
+          </Suspense>
         </div>
         <div className="md:hidden bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-green-900/20 w-full h-full min-h-screen"></div>
       </div>

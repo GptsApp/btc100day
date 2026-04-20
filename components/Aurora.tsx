@@ -1,4 +1,4 @@
-import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
+import { Renderer, Program, Mesh, Triangle, Color } from 'ogl';
 import { useEffect, useRef } from 'react';
 
 const VERT = `#version 300 es

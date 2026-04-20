@@ -48,7 +48,25 @@ export const calculateEMA = (data: CandleData[], period: number = 15): { time: n
   return emaArray;
 };
 
-// Helper: fetch with timeout
+// Cache helpers
+const CANDLE_CACHE_KEY = 'btc100_candle_cache';
+const CANDLE_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+const getCachedCandles = (): CandleData[] | null => {
+  try {
+    const raw = localStorage.getItem(CANDLE_CACHE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CANDLE_CACHE_TTL) return null;
+    return data;
+  } catch { return null; }
+};
+
+const setCachedCandles = (data: CandleData[]) => {
+  try {
+    localStorage.setItem(CANDLE_CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+  } catch { /* quota exceeded, ignore */ }
+};
 const fetchWithTimeout = async (url: string, timeoutMs: number = 10000): Promise<Response> => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
@@ -64,7 +82,7 @@ const fetchWithTimeout = async (url: string, timeoutMs: number = 10000): Promise
 const fetchFirstSuccess = async (urls: string[]): Promise<any> => {
   for (const url of urls) {
     try {
-      const res = await fetchWithTimeout(url);
+      const res = await fetchWithRetry(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (json?.code || json?.status?.error_code || json?.error) {
@@ -114,6 +132,10 @@ export const fetchMarketStats = async (): Promise<MarketStats> => {
 };
 
 export const fetchCandleData = async (_days: string = 'max'): Promise<CandleData[]> => {
+  // Check cache first
+  const cached = getCachedCandles();
+  if (cached) return cached;
+
   // Try Binance Vision → Binance → CoinGecko OHLC
   const parseBinanceKlines = (data: any[]): CandleData[] =>
     data
@@ -134,7 +156,9 @@ export const fetchCandleData = async (_days: string = 'max'): Promise<CandleData
       `${BINANCE_API_FALLBACK}/klines?symbol=BTCUSDT&interval=1d&limit=1000`,
     ]);
     if (!Array.isArray(data)) throw new Error('Not an array');
-    return parseBinanceKlines(data);
+    const result = parseBinanceKlines(data);
+    setCachedCandles(result);
+    return result;
   } catch {
     // CoinGecko OHLC fallback (max 365 days for free tier)
     const data = await fetchFirstSuccess([
@@ -153,4 +177,17 @@ export const fetchCandleData = async (_days: string = 'max'): Promise<CandleData
       .filter((d: CandleData) => !isNaN(d.close) && d.close > 0)
       .sort((a: CandleData, b: CandleData) => a.time - b.time);
   }
+};
+
+// Helper: retry with exponential backoff
+const fetchWithRetry = async (url: string, maxRetries: number = 2): Promise<Response> => {
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      return await fetchWithTimeout(url);
+    } catch (e) {
+      if (i === maxRetries) throw e;
+      await new Promise(r => setTimeout(r, Math.pow(2, i) * 500));
+    }
+  }
+  throw new Error('Unreachable');
 };

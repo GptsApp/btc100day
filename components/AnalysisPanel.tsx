@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { CandleData, Language } from '../types';
 import { calculateEMA } from '../services/cryptoService';
-import { TrendingUp, TrendingDown, Minus, BarChart3, Activity, ArrowUpRight, AlertCircle, Signal } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, Activity, ArrowUpRight, Signal } from 'lucide-react';
 
 interface AnalysisPanelProps {
   candles: CandleData[];

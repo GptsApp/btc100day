@@ -1,18 +1,26 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Layout } from './components/Layout';
 import { ModernChart } from './components/CandleChart';
-import { InsightCard } from './components/InsightCard';
-import { FAQSection } from './components/FAQSection';
-import { TheorySteps } from './components/TheorySteps';
 import { AnalysisPanel } from './components/AnalysisPanel';
 import { fetchMarketStats, fetchCandleData } from './services/cryptoService';
 import { MarketStats, CandleData, Language, HighlightPeriod } from './types';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
+const InsightCard = lazy(() => import('./components/InsightCard').then(m => ({ default: m.InsightCard })));
+const FAQSection = lazy(() => import('./components/FAQSection').then(m => ({ default: m.FAQSection })));
+const TheorySteps = lazy(() => import('./components/TheorySteps').then(m => ({ default: m.TheorySteps })));
+
+const LazyFallback = () => (
+  <div className="flex items-center justify-center py-12">
+    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+  </div>
+);
+
 const App = () => {
   const [stats, setStats] = useState<MarketStats | null>(null);
   const [candles, setCandles] = useState<CandleData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>('zh');
 
   useEffect(() => {
@@ -27,6 +35,7 @@ const App = () => {
         setCandles(candlesData);
       } catch (e) {
         console.error("Initialization error:", e);
+        setError(lang === 'en' ? 'Failed to load market data. Please refresh.' : '加载市场数据失败，请刷新页面重试。');
       } finally {
         setLoading(false);
       }
@@ -105,6 +114,16 @@ const App = () => {
   return (
     <Layout lang={lang} setLang={setLang}>
       
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 flex items-center justify-between">
+          <span className="text-sm text-red-300">{error}</span>
+          <button onClick={() => { setError(null); window.location.reload(); }} className="text-xs text-white bg-white/10 px-3 py-1 rounded-lg hover:bg-white/20 transition-colors">
+            {lang === 'en' ? 'Retry' : '重试'}
+          </button>
+        </div>
+      )}
+
       {/* Chart Section with Stats Header */}
       <div id="chart" className="animated-border bg-black/60 backdrop-blur-xl rounded-[24px] p-1 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative">
         <div className="px-4 md:px-6 py-5 border-b border-white/10">
@@ -161,8 +180,9 @@ const App = () => {
 
         <div className="w-full p-2 md:p-4 relative" style={{ height: '500px' }}>
            {loading && candles.length === 0 ? (
-             <div className="absolute inset-0 flex items-center justify-center z-10">
+             <div className="absolute inset-0 flex flex-col items-center justify-center z-10 gap-4">
                <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+               <span className="text-xs text-white/50">{lang === 'en' ? 'Loading market data...' : '正在加载市场数据...'}</span>
              </div>
            ) : (
              <div style={{ width: '100%', height: '100%' }}>
@@ -173,15 +193,17 @@ const App = () => {
       </div>
 
       {/* Step by Step Theory Guide (Wrapped in ID for nav) */}
-      <div id="theory-steps">
-        <TheorySteps lang={lang} />
-      </div>
+      <Suspense fallback={<LazyFallback />}>
+        <div id="theory-steps">
+          <TheorySteps lang={lang} />
+        </div>
 
-      {/* AI Insight Section */}
-      <InsightCard stats={stats} history={candles} lang={lang} />
+        {/* AI Insight Section */}
+        <InsightCard stats={stats} history={liveCandles} lang={lang} />
 
-      {/* FAQ Section */}
-      <FAQSection lang={lang} />
+        {/* FAQ Section */}
+        <FAQSection lang={lang} />
+      </Suspense>
 
     </Layout>
   );

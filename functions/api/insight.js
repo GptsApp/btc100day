@@ -1,5 +1,29 @@
+// Simple in-memory rate limiting (per-isolate, resets on cold start)
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = 10; // 10 requests per minute per IP
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now - entry.start > RATE_LIMIT_WINDOW) {
+    rateLimitMap.set(ip, { start: now, count: 1 });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
+
+  const clientIP = request.headers.get('cf-connecting-ip') || 'unknown';
+  if (isRateLimited(clientIP)) {
+    return new Response(JSON.stringify({ insight: 'Too many requests. Please wait a moment.' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
   try {
     const { analysis, stats, lang = 'zh' } = await request.json();
@@ -82,6 +106,9 @@ Based on the above data, analyze the current market state and provide profession
 2. 基于数据的风险评估
 3. 具体的操作建议`;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -92,8 +119,11 @@ Based on the above data, analyze the current market state and provide profession
         model: 'deepseek-chat',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 200
-      })
+      }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
 
     if (!response.ok) {
       throw new Error(`API Error: ${response.status}`);

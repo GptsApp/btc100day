@@ -3,36 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>BTC100.DAY</title>
+    <title>BTC100.DAY - Bitcoin 100-Day Cycle Analysis</title>
+    <meta name="description" content="Analyze Bitcoin price cycles with BTC 100-Day Cycle Theory. Real-time charts, EMA15 indicators, and AI-powered market insights.">
+    <meta name="keywords" content="Bitcoin, BTC cycle, trading, technical analysis, 100-day cycle theory, EMA15">
+    <meta name="author" content="BTC100.DAY">
+    <meta property="og:title" content="BTC100.DAY - Bitcoin 100-Day Cycle Analysis">
+    <meta property="og:description" content="Predict Bitcoin peaks using proven 100-day cycle theory. AI-powered market analysis and technical indicators.">
+    <meta property="og:url" content="https://btc100.day">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="BTC100.DAY">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="BTC100.DAY - Bitcoin Cycle Analysis">
+    <meta name="twitter:description" content="Analyze BTC cycles with AI insights and real-time EMA15 indicators.">
+    <link rel="canonical" href="https://btc100.day">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://data-api.binance.vision https://api.binance.com https://api.coingecko.com https://api.deepseek.com;">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23000000'/%3E%3Ccircle cx='24' cy='24' r='22' fill='none' stroke='%23ffffff' stroke-width='4'/%3E%3Ctext x='24' y='20' text-anchor='middle' fill='%23ffffff' font-family='monospace' font-weight='bold' font-size='14'%3E1%3C/text%3E%3Ctext x='24' y='34' text-anchor='middle' fill='%23ffffff' font-family='monospace' font-weight='bold' font-size='20' transform='rotate(-90 24 34)'%3EB%3C/text%3E%3C/svg%3E">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-            },
-            colors: {
-              primary: '#1a73e8',
-            },
-            animation: {
-              'border-rotate': 'border-rotate 4s linear infinite',
-            },
-            keyframes: {
-              'border-rotate': {
-                '0%': { '--border-angle': '0deg' },
-                '100%': { '--border-angle': '360deg' },
-              }
-            }
-          }
-        }
-      }
-    </script>
     <style>
       @property --border-angle {
         syntax: '<angle>';
@@ -171,6 +159,15 @@
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #bdc1c6;
+      }
+
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
       }
     </style>
 </head>
