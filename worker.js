@@ -1,0 +1,158 @@
+// Worker entry point — handles /api/insight, static assets served by [assets]
+
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60_000;
+const RATE_LIMIT_MAX = 10;
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now - entry.start > RATE_LIMIT_WINDOW) {
+    rateLimitMap.set(ip, { start: now, count: 1 });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
+function json(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
+}
+
+async function handleInsight(request, env) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '86400',
+      },
+    });
+  }
+
+  if (request.method !== 'POST') {
+    return json({ error: 'Method not allowed' }, 405);
+  }
+
+  const clientIP = request.headers.get('cf-connecting-ip') || 'unknown';
+  if (isRateLimited(clientIP)) {
+    return json({ insight: '请求过于频繁，请稍后再试。' }, 429);
+  }
+
+  try {
+    const body = await request.json();
+    const { analysis, stats, lang = 'zh' } = body;
+
+    if (!stats?.currentPrice || !analysis?.stage) {
+      return json({ insight: lang === 'en' ? 'Invalid request data.' : '请求数据无效。' }, 400);
+    }
+
+    if (!env?.API_KEY) {
+      return json({ insight: lang === 'en' ? 'API key not configured.' : 'API密钥未配置，请检查环境变量。' }, 500);
+    }
+
+    const price = Number(stats.currentPrice) || 0;
+    const change24h = Number(stats.change24hPercent) || 0;
+    const emaDistance = Number(analysis.metrics?.emaDistance) || 0;
+    const maxDrawdown = Number(analysis.metrics?.maxDrawdown) || 0;
+    const volumeRatio = Number(analysis.metrics?.volumeRatio) || 1;
+    const consecutiveDays = Number(analysis.criteria?.consecutiveDays) || 0;
+    const gain7d = Number(analysis.metrics?.gain7d) || 0;
+    const gain30d = Number(analysis.metrics?.gain30d) || 0;
+    const probability = Number(analysis.probability) || 0;
+    const daysInCycle = Number(analysis.daysInCycle) || 0;
+
+    const stageNames = lang === 'en'
+      ? { observation: 'Observation (0-30d)', confirmation: 'Confirmation (30-70d)', warning: 'Warning (70-100d)', rest: 'Rest Period' }
+      : { observation: '观察期 (0-30天)', confirmation: '确认期 (30-70天)', warning: '预警期 (70-100天)', rest: '休息期' };
+    const stageName = stageNames[analysis.stage] || stageNames.rest;
+
+    const systemPrompt = lang === 'en'
+      ? 'You are a senior Bitcoin cycle analyst specializing in the "100-Day Bull Run Theory". This theory posits that unilateral rapid BTC rises typically last ~100 days before peaking, divided into 4 stages: Observation (0-30d), Confirmation (30-70d), Warning (70-100d), and Rest. You use Bayesian probability to assess cycle progression, not mechanical day counting. Be concise, data-driven, and actionable.'
+      : '你是一位资深比特币周期分析师，专精"100天牛市理论"。该理论认为BTC单边快速上涨通常持续约100天到达峰值，分为四个阶段：观察期(0-30天)、确认期(30-70天)、预警期(70-100天)、休息期。你用贝叶斯概率动态评估周期进展，不机械数日子。回答要简练、基于数据、给出可执行建议。';
+
+    const userPrompt = lang === 'en'
+      ? `Current BTC market snapshot:
+- Price: $${price.toLocaleString()} | 24h: ${change24h.toFixed(2)}%
+- Stage: ${stageName} | Probability: ${probability}% | Cycle day: ${daysInCycle}
+- EMA15: ${analysis.criteria?.emaBreakout ? 'Above' : 'Below'} (${emaDistance}% away)
+- Single-sided rise: ${analysis.criteria?.singleSidedRise ? 'Yes' : 'No'} (max drawdown ${maxDrawdown}%)
+- Volume: ${analysis.criteria?.volumeExpansion ? 'Expanding' : 'Flat'} (ratio ${volumeRatio})
+- ${consecutiveDays} consecutive days above EMA15
+- 7d gain: ${gain7d}% | 30d gain: ${gain30d}%
+
+Give a brief market assessment (3-4 sentences): confirm the stage, highlight the key risk, and suggest one concrete action.`
+      : `当前BTC市场快照：
+- 价格: $${price.toLocaleString()} | 24h涨跌: ${change24h.toFixed(2)}%
+- 阶段: ${stageName} | 概率: ${probability}% | 周期第${daysInCycle}天
+- EMA15: ${analysis.criteria?.emaBreakout ? '已突破' : '未突破'} (偏离${emaDistance}%)
+- 单边上涨: ${analysis.criteria?.singleSidedRise ? '是' : '否'} (最大回撤${maxDrawdown}%)
+- 成交量: ${analysis.criteria?.volumeExpansion ? '放量' : '缩量'} (比率${volumeRatio})
+- 连续${consecutiveDays}天站上EMA15
+- 7日涨幅: ${gain7d}% | 30日涨幅: ${gain30d}%
+
+请给出简要市场评估（3-4句话）：确认当前阶段判断、指出关键风险、给出一条具体操作建议。`;
+
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 30000);
+
+    const resp = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        max_tokens: 800,
+        temperature: 0.7,
+      }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => '');
+      console.error(`DeepSeek API error: ${resp.status} ${errText}`);
+      return json({ insight: lang === 'en' ? 'AI service returned an error. Please try again.' : 'AI 服务返回错误，请稍后重试。' }, 502);
+    }
+
+    const data = await resp.json();
+    const insight = data.choices?.[0]?.message?.content?.trim();
+    if (!insight) {
+      return json({ insight: lang === 'en' ? 'AI returned an empty response.' : 'AI 返回了空内容，请重试。' }, 502);
+    }
+
+    return json({ insight });
+  } catch (error) {
+    console.error('Insight API error:', error?.message || error);
+    const isAbort = error?.name === 'AbortError';
+    return json({
+      insight: isAbort ? '请求超时，AI 服务响应过慢，请稍后重试。' : 'AI 分析服务暂时不可用，请稍后重试。',
+    }, isAbort ? 504 : 500);
+  }
+}
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/api/insight') {
+      return handleInsight(request, env);
+    }
+
+    // All other requests → static assets (handled by [assets] binding)
+    return env.ASSETS.fetch(request);
+  },
+};

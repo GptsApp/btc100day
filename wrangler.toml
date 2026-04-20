@@ -1,6 +1,8 @@
 name = "btc100day"
 compatibility_date = "2024-12-03"
-pages_build_output_dir = "./dist"
+main = "worker.js"
 
-# API_KEY environment variable will be set in Cloudflare Pages
-# and used by the serverless function
+[assets]
+directory = "./dist"
+
+# API_KEY set via `wrangler secret put API_KEY`
