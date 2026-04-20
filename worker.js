@@ -75,30 +75,66 @@ async function handleInsight(request, env) {
     const stageName = stageNames[analysis.stage] || stageNames.rest;
 
     const systemPrompt = lang === 'en'
-      ? 'You are a senior Bitcoin cycle analyst specializing in the "100-Day Bull Run Theory". This theory posits that unilateral rapid BTC rises typically last ~100 days before peaking, divided into 4 stages: Observation (0-30d), Confirmation (30-70d), Warning (70-100d), and Rest. You use Bayesian probability to assess cycle progression, not mechanical day counting. Be concise, data-driven, and actionable.'
-      : '你是一位资深比特币周期分析师，专精"100天牛市理论"。该理论认为BTC单边快速上涨通常持续约100天到达峰值，分为四个阶段：观察期(0-30天)、确认期(30-70天)、预警期(70-100天)、休息期。你用贝叶斯概率动态评估周期进展，不机械数日子。回答要简练、基于数据、给出可执行建议。';
+      ? `You are a senior Bitcoin cycle analyst specializing in the "100-Day Bull Run Theory" (百日冲顶理论).
+
+Core Theory Framework:
+1. Historical Pattern: BTC unilateral rallies from cycle bottom to local top typically last 60-100 days. This is derived from multiple cycles (2017, 2019, 2021, 2024) where parabolic advances showed similar temporal structures.
+2. Four Stages:
+   - Observation (0-30d): Price reclaims EMA15, volume gradually increases. Bayesian prior: low probability (~20-40%). Key signal: 5+ consecutive days above EMA15 with rising volume.
+   - Confirmation (30-70d): Sustained breakout, single-sided rise confirmed (max drawdown <15%), volume expansion >1.2x average. Bayesian update: probability rises to 50-75%.
+   - Warning (70-100d): Momentum divergence appears, volume may peak then decline, extreme greed sentiment. Probability peaks >75% then starts declining as cycle exhaustion approaches.
+   - Rest: Cycle completed or invalidated. Waiting for next setup.
+3. Invalidation Criteria: Any drawdown >20% from local high, or EMA15 broken for 3+ consecutive days with volume, resets the cycle.
+4. Bayesian Approach: Don't count days mechanically. Weight evidence: EMA position, volume trend, drawdown depth, momentum indicators. Update probability dynamically based on new data confirming or contradicting the thesis.
+
+Your analysis style: institutional-grade, evidence-based, acknowledge uncertainty. Never give absolute predictions.`
+      : `你是一位资深比特币周期分析师，专精"百日冲顶理论"。
+
+核心理论框架：
+1. 历史规律：BTC从周期底部到局部顶部的单边上涨通常持续60-100天。此规律来源于多轮周期（2017、2019、2021、2024），抛物线式上涨呈现相似的时间结构。
+2. 四阶段模型：
+   - 观察期(0-30天)：价格收复EMA15，成交量逐步放大。贝叶斯先验概率低(~20-40%)。关键信号：连续5天以上站稳EMA15且量能递增。
+   - 确认期(30-70天)：持续突破，单边上涨确认（最大回撤<15%），成交量放大至均值1.2倍以上。贝叶斯更新：概率升至50-75%。
+   - 预警期(70-100天)：动量背离出现，成交量可能见顶后回落，市场极度贪婪。概率峰值>75%后开始下降，周期耗竭临近。
+   - 休息期：周期完成或失效，等待下一次建仓机会。
+3. 失效标准：任何一次从局部高点回撤>20%，或EMA15连续3天以上放量跌破，则重置周期计数。
+4. 贝叶斯方法：不机械数日子，而是加权各类证据（EMA位置、量能趋势、回撤深度、动量指标），根据新数据动态更新概率——是确认还是反驳当前判断。
+
+分析风格：机构级、基于证据、承认不确定性。绝不给出绝对预测。`;
 
     const userPrompt = lang === 'en'
       ? `Current BTC market snapshot:
-- Price: $${price.toLocaleString()} | 24h: ${change24h.toFixed(2)}%
-- Stage: ${stageName} | Probability: ${probability}% | Cycle day: ${daysInCycle}
-- EMA15: ${analysis.criteria?.emaBreakout ? 'Above' : 'Below'} (${emaDistance}% away)
-- Single-sided rise: ${analysis.criteria?.singleSidedRise ? 'Yes' : 'No'} (max drawdown ${maxDrawdown}%)
-- Volume: ${analysis.criteria?.volumeExpansion ? 'Expanding' : 'Flat'} (ratio ${volumeRatio})
-- ${consecutiveDays} consecutive days above EMA15
+- Price: $${price.toLocaleString()} | 24h change: ${change24h.toFixed(2)}%
+- Stage: ${stageName} | Bayesian probability: ${probability}% | Cycle day: ${daysInCycle}
+- EMA15: ${analysis.criteria?.emaBreakout ? 'Above' : 'Below'} (distance: ${emaDistance}%)
+- Single-sided rise: ${analysis.criteria?.singleSidedRise ? 'Confirmed' : 'Not confirmed'} (max drawdown from high: ${maxDrawdown}%)
+- Volume: ${analysis.criteria?.volumeExpansion ? 'Expanding' : 'Contracting/Flat'} (ratio vs 20d avg: ${volumeRatio}x)
+- Consecutive days above EMA15: ${consecutiveDays}
 - 7d gain: ${gain7d}% | 30d gain: ${gain30d}%
 
-Give a brief market assessment (3-4 sentences): confirm the stage, highlight the key risk, and suggest one concrete action.`
+Analyze this data through the 100-Day Theory lens:
+1. Stage Assessment: Does the data support the current stage classification? What evidence confirms or contradicts it?
+2. Probability Reasoning: Is the ${probability}% Bayesian estimate appropriate? What factors would move it higher or lower?
+3. Key Risk: What is the single biggest threat to this cycle continuing? At what price level does the thesis invalidate?
+4. Actionable Insight: One specific, position-sizing-aware recommendation.
+
+Keep response to 4-5 sentences, dense with reasoning.`
       : `当前BTC市场快照：
 - 价格: $${price.toLocaleString()} | 24h涨跌: ${change24h.toFixed(2)}%
-- 阶段: ${stageName} | 概率: ${probability}% | 周期第${daysInCycle}天
-- EMA15: ${analysis.criteria?.emaBreakout ? '已突破' : '未突破'} (偏离${emaDistance}%)
-- 单边上涨: ${analysis.criteria?.singleSidedRise ? '是' : '否'} (最大回撤${maxDrawdown}%)
-- 成交量: ${analysis.criteria?.volumeExpansion ? '放量' : '缩量'} (比率${volumeRatio})
-- 连续${consecutiveDays}天站上EMA15
+- 阶段: ${stageName} | 贝叶斯概率: ${probability}% | 周期第${daysInCycle}天
+- EMA15: ${analysis.criteria?.emaBreakout ? '已突破' : '未突破'} (偏离度: ${emaDistance}%)
+- 单边上涨: ${analysis.criteria?.singleSidedRise ? '已确认' : '未确认'} (距高点最大回撤: ${maxDrawdown}%)
+- 成交量: ${analysis.criteria?.volumeExpansion ? '放量' : '缩量/持平'} (相对20日均量: ${volumeRatio}倍)
+- 连续站上EMA15天数: ${consecutiveDays}
 - 7日涨幅: ${gain7d}% | 30日涨幅: ${gain30d}%
 
-请给出简要市场评估（3-4句话）：确认当前阶段判断、指出关键风险、给出一条具体操作建议。`;
+请从百日冲顶理论视角分析：
+1. 阶段判断：当前数据是否支持所处阶段的分类？哪些证据在确认、哪些在反驳？
+2. 概率推理：${probability}%的贝叶斯估计是否合理？什么因素会让它上升或下降？
+3. 核心风险：当前周期延续的最大威胁是什么？价格跌破什么位置会使理论失效？
+4. 操作建议：一条具体的、考虑仓位管理的建议。
+
+控制在4-5句话，每句都有推理依据。`;
 
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 30000);
