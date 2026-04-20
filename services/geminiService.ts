@@ -33,15 +33,13 @@ export const generateMarketInsight = async (stats: MarketStats, recentCandles: C
 
     if (response.ok) {
       const data = await response.json();
-      return data.insight || formatAnalysisReport(analysis);
+      return data.insight || (lang === 'en' ? "Unable to generate analysis at the moment." : "暂时无法生成分析。");
     } else {
-      // Fallback to local analysis
-      return formatAnalysisReport(analysis);
+      return lang === 'en' ? "AI analysis service error. Please try again later." : "AI 分析服务错误，请稍后重试。";
     }
   } catch (error) {
     console.error("Error generating insight:", error);
-    const analysis = analyzeCycleStage(stats, recentCandles);
-    return formatAnalysisReport(analysis);
+    return lang === 'en' ? "Network error. Please check your connection and try again." : "网络错误，请检查连接后重试。";
   }
 };
 

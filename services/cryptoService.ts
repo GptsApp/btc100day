@@ -3,22 +3,47 @@ import { CandleData, MarketStats } from '../types';
 const BINANCE_API = 'https://api.binance.com/api/v3';
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
 
-// EMA Calculation Helper
+// EMA Calculation Helper - uses SMA of first `period` points as seed
 export const calculateEMA = (data: CandleData[], period: number = 15): { time: number; ema: number }[] => {
   if (!data || data.length === 0) return [];
   const k = 2 / (period + 1);
-  let emaArray: { time: number; ema: number }[] = [];
-  let prevEma = data[0]?.close || 0;
+  const emaArray: { time: number; ema: number }[] = [];
 
-  data.forEach((d, i) => {
-    if (i === 0) {
-      emaArray.push({ time: d.time, ema: d.close });
-    } else {
-      const ema = d.close * k + prevEma * (1 - k);
-      emaArray.push({ time: d.time, ema: ema });
-      prevEma = ema;
-    }
-  });
+  // Not enough data for full SMA, use running average
+  if (data.length < period) {
+    let sum = 0;
+    data.forEach((d, i) => {
+      sum += d.close;
+      emaArray.push({ time: d.time, ema: sum / (i + 1) });
+    });
+    return emaArray;
+  }
+
+  // Phase 1: Calculate SMA for the first `period` data points
+  let sum = 0;
+  for (let i = 0; i < period; i++) {
+    sum += data[i].close;
+  }
+  const sma = sum / period;
+
+  // Fill first period-1 entries with running SMA for visual continuity
+  let runSum = 0;
+  for (let i = 0; i < period - 1; i++) {
+    runSum += data[i].close;
+    emaArray.push({ time: data[i].time, ema: runSum / (i + 1) });
+  }
+
+  // The period-th entry uses proper SMA as seed
+  emaArray.push({ time: data[period - 1].time, ema: sma });
+  let prevEma = sma;
+
+  // Phase 2: Standard EMA formula
+  for (let i = period; i < data.length; i++) {
+    const ema = data[i].close * k + prevEma * (1 - k);
+    emaArray.push({ time: data[i].time, ema });
+    prevEma = ema;
+  }
+
   return emaArray;
 };
 
@@ -30,38 +55,56 @@ const generateMockData = (): CandleData[] => {
   const dayMs = 24 * 60 * 60 * 1000;
   const totalDays = Math.ceil((now - startDate) / dayMs);
 
-  let price = 16600; 
+  // Realistic BTC price milestones (day index → price)
+  const milestones: [number, number][] = [
+    [0, 16600],   [45, 23000],  [90, 28500],   [180, 30000],
+    [270, 27000], [330, 42000], [380, 52000],   [435, 73000],
+    [480, 63000], [540, 57000], [600, 58000],   [660, 68000],
+    [700, 76000], [730, 97000], [760, 102000],  [820, 84000],
+    [900, 90000], [1000, 92000],[1100, 88000],  [1200, 87000],
+  ];
+
+  const getTargetPrice = (day: number): number => {
+    if (day <= milestones[0][0]) return milestones[0][1];
+    if (day >= milestones[milestones.length - 1][0]) return milestones[milestones.length - 1][1];
+    for (let j = 0; j < milestones.length - 1; j++) {
+      const [d0, p0] = milestones[j];
+      const [d1, p1] = milestones[j + 1];
+      if (day >= d0 && day <= d1) {
+        const t = (day - d0) / (d1 - d0);
+        return p0 + (p1 - p0) * t;
+      }
+    }
+    return milestones[milestones.length - 1][1];
+  };
+
+  // Seeded PRNG for deterministic output
+  let seed = 42;
+  const rand = () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+
+  let prevClose = milestones[0][1];
 
   for (let i = 0; i < totalDays; i++) {
     const time = startDate + i * dayMs;
-    
-    // Trend simulation
-    let trend = 0;
-    if (i < 90) trend = 1.005; 
-    else if (i < 250) trend = 1.0005;
-    else if (i > 270 && i < 380) trend = 1.008;
-    else if (i > 380 && i < 420) trend = 0.995;
-    else if (i > 420 && i < 480) trend = 1.005;
-    else if (i > 480 && i < 600) trend = 0.999;
-    else if (i > 600) trend = 1.003;
-    else trend = 1.000 + (Math.random() * 0.002 - 0.001);
+    const target = getTargetPrice(i);
+    const noise = (rand() - 0.5) * 0.04;
+    const close = target * (1 + noise);
+    const open = prevClose;
+    const high = Math.max(open, close) * (1 + rand() * 0.01);
+    const low = Math.min(open, close) * (1 - rand() * 0.01);
 
-    const change = trend + (Math.random() * 0.04 - 0.02);
-    
-    const open = price;
-    const close = open * change;
-    const high = Math.max(open, close) * (1 + Math.random() * 0.01);
-    const low = Math.min(open, close) * (1 - Math.random() * 0.01);
-    
     data.push({
       time,
       open,
       high,
       low,
       close,
-      volume: Math.random() * 50000000 // Mock volume in USD
+      volume: rand() * 40000000000 + 10000000000
     });
-    price = close;
+    prevClose = close;
   }
   return data;
 };
@@ -99,13 +142,13 @@ export const fetchMarketStats = async (): Promise<MarketStats> => {
         };
     } catch (e) {
         return {
-            currentPrice: 96431.45,
-            change24h: 1245.20,
-            change24hPercent: 1.98,
-            high24h: 98100,
-            low24h: 95800,
-            marketCap: 1800000000000,
-            volume24h: 45000000000
+            currentPrice: 87000,
+            change24h: 520,
+            change24hPercent: 0.6,
+            high24h: 88200,
+            low24h: 85800,
+            marketCap: 1720000000000,
+            volume24h: 35000000000
         };
     }
   }
@@ -129,14 +172,17 @@ export const fetchCandleData = async (days: string = 'max'): Promise<CandleData[
 
     // Binance format: [openTime, open, high, low, close, volume, closeTime, quoteAssetVolume, ...]
     // Index 5 is Volume (BTC), Index 7 is Quote Asset Volume (USDT)
-    return data.map((d: any[]) => ({
-      time: d[0],
-      open: parseFloat(d[1]),
-      high: parseFloat(d[2]),
-      low: parseFloat(d[3]),
-      close: parseFloat(d[4]),
-      volume: parseFloat(d[7]) // Use quote asset volume (USDT) instead of base volume (BTC)
-    }));
+    return data
+      .map((d: any[]) => ({
+        time: d[0],
+        open: parseFloat(d[1]),
+        high: parseFloat(d[2]),
+        low: parseFloat(d[3]),
+        close: parseFloat(d[4]),
+        volume: parseFloat(d[7]) // Use quote asset volume (USDT) instead of base volume (BTC)
+      }))
+      .filter((d: CandleData) => !isNaN(d.close) && !isNaN(d.open) && d.close > 0)
+      .sort((a: CandleData, b: CandleData) => a.time - b.time);
   } catch (error) {
     console.warn("Binance Candles failed, using fallback:", error);
     return generateMockData();

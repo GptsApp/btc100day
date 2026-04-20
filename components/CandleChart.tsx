@@ -65,18 +65,25 @@ const CustomTooltip = ({ active, payload, label, highlights }: any) => {
 };
 
 export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] }) => {
+   const CHART_START = new Date('2023-01-01').getTime();
+
+   // Calculate EMA on FULL dataset for accuracy
    const emaData = useMemo(() => calculateEMA(data, 15), [data]);
    
+   // Merge EMA into data, then filter for chart display range
    const chartData = useMemo(() => {
-     return data.map((d, i) => ({
-       ...d,
-       ema: emaData[i]?.ema
-     }));
+     return data
+       .map((d, i) => ({
+         ...d,
+         ema: emaData[i]?.ema
+       }))
+       .filter(d => d.time >= CHART_START);
    }, [data, emaData]);
 
-   const minPrice = useMemo(() => Math.min(...data.map(d => d.low)), [data]);
-   const maxPrice = useMemo(() => Math.max(...data.map(d => d.high)), [data]);
-   const maxVolume = useMemo(() => Math.max(...data.map(d => d.volume || 0)), [data]);
+   // Use filtered chartData for axis calculations
+   const minPrice = useMemo(() => chartData.length > 0 ? Math.min(...chartData.map(d => d.low)) : 0, [chartData]);
+   const maxPrice = useMemo(() => chartData.length > 0 ? Math.max(...chartData.map(d => d.high)) : 100000, [chartData]);
+   const maxVolume = useMemo(() => chartData.length > 0 ? Math.max(...chartData.map(d => d.volume || 0)) : 1, [chartData]);
 
    const padding = (maxPrice - minPrice) * 0.1;
 

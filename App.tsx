@@ -23,6 +23,21 @@ const App = () => {
           fetchMarketStats(),
           fetchCandleData('max')
         ]);
+
+        // Ensure stats and candle data are consistent (handles mixed fallback scenarios)
+        if (candlesData.length > 0 && statsData) {
+          const lastClose = candlesData[candlesData.length - 1].close;
+          const priceDiff = Math.abs(statsData.currentPrice - lastClose) / lastClose;
+          if (priceDiff > 0.15) {
+            const prevClose = candlesData.length > 1 ? candlesData[candlesData.length - 2].close : lastClose;
+            statsData.currentPrice = lastClose;
+            statsData.change24h = lastClose - prevClose;
+            statsData.change24hPercent = ((lastClose - prevClose) / prevClose) * 100;
+            statsData.high24h = lastClose * 1.02;
+            statsData.low24h = lastClose * 0.98;
+          }
+        }
+
         setStats(statsData);
         setCandles(candlesData);
       } catch (e) {
@@ -52,10 +67,19 @@ const App = () => {
   const t = translations[lang];
   const isPositive = stats ? stats.change24hPercent >= 0 : true;
 
-  // Ensure we show data from 2023-01-01 to match user request
-  const chartData = useMemo(() => {
-    return candles.filter(c => c.time >= new Date('2023-01-01').getTime());
-  }, [candles]);
+  // Update last candle with real-time price so chart stays in sync with header
+  const liveCandles = useMemo(() => {
+    if (candles.length === 0 || !stats?.currentPrice) return candles;
+    const result = [...candles];
+    const last = result[result.length - 1];
+    result[result.length - 1] = {
+      ...last,
+      close: stats.currentPrice,
+      high: Math.max(last.high, stats.currentPrice),
+      low: Math.min(last.low, stats.currentPrice)
+    };
+    return result;
+  }, [candles, stats?.currentPrice]);
 
   // Defined from User Request for the Chart
   const highlightPeriods: HighlightPeriod[] = useMemo(() => {
@@ -147,7 +171,7 @@ const App = () => {
         
         {/* Analysis Panel */}
         <div className="px-4 md:px-6 pt-6 border-b border-white/15">
-           <AnalysisPanel candles={candles} currentPrice={stats?.currentPrice || 0} lang={lang} />
+           <AnalysisPanel candles={liveCandles} currentPrice={stats?.currentPrice || 0} lang={lang} />
         </div>
 
         <div className="w-full p-2 md:p-4 relative" style={{ height: '500px' }}>
@@ -157,7 +181,7 @@ const App = () => {
              </div>
            ) : (
              <div style={{ width: '100%', height: '100%' }}>
-               <ModernChart data={chartData} highlights={highlightPeriods} />
+               <ModernChart data={liveCandles} highlights={highlightPeriods} />
              </div>
            )}
         </div>
