@@ -23,21 +23,6 @@ const App = () => {
           fetchMarketStats(),
           fetchCandleData('max')
         ]);
-
-        // Ensure stats and candle data are consistent (handles mixed fallback scenarios)
-        if (candlesData.length > 0 && statsData) {
-          const lastClose = candlesData[candlesData.length - 1].close;
-          const priceDiff = Math.abs(statsData.currentPrice - lastClose) / lastClose;
-          if (priceDiff > 0.15) {
-            const prevClose = candlesData.length > 1 ? candlesData[candlesData.length - 2].close : lastClose;
-            statsData.currentPrice = lastClose;
-            statsData.change24h = lastClose - prevClose;
-            statsData.change24hPercent = ((lastClose - prevClose) / prevClose) * 100;
-            statsData.high24h = lastClose * 1.02;
-            statsData.low24h = lastClose * 0.98;
-          }
-        }
-
         setStats(statsData);
         setCandles(candlesData);
       } catch (e) {

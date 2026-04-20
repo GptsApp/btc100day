@@ -1,6 +1,7 @@
 import { CandleData, MarketStats } from '../types';
 
-const BINANCE_API = 'https://api.binance.com/api/v3';
+const BINANCE_API = 'https://data-api.binance.vision/api/v3';
+const BINANCE_API_FALLBACK = 'https://api.binance.com/api/v3';
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
 
 // EMA Calculation Helper - uses SMA of first `period` points as seed
@@ -47,160 +48,109 @@ export const calculateEMA = (data: CandleData[], period: number = 15): { time: n
   return emaArray;
 };
 
-// Generate realistic mock data if APIs fail
-const generateMockData = (): CandleData[] => {
-  const data: CandleData[] = [];
-  const startDate = new Date('2023-01-01').getTime();
-  const now = Date.now();
-  const dayMs = 24 * 60 * 60 * 1000;
-  const totalDays = Math.ceil((now - startDate) / dayMs);
-
-  // Realistic BTC price milestones (day index from 2023-01-01 → price USD)
-  const milestones: [number, number][] = [
-    [0, 16600],    // 2023-01-01
-    [73, 25000],   // 2023-03-15
-    [180, 30500],  // 2023-07-01
-    [273, 27000],  // 2023-10-01
-    [375, 46000],  // 2024-01-10
-    [438, 73000],  // 2024-03-14 ATH
-    [486, 58000],  // 2024-05-01
-    [582, 49000],  // 2024-08-05
-    [623, 58000],  // 2024-09-15
-    [674, 68000],  // 2024-11-05
-    [716, 108000], // 2024-12-17 ATH
-    [750, 102000], // 2025-01-20
-    [789, 84000],  // 2025-02-28
-    [827, 76000],  // 2025-04-07
-    [860, 78000],  // 2025-05
-    [920, 82000],  // 2025-07
-    [980, 68000],  // 2025-09
-    [1040, 65000], // 2025-11
-    [1100, 72000], // 2026-01
-    [1160, 78000], // 2026-03
-    [1210, 75000], // 2026-04-20 (today)
-  ];
-
-  const getTargetPrice = (day: number): number => {
-    if (day <= milestones[0][0]) return milestones[0][1];
-    if (day >= milestones[milestones.length - 1][0]) return milestones[milestones.length - 1][1];
-    for (let j = 0; j < milestones.length - 1; j++) {
-      const [d0, p0] = milestones[j];
-      const [d1, p1] = milestones[j + 1];
-      if (day >= d0 && day <= d1) {
-        const t = (day - d0) / (d1 - d0);
-        return p0 + (p1 - p0) * t;
-      }
-    }
-    return milestones[milestones.length - 1][1];
-  };
-
-  // Seeded PRNG for deterministic output
-  let seed = 42;
-  const rand = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-
-  let prevClose = milestones[0][1];
-
-  for (let i = 0; i < totalDays; i++) {
-    const time = startDate + i * dayMs;
-    const target = getTargetPrice(i);
-    const noise = (rand() - 0.5) * 0.04;
-    const close = target * (1 + noise);
-    const open = prevClose;
-    const high = Math.max(open, close) * (1 + rand() * 0.01);
-    const low = Math.min(open, close) * (1 - rand() * 0.01);
-
-    data.push({
-      time,
-      open,
-      high,
-      low,
-      close,
-      volume: rand() * 40000000000 + 10000000000
-    });
-    prevClose = close;
+// Helper: fetch with timeout
+const fetchWithTimeout = async (url: string, timeoutMs: number = 10000): Promise<Response> => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
   }
-  return data;
+};
+
+// Helper: try fetching JSON from a list of URLs, return first success
+const fetchFirstSuccess = async (urls: string[]): Promise<any> => {
+  for (const url of urls) {
+    try {
+      const res = await fetchWithTimeout(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json?.code || json?.status?.error_code || json?.error) {
+        throw new Error(JSON.stringify(json));
+      }
+      return json;
+    } catch (e) {
+      console.warn(`Failed: ${url}`, e);
+      continue;
+    }
+  }
+  throw new Error('All API sources failed');
 };
 
 export const fetchMarketStats = async (): Promise<MarketStats> => {
+  // Try Binance Vision → Binance → CoinGecko
   try {
-    // Binance Ticker for real-time price
-    const response = await fetch(`${BINANCE_API}/ticker/24hr?symbol=BTCUSDT`);
-    if (!response.ok) throw new Error('Binance API Error');
-    const data = await response.json();
-
+    const data = await fetchFirstSuccess([
+      `${BINANCE_API}/ticker/24hr?symbol=BTCUSDT`,
+      `${BINANCE_API_FALLBACK}/ticker/24hr?symbol=BTCUSDT`,
+    ]);
     return {
       currentPrice: parseFloat(data.lastPrice),
       change24h: parseFloat(data.priceChange),
       change24hPercent: parseFloat(data.priceChangePercent),
       high24h: parseFloat(data.highPrice),
       low24h: parseFloat(data.lowPrice),
-      marketCap: parseFloat(data.quoteVolume) * 1000, 
+      marketCap: parseFloat(data.quoteVolume) * 1000,
       volume24h: parseFloat(data.quoteVolume)
     };
-  } catch (error) {
-    console.warn("Binance Ticker failed, trying CoinGecko fallback...", error);
-    try {
-        const response = await fetch(`${COINGECKO_API}/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true&include_market_cap=true&include_24hr_high=true&include_24hr_low=true`);
-        const data = await response.json();
-        const btc = data.bitcoin;
-        return {
-          currentPrice: btc.usd,
-          change24h: btc.usd * (btc.usd_24h_change / 100),
-          change24hPercent: btc.usd_24h_change,
-          high24h: btc.usd * 1.02,
-          low24h: btc.usd * 0.98,
-          marketCap: btc.usd_market_cap,
-          volume24h: btc.usd_24h_vol
-        };
-    } catch (e) {
-        return {
-            currentPrice: 75000,
-            change24h: 380,
-            change24hPercent: 0.51,
-            high24h: 75800,
-            low24h: 74200,
-            marketCap: 1490000000000,
-            volume24h: 28000000000
-        };
-    }
+  } catch {
+    // CoinGecko fallback
+    const data = await fetchFirstSuccess([
+      `${COINGECKO_API}/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true&include_market_cap=true`,
+    ]);
+    const btc = data.bitcoin;
+    return {
+      currentPrice: btc.usd,
+      change24h: btc.usd * (btc.usd_24h_change / 100),
+      change24hPercent: btc.usd_24h_change,
+      high24h: btc.usd * 1.02,
+      low24h: btc.usd * 0.98,
+      marketCap: btc.usd_market_cap,
+      volume24h: btc.usd_24h_vol
+    };
   }
 };
 
-export const fetchCandleData = async (days: string = 'max'): Promise<CandleData[]> => {
-  try {
-    // Fetch 1000 days (covers ~3 years) from Binance. 
-    // Interval 1d.
-    const response = await fetch(`${BINANCE_API}/klines?symbol=BTCUSDT&interval=1d&limit=1000`);
-    
-    if (!response.ok) {
-       throw new Error(`Binance API Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!Array.isArray(data)) {
-      throw new Error('Data is not an array');
-    }
-
-    // Binance format: [openTime, open, high, low, close, volume, closeTime, quoteAssetVolume, ...]
-    // Index 5 is Volume (BTC), Index 7 is Quote Asset Volume (USDT)
-    return data
+export const fetchCandleData = async (_days: string = 'max'): Promise<CandleData[]> => {
+  // Try Binance Vision → Binance → CoinGecko OHLC
+  const parseBinanceKlines = (data: any[]): CandleData[] =>
+    data
       .map((d: any[]) => ({
         time: d[0],
         open: parseFloat(d[1]),
         high: parseFloat(d[2]),
         low: parseFloat(d[3]),
         close: parseFloat(d[4]),
-        volume: parseFloat(d[7]) // Use quote asset volume (USDT) instead of base volume (BTC)
+        volume: parseFloat(d[7])
       }))
       .filter((d: CandleData) => !isNaN(d.close) && !isNaN(d.open) && d.close > 0)
       .sort((a: CandleData, b: CandleData) => a.time - b.time);
-  } catch (error) {
-    console.warn("Binance Candles failed, using fallback:", error);
-    return generateMockData();
+
+  try {
+    const data = await fetchFirstSuccess([
+      `${BINANCE_API}/klines?symbol=BTCUSDT&interval=1d&limit=1000`,
+      `${BINANCE_API_FALLBACK}/klines?symbol=BTCUSDT&interval=1d&limit=1000`,
+    ]);
+    if (!Array.isArray(data)) throw new Error('Not an array');
+    return parseBinanceKlines(data);
+  } catch {
+    // CoinGecko OHLC fallback (max 365 days for free tier)
+    const data = await fetchFirstSuccess([
+      `${COINGECKO_API}/coins/bitcoin/ohlc?vs_currency=usd&days=365`,
+    ]);
+    if (!Array.isArray(data)) throw new Error('Not an array');
+    return data
+      .map((d: number[]) => ({
+        time: d[0],
+        open: d[1],
+        high: d[2],
+        low: d[3],
+        close: d[4],
+        volume: 0
+      }))
+      .filter((d: CandleData) => !isNaN(d.close) && d.close > 0)
+      .sort((a: CandleData, b: CandleData) => a.time - b.time);
   }
 };
