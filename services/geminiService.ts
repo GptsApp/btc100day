@@ -22,24 +22,28 @@ interface CycleAnalysis {
 
 export const generateMarketInsight = async (stats: MarketStats, recentCandles: CandleData[], lang: string = 'zh'): Promise<string> => {
   try {
+    if (!stats?.currentPrice || !recentCandles?.length) {
+      return lang === 'en' ? 'Insufficient market data to generate analysis.' : '市场数据不足，无法生成分析。';
+    }
+
     const analysis = analyzeCycleStage(stats, recentCandles);
 
-    // Call DeepSeek AI with processed data
     const response = await fetch('/api/insight', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ analysis, stats, lang })
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      return data.insight || (lang === 'en' ? "Unable to generate analysis at the moment." : "暂时无法生成分析。");
-    } else {
-      return lang === 'en' ? "AI analysis service error. Please try again later." : "AI 分析服务错误，请稍后重试。";
+    const data = await response.json().catch(() => null);
+
+    if (data?.insight) {
+      return data.insight;
     }
+
+    return lang === 'en' ? 'Unable to generate analysis. Please try again.' : '暂时无法生成分析，请重试。';
   } catch (error) {
-    console.error("Error generating insight:", error);
-    return lang === 'en' ? "Network error. Please check your connection and try again." : "网络错误，请检查连接后重试。";
+    console.error('Insight request failed:', error);
+    return lang === 'en' ? 'Network error. Please check your connection.' : '网络错误，请检查连接后重试。';
   }
 };
 

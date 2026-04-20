@@ -14,102 +14,96 @@ function isRateLimited(ip) {
   return entry.count > RATE_LIMIT_MAX;
 }
 
+const CORS_HEADERS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+};
+
+function jsonResponse(body, status = 200) {
+  return new Response(JSON.stringify(body), { status, headers: CORS_HEADERS });
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   const clientIP = request.headers.get('cf-connecting-ip') || 'unknown';
   if (isRateLimited(clientIP)) {
-    return new Response(JSON.stringify({ insight: 'Too many requests. Please wait a moment.' }), {
-      status: 429,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonResponse({ insight: '请求过于频繁，请稍后再试。' }, 429);
   }
 
   try {
-    const { analysis, stats, lang = 'zh' } = await request.json();
+    const body = await request.json();
+    const { analysis, stats, lang = 'zh' } = body;
 
-    if (!env?.API_KEY) {
-      return new Response(JSON.stringify({
-        insight: lang === 'en' ? "API key not configured, please check environment variables." : "API密钥未配置，请检查环境变量设置。"
-      }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
+    // Input validation
+    if (!stats?.currentPrice || !analysis?.stage) {
+      return jsonResponse({ insight: lang === 'en' ? 'Invalid request data.' : '请求数据无效。' }, 400);
     }
 
-    const stageNames = lang === 'en' ? {
-      observation: 'Observation (0-30 days)',
-      confirmation: 'Confirmation (30-70 days)',
-      warning: 'Warning (70-100 days)',
-      rest: 'Rest Period'
-    } : {
-      observation: '观察期 (0-30天)',
-      confirmation: '确认期 (30-70天)',
-      warning: '预警期 (70-100天)',
-      rest: '休息期'
-    };
+    if (!env?.API_KEY) {
+      return jsonResponse({
+        insight: lang === 'en' ? 'API key not configured.' : 'API密钥未配置，请检查环境变量。'
+      }, 500);
+    }
 
-    const prompt = lang === 'en' ?
-      `You are an expert analyst of the BTC 100-Day Cycle Theory.
+    const price = Number(stats.currentPrice) || 0;
+    const change24h = Number(stats.change24hPercent) || 0;
+    const emaDistance = Number(analysis.metrics?.emaDistance) || 0;
+    const maxDrawdown = Number(analysis.metrics?.maxDrawdown) || 0;
+    const volumeRatio = Number(analysis.metrics?.volumeRatio) || 1;
+    const consecutiveDays = Number(analysis.criteria?.consecutiveDays) || 0;
+    const gain7d = Number(analysis.metrics?.gain7d) || 0;
+    const gain30d = Number(analysis.metrics?.gain30d) || 0;
+    const probability = Number(analysis.probability) || 0;
+    const daysInCycle = Number(analysis.daysInCycle) || 0;
 
-**Core Theory**:
-- Unilateral rapid rises typically last about 100 days to reach peaks
-- Four stages: Observation (0-30 days), Confirmation (30-70 days), Warning (70-100 days), Rest Period
-- Based on Bayesian thinking for dynamic probability assessment, not mechanical day counting
+    const stageNames = lang === 'en'
+      ? { observation: 'Observation (0-30d)', confirmation: 'Confirmation (30-70d)', warning: 'Warning (70-100d)', rest: 'Rest Period' }
+      : { observation: '观察期 (0-30天)', confirmation: '确认期 (30-70天)', warning: '预警期 (70-100天)', rest: '休息期' };
 
-**Current Market Data** (processed, no calculation needed):
-- BTC Price: $${stats.currentPrice.toLocaleString()}
-- 24h Change: ${stats.change24hPercent.toFixed(2)}%
+    const stageName = stageNames[analysis.stage] || stageNames.rest;
 
-**Technical Analysis Results**:
-- Current Stage: ${stageNames[analysis.stage]}
-- Probability Assessment: ${analysis.probability}%
-- Cycle Days: ${analysis.daysInCycle} days
+    const systemPrompt = lang === 'en'
+      ? `You are a senior Bitcoin cycle analyst specializing in the "100-Day Bull Run Theory". This theory posits that unilateral rapid BTC rises typically last ~100 days before peaking, divided into 4 stages: Observation (0-30d), Confirmation (30-70d), Warning (70-100d), and Rest. You use Bayesian probability to assess cycle progression, not mechanical day counting. Be concise, data-driven, and actionable.`
+      : `你是一位资深比特币周期分析师，专精"100天牛市理论"。该理论认为BTC单边快速上涨通常持续约100天到达峰值，分为四个阶段：观察期(0-30天)、确认期(30-70天)、预警期(70-100天)、休息期。你用贝叶斯概率动态评估周期进展，不机械数日子。回答要简练、基于数据、给出可执行建议。`;
 
-**Key Indicators**:
-- EMA15 Breakout: ${analysis.criteria.emaBreakout ? 'Broken' : 'Not Broken'} (Distance ${analysis.metrics.emaDistance}%)
-- Unilateral Rise: ${analysis.criteria.singleSidedRise ? 'Yes' : 'No'} (Max Drawdown ${analysis.metrics.maxDrawdown}%)
-- Volume Expansion: ${analysis.criteria.volumeExpansion ? 'Yes' : 'No'} (Ratio ${analysis.metrics.volumeRatio})
-- Consecutive Days: ${analysis.criteria.consecutiveDays} days above EMA15
-- Recent Gains: 7d ${analysis.metrics.gain7d}%, 30d ${analysis.metrics.gain30d}%
+    const userPrompt = lang === 'en'
+      ? `Current BTC market snapshot:
+- Price: $${price.toLocaleString()} | 24h: ${change24h.toFixed(2)}%
+- Stage: ${stageName} | Probability: ${probability}% | Cycle day: ${daysInCycle}
+- EMA15: ${analysis.criteria?.emaBreakout ? 'Above' : 'Below'} (${emaDistance}% away)
+- Single-sided rise: ${analysis.criteria?.singleSidedRise ? 'Yes' : 'No'} (max drawdown ${maxDrawdown}%)
+- Volume: ${analysis.criteria?.volumeExpansion ? 'Expanding' : 'Flat'} (ratio ${volumeRatio})
+- ${consecutiveDays} consecutive days above EMA15
+- 7d gain: ${gain7d}% | 30d gain: ${gain30d}%
 
-**Task**:
-Based on the above data, analyze the current market state and provide professional investment advice. Please respond in English, keep it concise and professional (max 4 sentences). Focus on:
-1. Confirmation of current stage assessment
-2. Data-based risk evaluation
-3. Specific operational recommendations` :
-      `你是BTC 100天周期理论的专家分析师。
+Give a brief market assessment (3-4 sentences): confirm the stage, highlight the key risk, and suggest one concrete action.`
+      : `当前BTC市场快照：
+- 价格: $${price.toLocaleString()} | 24h涨跌: ${change24h.toFixed(2)}%
+- 阶段: ${stageName} | 概率: ${probability}% | 周期第${daysInCycle}天
+- EMA15: ${analysis.criteria?.emaBreakout ? '已突破' : '未突破'} (偏离${emaDistance}%)
+- 单边上涨: ${analysis.criteria?.singleSidedRise ? '是' : '否'} (最大回撤${maxDrawdown}%)
+- 成交量: ${analysis.criteria?.volumeExpansion ? '放量' : '缩量'} (比率${volumeRatio})
+- 连续${consecutiveDays}天站上EMA15
+- 7日涨幅: ${gain7d}% | 30日涨幅: ${gain30d}%
 
-**理论核心**：
-- 单边快速上涨通常持续约100天达到峰值
-- 四个阶段：观察期(0-30天)、确认期(30-70天)、预警期(70-100天)、休息期
-- 基于贝叶斯思维动态评估概率，不机械数日子
-
-**当前市场数据**（已处理完毕，无需计算）：
-- BTC价格: $${stats.currentPrice.toLocaleString()}
-- 24小时涨跌: ${stats.change24hPercent.toFixed(2)}%
-
-**技术分析结果**：
-- 当前阶段: ${stageNames[analysis.stage]}
-- 概率评估: ${analysis.probability}%
-- 周期天数: ${analysis.daysInCycle}天
-
-**关键指标**：
-- EMA15突破: ${analysis.criteria.emaBreakout ? '已突破' : '未突破'} (距离${analysis.metrics.emaDistance}%)
-- 单边上涨: ${analysis.criteria.singleSidedRise ? '是' : '否'} (最大回撤${analysis.metrics.maxDrawdown}%)
-- 成交量放大: ${analysis.criteria.volumeExpansion ? '是' : '否'} (比率${analysis.metrics.volumeRatio})
-- 连续天数: ${analysis.criteria.consecutiveDays}天在EMA15上方
-- 近期涨幅: 7天${analysis.metrics.gain7d}%, 30天${analysis.metrics.gain30d}%
-
-**任务**：
-基于以上数据分析当前市场状态，给出专业的投资建议。请用中文回答，保持简洁专业（最多4句话）。重点说明：
-1. 对当前阶段判断的确认
-2. 基于数据的风险评估
-3. 具体的操作建议`;
+请给出简要市场评估（3-4句话）：确认当前阶段判断、指出关键风险、给出一条具体操作建议。`;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,8 +111,12 @@ Based on the above data, analyze the current market state and provide profession
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 200
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 800,
+        temperature: 0.7,
       }),
       signal: controller.signal
     });
@@ -126,21 +124,30 @@ Based on the above data, analyze the current market state and provide profession
     clearTimeout(timeout);
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+      const errText = await response.text().catch(() => '');
+      console.error(`DeepSeek API error: ${response.status} ${errText}`);
+      return jsonResponse({
+        insight: lang === 'en' ? 'AI service returned an error. Please try again.' : 'AI 服务返回错误，请稍后重试。'
+      }, 502);
     }
 
     const data = await response.json();
-    const insight = data.choices?.[0]?.message?.content || (lang === 'en' ? "Unable to generate analysis at the moment." : "暂时无法生成分析。");
+    const insight = data.choices?.[0]?.message?.content?.trim();
 
-    return new Response(JSON.stringify({ insight }), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+    if (!insight) {
+      return jsonResponse({
+        insight: lang === 'en' ? 'AI returned an empty response.' : 'AI 返回了空内容，请重试。'
+      }, 502);
+    }
+
+    return jsonResponse({ insight });
   } catch (error) {
-    return new Response(JSON.stringify({ insight: lang === 'en' ? "AI analysis service is temporarily unavailable." : "AI 分析服务暂时不可用。" }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('Insight API error:', error?.message || error);
+    const isAbort = error?.name === 'AbortError';
+    return jsonResponse({
+      insight: isAbort
+        ? '请求超时，AI 服务响应过慢，请稍后重试。'
+        : 'AI 分析服务暂时不可用，请稍后重试。'
+    }, isAbort ? 504 : 500);
   }
 }
