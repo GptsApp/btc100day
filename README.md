@@ -6,7 +6,7 @@ A real-time Bitcoin analysis dashboard based on the "100-Day Bull Run Theory" wi
 
 - 📈 Real-time BTC price updates (every 5 seconds)
 - 📊 Interactive candlestick chart with EMA15 indicator
-- 🤖 AI-powered market analysis using DeepSeek V3.2
+- 🤖 AI-powered market analysis using DeepSeek V4 Flash
 - 🌐 Bilingual support (English/Chinese)
 - 📱 Responsive design for all devices
 - ⚡ Fast deployment with Cloudflare Pages

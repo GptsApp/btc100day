@@ -67,7 +67,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({ stats, history, lang }
              <div className="flex items-center justify-between mb-5">
                <div className="flex items-center gap-2">
                    <Sparkles className="w-4 h-4 text-[#7cff67]" />
-                   <span className="text-xs font-bold text-white text-shadow uppercase tracking-wider">DeepSeek V3.2</span>
+                   <span className="text-xs font-bold text-white text-shadow uppercase tracking-wider">DeepSeek V4 Flash</span>
                </div>
                <span className="text-[10px] text-white/60 font-mono bg-black/20 backdrop-blur-sm px-2 py-1 rounded-md border border-white/20">{new Date().toLocaleTimeString()}</span>
              </div>
@@ -105,7 +105,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({ stats, history, lang }
 const translations = {
     en: {
         title: "AI Market Analyst",
-        description: "Analyze the current trend against the '100-Day Bull Run' theory criteria (rapid unilateral rise, volume, sentiment) using DeepSeek V3.2.",
+        description: "Analyze the current trend against the '100-Day Bull Run' theory criteria (rapid unilateral rise, volume, sentiment) using DeepSeek V4 Flash.",
         button: "Generate Analysis",
         buttonLoading: "Thinking...",
         placeholderTitle: "AI Analysis Ready",
@@ -114,7 +114,7 @@ const translations = {
     },
     zh: {
         title: "AI 市场分析师",
-        description: "使用 DeepSeek V3.2 根据\"100天牛市\"理论标准（单边快速上涨、成交量、情绪）分析当前趋势。",
+        description: "使用 DeepSeek V4 Flash 根据\"100天牛市\"理论标准（单边快速上涨、成交量、情绪）分析当前趋势。",
         button: "生成分析报告",
         buttonLoading: "正在思考...",
         placeholderTitle: "等待指令",

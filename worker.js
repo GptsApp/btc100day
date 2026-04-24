@@ -4,6 +4,65 @@ const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW = 60_000;
 const RATE_LIMIT_MAX = 10;
 
+const insightCache = {
+  zh: null,
+  en: null,
+};
+
+const CACHE_MAX_AGE_MS = 15 * 60 * 1000;
+const CACHE_THRESHOLD = {
+  pricePct: 0.003,
+  change24hPct: 0.3,
+  probabilityPct: 2,
+  emaDistancePct: 0.5,
+  maxDrawdownPct: 0.6,
+  volumeRatio: 0.08,
+  gain7dPct: 0.6,
+  gain30dPct: 1.2,
+  consecutiveDays: 1,
+};
+
+function buildSnapshot(analysis, stats) {
+  return {
+    stage: analysis?.stage,
+    price: Number(stats?.currentPrice) || 0,
+    change24h: Number(stats?.change24hPercent) || 0,
+    probability: Number(analysis?.probability) || 0,
+    emaDistance: Number(analysis?.metrics?.emaDistance) || 0,
+    maxDrawdown: Number(analysis?.metrics?.maxDrawdown) || 0,
+    volumeRatio: Number(analysis?.metrics?.volumeRatio) || 0,
+    gain7d: Number(analysis?.metrics?.gain7d) || 0,
+    gain30d: Number(analysis?.metrics?.gain30d) || 0,
+    consecutiveDays: Number(analysis?.criteria?.consecutiveDays) || 0,
+  };
+}
+
+function isSmallFluctuation(prev, curr) {
+  if (!prev || !curr) return false;
+  if (prev.stage !== curr.stage) return false;
+  if (prev.price <= 0 || curr.price <= 0) return false;
+
+  const pricePct = Math.abs((curr.price - prev.price) / prev.price);
+  return (
+    pricePct <= CACHE_THRESHOLD.pricePct &&
+    Math.abs(curr.change24h - prev.change24h) <= CACHE_THRESHOLD.change24hPct &&
+    Math.abs(curr.probability - prev.probability) <= CACHE_THRESHOLD.probabilityPct &&
+    Math.abs(curr.emaDistance - prev.emaDistance) <= CACHE_THRESHOLD.emaDistancePct &&
+    Math.abs(curr.maxDrawdown - prev.maxDrawdown) <= CACHE_THRESHOLD.maxDrawdownPct &&
+    Math.abs(curr.volumeRatio - prev.volumeRatio) <= CACHE_THRESHOLD.volumeRatio &&
+    Math.abs(curr.gain7d - prev.gain7d) <= CACHE_THRESHOLD.gain7dPct &&
+    Math.abs(curr.gain30d - prev.gain30d) <= CACHE_THRESHOLD.gain30dPct &&
+    Math.abs(curr.consecutiveDays - prev.consecutiveDays) <= CACHE_THRESHOLD.consecutiveDays
+  );
+}
+
+function shouldUseCache(cacheEntry, snapshot) {
+  if (!cacheEntry) return false;
+  if (!cacheEntry.insight) return false;
+  if (Date.now() - cacheEntry.updatedAt > CACHE_MAX_AGE_MS) return false;
+  return isSmallFluctuation(cacheEntry.snapshot, snapshot);
+}
+
 function isRateLimited(ip) {
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
@@ -68,6 +127,13 @@ async function handleInsight(request, env) {
     const gain30d = Number(analysis.metrics?.gain30d) || 0;
     const probability = Number(analysis.probability) || 0;
     const daysInCycle = Number(analysis.daysInCycle) || 0;
+    const snapshot = buildSnapshot(analysis, stats);
+    const cacheKey = lang === 'en' ? 'en' : 'zh';
+    const cacheEntry = insightCache[cacheKey];
+
+    if (shouldUseCache(cacheEntry, snapshot)) {
+      return json({ insight: cacheEntry.insight });
+    }
 
     const stageNames = lang === 'en'
       ? { observation: 'Observation (0-30d)', confirmation: 'Confirmation (30-70d)', warning: 'Warning (70-100d)', rest: 'Rest Period' }
@@ -146,13 +212,13 @@ Keep response to 4-5 sentences, dense with reasoning.`
         Authorization: `Bearer ${env.API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek-v4-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
         max_tokens: 800,
-        temperature: 0.7,
+        temperature: 0.2,
       }),
       signal: ctrl.signal,
     });
@@ -169,6 +235,12 @@ Keep response to 4-5 sentences, dense with reasoning.`
     if (!insight) {
       return json({ insight: lang === 'en' ? 'AI returned an empty response.' : 'AI 返回了空内容，请重试。' }, 502);
     }
+
+    insightCache[cacheKey] = {
+      insight,
+      snapshot,
+      updatedAt: Date.now(),
+    };
 
     return json({ insight });
   } catch (error) {
