@@ -69,6 +69,10 @@ const contentData = {
         a: "Key criteria for identifying cycle start: 1) Price breaks above and consistently stays above EMA15 (white line) 2) Single-sided rapid rise with minimal deep pullbacks 3) Volume expansion supporting the move 4) High proportion of consecutive up days. Use Bayesian thinking for dynamic confirmation - don't mechanically count days. Gradually increase confidence: Days 0-30 observe (10% confidence), Days 30-70 confirm trend (50%+ confidence), Days 70-100 high alert (maximum confidence). The key is weekly-level confirmation, not getting distracted by daily fluctuations."
       },
       {
+        q: "2.1 How does 'Consecutive Days Above EMA15' calculation work?",
+        a: "We use a smart 7-day rolling window algorithm: Within each 7-day window, at least 5 days must be above EMA15 to continue counting. This filters short-term noise (like 1-2 day pullbacks or wash trading) while staying sensitive to real trend reversals. Additionally, any single day breaking below EMA15 by >5% triggers an immediate circuit breaker, stopping the count. This approach aligns with Wei God's 'weekly-level confirmation' philosophy - focusing on the trend, not daily fluctuations."
+      },
+      {
         q: "3. What do 'Fast Start, Slow End' and 'Slow Start, Fast End' mean?",
         a: "These describe how gains are distributed within the 100 days: Fast Start, Slow End = first 50 days rise aggressively (e.g., +50%), last 50 days rise slowly (e.g., +20%); Slow Start, Fast End = first 50 days rise slowly (e.g., +20%), last 50 days accelerate (e.g., +50%); Uniform Distribution = similar gains in both halves. Wei God observed these patterns rotate, helping identify current cycle characteristics."
       },
@@ -112,6 +116,10 @@ const contentData = {
       {
         q: "2. 如何判断 100天周期的起点？",
         a: "判断周期起点的关键标准：1) 价格突破并持续在EMA15白线上方运行 2) 单边快速上涨，少有深度回调 3) 成交量配合放大 4) 连续上涨天数占比高。采用贝叶斯思维动态确认，而不是机械数日子。逐步增加信心：0-30天观察期（信心10%），30-70天确认期（信心50%+），70-100天预警期（信心最高）。关键是周级别确认，不被日线波动干扰。"
+      },
+      {
+        q: "2.1 '连续在EMA15上方天数'是如何计算的？",
+        a: "我们采用智能的7天滚动窗口算法：每个7天窗口内，至少要有5天收盘价在EMA15上方才继续计数。这样可以过滤短期噪音（比如1-2天的回调或洗盘），同时对真正的趋势反转保持敏感。此外，任何单日跌破EMA15超过5%会立即触发熔断机制，停止计数。这种方法符合魏神的'周级别确认'理念——关注趋势，不被日线波动干扰。"
       },
       {
         q: "3. 前快后慢和前慢后快是什么意思？",
