@@ -30,14 +30,9 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ candles, currentPr
     let consecutiveAbove = 0;
     const DEEP_BREAK_THRESHOLD = 5; // Deep break >5% triggers immediate stop
 
-    console.log('=== EMA15 Consecutive Days Debug ===');
-    console.log(`Total candles: ${candles.length}`);
-    console.log(`Latest candle date: ${new Date(candles[candles.length - 1].time).toISOString().split('T')[0]}`);
-
     for (let i = candles.length - 1; i >= 0; i--) {
         const emaVal = emaDataFull[i]?.ema;
         const close = candles[i].close;
-        const date = new Date(candles[i].time).toISOString().split('T')[0];
 
         if (!emaVal) break;
 
@@ -46,11 +41,9 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ candles, currentPr
 
         if (isAbove) {
             consecutiveAbove++;
-            console.log(`Day ${consecutiveAbove}: ${date} | ✅ Above | Diff: ${((close - emaVal) / emaVal * 100).toFixed(2)}%`);
         } else {
             // Check if this is a deep break
             if (breakDepth > DEEP_BREAK_THRESHOLD) {
-                console.log(`\n❌ STOPPED at ${date} | Deep break: ${breakDepth.toFixed(2)}%`);
                 break;
             }
 
@@ -61,16 +54,12 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ candles, currentPr
             if (prevAbove && nextAbove) {
                 // Isolated shallow break: treat as noise, continue counting
                 consecutiveAbove++;
-                console.log(`Day ${consecutiveAbove}: ${date} | ⚠️ Shallow break (${breakDepth.toFixed(2)}%) but isolated, continuing`);
             } else {
                 // Not isolated: this is a real break
-                console.log(`\n❌ STOPPED at ${date} | Shallow break ${breakDepth.toFixed(2)}% but not isolated`);
                 break;
             }
         }
     }
-
-    console.log(`\n✅ Final count: ${consecutiveAbove} days`);
 
     // 3. Max Run-Up in Last 30 Days (Correct "Gain" Logic)
     let maxRunUp = 0;
