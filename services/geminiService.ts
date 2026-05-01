@@ -66,14 +66,33 @@ function analyzeCycleStage(stats: MarketStats, candles: CandleData[]): CycleAnal
   const emaBreakout = currentPrice > lastEMA;
   const emaDistance = ((currentPrice - lastEMA) / lastEMA) * 100;
 
-  // 2. Consecutive Days Above EMA15
+  // 2. Consecutive Days Above EMA15 (with shallow break tolerance)
   let consecutiveDays = 0;
+  const DEEP_BREAK_THRESHOLD = 0.05; // 5% deep break threshold
+
   for (let i = candles.length - 1; i >= 0; i--) {
     const emaVal = emaData[i]?.ema;
-    if (emaVal && candles[i].close > emaVal) {
+    const close = candles[i].close;
+
+    if (!emaVal) break;
+
+    if (close > emaVal) {
       consecutiveDays++;
     } else {
-      break;
+      const breakDepth = (emaVal - close) / emaVal;
+
+      if (breakDepth > DEEP_BREAK_THRESHOLD) {
+        break;
+      }
+
+      const prevAbove = i > 0 && candles[i - 1].close > (emaData[i - 1]?.ema || 0);
+      const nextAbove = i < candles.length - 1 && candles[i + 1].close > (emaData[i + 1]?.ema || 0);
+
+      if (prevAbove && nextAbove) {
+        consecutiveDays++;
+      } else {
+        break;
+      }
     }
   }
 
