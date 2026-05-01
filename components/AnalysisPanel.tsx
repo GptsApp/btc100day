@@ -23,54 +23,54 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ candles, currentPr
     const lastEMA = emaDataFull[emaDataFull.length - 1]?.ema || lastCandle.close;
     const emaDistance = ((currentPrice - lastEMA) / lastEMA) * 100;
     
-    // 2. Consecutive Days Above EMA15 (Strict consecutive with shallow break tolerance)
-    // Algorithm: Count from latest day backwards, strictly consecutive above EMA15
-    // Tolerance: Allow shallow breaks (≤5%) if quickly recovered within 3 days
+    // 2. Consecutive Days Above EMA15 (with shallow break tolerance)
+    // Algorithm: Count from latest day backwards
+    // - Deep break >5% triggers immediate stop
+    // - Shallow break ≤5%: if isolated (surrounded by days above), treat as noise and continue
     let consecutiveAbove = 0;
     const DEEP_BREAK_THRESHOLD = 5; // Deep break >5% triggers immediate stop
-    const RECOVERY_WINDOW = 3;      // Check next 3 days for recovery
-    const RECOVERY_MIN_DAYS = 2;    // Need 2 out of 3 days to recover
 
-    let i = candles.length - 1;
+    console.log('=== EMA15 Consecutive Days Debug ===');
+    console.log(`Total candles: ${candles.length}`);
+    console.log(`Latest candle date: ${new Date(candles[candles.length - 1].time).toISOString().split('T')[0]}`);
 
-    while (i >= 0) {
+    for (let i = candles.length - 1; i >= 0; i--) {
         const emaVal = emaDataFull[i]?.ema;
         const close = candles[i].close;
+        const date = new Date(candles[i].time).toISOString().split('T')[0];
 
         if (!emaVal) break;
 
         const isAbove = close > emaVal;
+        const breakDepth = ((emaVal - close) / emaVal) * 100;
 
         if (isAbove) {
             consecutiveAbove++;
-            i--;
+            console.log(`Day ${consecutiveAbove}: ${date} | ✅ Above | Diff: ${((close - emaVal) / emaVal * 100).toFixed(2)}%`);
         } else {
-            const breakDepth = ((emaVal - close) / emaVal) * 100;
-
+            // Check if this is a deep break
             if (breakDepth > DEEP_BREAK_THRESHOLD) {
+                console.log(`\n❌ STOPPED at ${date} | Deep break: ${breakDepth.toFixed(2)}%`);
                 break;
             }
 
-            const futureStart = i + 1;
-            const futureEnd = Math.min(i + 1 + RECOVERY_WINDOW, candles.length);
-            let recoveryDays = 0;
+            // Shallow break: check if it's isolated (single day anomaly)
+            const prevAbove = i > 0 && emaDataFull[i - 1]?.ema && candles[i - 1].close > emaDataFull[i - 1].ema;
+            const nextAbove = i < candles.length - 1 && emaDataFull[i + 1]?.ema && candles[i + 1].close > emaDataFull[i + 1].ema;
 
-            for (let j = futureStart; j < futureEnd; j++) {
-                const futureEma = emaDataFull[j]?.ema;
-                const futureClose = candles[j].close;
-                if (futureEma && futureClose > futureEma) {
-                    recoveryDays++;
-                }
-            }
-
-            if (recoveryDays >= RECOVERY_MIN_DAYS) {
+            if (prevAbove && nextAbove) {
+                // Isolated shallow break: treat as noise, continue counting
                 consecutiveAbove++;
-                i--;
+                console.log(`Day ${consecutiveAbove}: ${date} | ⚠️ Shallow break (${breakDepth.toFixed(2)}%) but isolated, continuing`);
             } else {
+                // Not isolated: this is a real break
+                console.log(`\n❌ STOPPED at ${date} | Shallow break ${breakDepth.toFixed(2)}% but not isolated`);
                 break;
             }
         }
     }
+
+    console.log(`\n✅ Final count: ${consecutiveAbove} days`);
 
     // 3. Max Run-Up in Last 30 Days (Correct "Gain" Logic)
     let maxRunUp = 0;
