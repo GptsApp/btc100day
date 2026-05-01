@@ -70,7 +70,7 @@ const contentData = {
       },
       {
         q: "2.1 How does 'Consecutive Days Above EMA15' calculation work?",
-        a: "We use a smart 7-day rolling window algorithm: Within each 7-day window, at least 5 days must be above EMA15 to continue counting. This filters short-term noise (like 1-2 day pullbacks or wash trading) while staying sensitive to real trend reversals. Additionally, any single day breaking below EMA15 by >5% triggers an immediate circuit breaker, stopping the count. This approach aligns with Wei God's 'weekly-level confirmation' philosophy - focusing on the trend, not daily fluctuations."
+        a: "We count strictly consecutive days from the latest day backwards, where the closing price is above EMA15. To filter false breaks (short-term wash trading), we allow shallow breaks (≤5%) if they recover quickly: if the next 3 days have at least 2 days back above EMA15, we treat it as noise and continue counting. However, any deep break (>5% below EMA15) immediately stops the count - this is a real trend reversal signal. This approach aligns with Wei God's 'weekly-level confirmation' philosophy: focus on the trend, not daily noise."
       },
       {
         q: "3. What do 'Fast Start, Slow End' and 'Slow Start, Fast End' mean?",
@@ -119,7 +119,7 @@ const contentData = {
       },
       {
         q: "2.1 '连续在EMA15上方天数'是如何计算的？",
-        a: "我们采用智能的7天滚动窗口算法：每个7天窗口内，至少要有5天收盘价在EMA15上方才继续计数。这样可以过滤短期噪音（比如1-2天的回调或洗盘），同时对真正的趋势反转保持敏感。此外，任何单日跌破EMA15超过5%会立即触发熔断机制，停止计数。这种方法符合魏神的'周级别确认'理念——关注趋势，不被日线波动干扰。"
+        a: "我们从最新一天开始往回数，严格计算收盘价在EMA15上方的连续天数。为了过滤假跌破（短期洗盘），我们允许浅度跌破（≤5%）如果快速恢复：如果后续3天内有至少2天重新站上EMA15，就视为噪音并继续计数。但是，任何深度跌破（>5%）会立即停止计数——这是真正的趋势反转信号。这种方法符合魏神的'周级别确认'理念：关注趋势，不被日线噪音干扰。"
       },
       {
         q: "3. 前快后慢和前慢后快是什么意思？",

@@ -23,40 +23,52 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ candles, currentPr
     const lastEMA = emaDataFull[emaDataFull.length - 1]?.ema || lastCandle.close;
     const emaDistance = ((currentPrice - lastEMA) / lastEMA) * 100;
     
-    // 2. Consecutive Days Above EMA15 (7-day rolling window + deep break circuit breaker)
-    // Logic: Within each 7-day window, at least 5 days must be above EMA15, AND no deep break >5%
-    // This filters short-term noise while remaining sensitive to true trend reversals
+    // 2. Consecutive Days Above EMA15 (Strict consecutive with shallow break tolerance)
+    // Algorithm: Count from latest day backwards, strictly consecutive above EMA15
+    // Tolerance: Allow shallow breaks (≤5%) if quickly recovered within 3 days
     let consecutiveAbove = 0;
-    const WINDOW_SIZE = 7;        // 7-day window = 1 week (weekly-level confirmation)
-    const MIN_DAYS_ABOVE = 5;     // At least 5 days above EMA15 in window (allows 2 days tolerance)
-    const DEEP_BREAK_THRESHOLD = 5; // Deep break >5% triggers immediate circuit breaker
+    const DEEP_BREAK_THRESHOLD = 5; // Deep break >5% triggers immediate stop
+    const RECOVERY_WINDOW = 3;      // Check next 3 days for recovery
+    const RECOVERY_MIN_DAYS = 2;    // Need 2 out of 3 days to recover
 
-    for (let i = candles.length - 1; i >= WINDOW_SIZE - 1; i--) {
-        // Check current 7-day window
-        let daysAboveInWindow = 0;
-        let hasDeepBreak = false;
+    let i = candles.length - 1;
 
-        for (let j = 0; j < WINDOW_SIZE; j++) {
-            const idx = i - j;
-            const emaVal = emaDataFull[idx]?.ema;
-            const close = candles[idx].close;
+    while (i >= 0) {
+        const emaVal = emaDataFull[i]?.ema;
+        const close = candles[i].close;
 
-            if (emaVal && close > emaVal) {
-                daysAboveInWindow++;
-            } else if (emaVal) {
-                const breakDepth = ((emaVal - close) / emaVal) * 100;
-                if (breakDepth > DEEP_BREAK_THRESHOLD) {
-                    hasDeepBreak = true;
-                    break;
+        if (!emaVal) break;
+
+        const isAbove = close > emaVal;
+
+        if (isAbove) {
+            consecutiveAbove++;
+            i--;
+        } else {
+            const breakDepth = ((emaVal - close) / emaVal) * 100;
+
+            if (breakDepth > DEEP_BREAK_THRESHOLD) {
+                break;
+            }
+
+            const futureStart = i + 1;
+            const futureEnd = Math.min(i + 1 + RECOVERY_WINDOW, candles.length);
+            let recoveryDays = 0;
+
+            for (let j = futureStart; j < futureEnd; j++) {
+                const futureEma = emaDataFull[j]?.ema;
+                const futureClose = candles[j].close;
+                if (futureEma && futureClose > futureEma) {
+                    recoveryDays++;
                 }
             }
-        }
 
-        // Continue counting if: 5+ days above EMA15 in window AND no deep break
-        if (daysAboveInWindow >= MIN_DAYS_ABOVE && !hasDeepBreak) {
-            consecutiveAbove++;
-        } else {
-            break; // True interruption
+            if (recoveryDays >= RECOVERY_MIN_DAYS) {
+                consecutiveAbove++;
+                i--;
+            } else {
+                break;
+            }
         }
     }
 
