@@ -52,21 +52,22 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   const volSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
   const priceLinesRef = useRef<any[]>([]);
 
-  // Active view: 'all' or 'c1', 'c2', 'c3', 'c4'
+  // Active view tab: 'all' or 'c1', 'c2', 'c3', 'c4'
   const [activeCycleTab, setActiveCycleTab] = useState<string>('all');
   const activeCycleTabRef = useRef<string>('all');
   activeCycleTabRef.current = activeCycleTab;
 
-  // Background overlay bands coordinates state computed from candle indices
-  const [bandsCoords, setBandsCoords] = useState<{
-    id: string;
-    label: string;
-    p1Left: number;
-    p1Width: number;
-    p2Left: number;
-    p2Width: number;
-    visible: boolean;
-  }[]>([]);
+  // Track the user's actual, latest visible logical range (#1 Priority)
+  // Whenever user pans or zooms, this is updated and NEVER overwritten by background polling!
+  const currentLogicalRangeRef = useRef<{ from: number; to: number } | null>(null);
+
+  // References to the 4 cycle background shading DOM elements (direct zero-lag manipulation)
+  const bandsMapRef = useRef<{ [key: string]: { p1: HTMLDivElement | null; p2: HTMLDivElement | null } }>({
+    c1: { p1: null, p2: null },
+    c2: { p1: null, p2: null },
+    c3: { p1: null, p2: null },
+    c4: { p1: null, p2: null },
+  });
 
   // Legend tooltip dynamic data
   const [crosshairData, setCrosshairData] = useState<{
@@ -188,20 +189,25 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
     };
   }, [chartData, emaData]);
 
-  // Pixel-accurate background shading coordinate calculation using logicalToCoordinate
+  // Synchronous zero-lag DOM position update for background shading zones (0 React re-renders)
   const updateBandsCoords = useCallback(() => {
     if (!chartRef.current || !containerRef.current) return;
     const timeScale = chartRef.current.timeScale();
     const containerWidth = containerRef.current.clientWidth;
     const indices = cycleIndicesRef.current;
 
-    const coords = indices.map((ci) => {
+    indices.forEach((ci) => {
       const xStart = timeScale.logicalToCoordinate(ci.startIdx as any);
       const xMid = timeScale.logicalToCoordinate(ci.midIdx as any);
       const xEnd = timeScale.logicalToCoordinate(ci.theoreticalEndIdx as any);
 
+      const bandEls = bandsMapRef.current[ci.id];
+      if (!bandEls) return;
+
       if (xStart === null && xMid === null && xEnd === null) {
-        return { id: ci.id, label: ci.label, p1Left: 0, p1Width: 0, p2Left: 0, p2Width: 0, visible: false };
+        if (bandEls.p1) bandEls.p1.style.display = 'none';
+        if (bandEls.p2) bandEls.p2.style.display = 'none';
+        return;
       }
 
       const s = xStart !== null ? xStart : (xMid !== null ? xMid - 100 : 0);
@@ -213,26 +219,29 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       const p2Left = m;
       const p2Width = Math.max(0, e - m);
 
-      const visible = (p1Left + p1Width > 0 && p1Left < containerWidth) ||
-                      (p2Left + p2Width > 0 && p2Left < containerWidth);
+      if (bandEls.p1) {
+        if (p1Width > 0 && p1Left + p1Width > 0 && p1Left < containerWidth) {
+          bandEls.p1.style.display = 'block';
+          bandEls.p1.style.left = `${p1Left}px`;
+          bandEls.p1.style.width = `${p1Width}px`;
+        } else {
+          bandEls.p1.style.display = 'none';
+        }
+      }
 
-      return {
-        id: ci.id,
-        label: ci.label,
-        p1Left,
-        p1Width,
-        p2Left,
-        p2Width,
-        visible,
-      };
+      if (bandEls.p2) {
+        if (p2Width > 0 && p2Left + p2Width > 0 && p2Left < containerWidth) {
+          bandEls.p2.style.display = 'block';
+          bandEls.p2.style.left = `${p2Left}px`;
+          bandEls.p2.style.width = `${p2Width}px`;
+        } else {
+          bandEls.p2.style.display = 'none';
+        }
+      }
     });
-
-    setBandsCoords(coords);
   }, []);
 
-  const lockedLogicalRangeRef = useRef<{ from: number; to: number } | null>(null);
-
-  // Initialize Chart ONCE with Clean White Professional Theme
+  // Initialize Chart ONCE on mount with Clean White Theme
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -281,8 +290,8 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
         borderColor: '#e2e8f0',
         timeVisible: true,
         secondsVisible: false,
-        minBarSpacing: 0.2, // Allow fitting 1370+ bars for full panoramic overview
-        shiftVisibleRangeOnNewBar: false, // Prevent auto-scrolling to the latest bar when live updates arrive!
+        minBarSpacing: 0.2,
+        shiftVisibleRangeOnNewBar: false, // Prevents auto-scrolling away when live updates arrive!
       },
     });
 
@@ -324,8 +333,11 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
     });
     emaSeriesRef.current = emaSeries;
 
-    // Range changes trigger background bands re-render
-    chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
+    // Track user pan/zoom in REAL-TIME: Whenever time scale changes, record the user's active viewport!
+    chart.timeScale().subscribeVisibleLogicalRangeChange((newRange) => {
+      if (newRange) {
+        currentLogicalRangeRef.current = newRange;
+      }
       updateBandsCoords();
     });
 
@@ -399,7 +411,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
     };
   }, [updateBandsCoords]);
 
-  // Guaranteed Full Visibility Zoom to Cycle without scale jitter
+  // Guaranteed Full Visibility Zoom to Cycle (Zero Flash, Direct Viewport Setup)
   const zoomToCycle = useCallback((cycleId: string) => {
     if (!chartRef.current) return;
     setActiveCycleTab(cycleId);
@@ -407,14 +419,11 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
 
     if (cycleId === 'all') {
       chartRef.current.timeScale().fitContent();
-      requestAnimationFrame(() => {
-        if (!chartRef.current) return;
-        const fullRange = chartRef.current.timeScale().getVisibleLogicalRange();
-        if (fullRange) {
-          lockedLogicalRangeRef.current = fullRange;
-        }
-        updateBandsCoords();
-      });
+      const fullRange = chartRef.current.timeScale().getVisibleLogicalRange();
+      if (fullRange) {
+        currentLogicalRangeRef.current = fullRange;
+      }
+      updateBandsCoords();
       return;
     }
 
@@ -432,8 +441,8 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       to: toLogical,
     };
 
-    // Lock range in ref so background polling will NEVER shift it away!
-    lockedLogicalRangeRef.current = rangeObj;
+    // Explicitly set the cycle view and record it as current viewport
+    currentLogicalRangeRef.current = rangeObj;
     chartRef.current.timeScale().setVisibleLogicalRange(rangeObj);
     updateBandsCoords();
   }, [updateBandsCoords]);
@@ -441,12 +450,10 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   const prevCandlesCountRef = useRef<number>(0);
   const isInitializedRef = useRef<boolean>(false);
 
-  // Set Candlestick / EMA / Vol Data without flicker or camera reset
+  // Set Candlestick / EMA / Vol Data: STRICTLY PRESERVES USER MANUAL ZOOM & PAN
   useEffect(() => {
     if (!candleSeriesRef.current || !emaSeriesRef.current || !volSeriesRef.current) return;
     if (chartData.length === 0) return;
-
-    const currentRange = chartRef.current?.timeScale().getVisibleLogicalRange();
 
     const formattedCandles = chartData.map((c) => {
       const d = new Date(c.time);
@@ -509,53 +516,50 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       }
     });
 
-    const isNewData = !isInitializedRef.current || uniqueCandles.length !== prevCandlesCountRef.current;
+    const isFirstInit = !isInitializedRef.current;
 
-    if (isNewData) {
+    if (isFirstInit) {
+      isInitializedRef.current = true;
       candleSeriesRef.current.setData(uniqueCandles);
       volSeriesRef.current.setData(uniqueVol);
       emaSeriesRef.current.setData(uniqueEma);
       prevCandlesCountRef.current = uniqueCandles.length;
 
-      if (!isInitializedRef.current) {
-        isInitializedRef.current = true;
-        if (activeCycleTabRef.current === 'all') {
-          chartRef.current?.timeScale().fitContent();
-          setTimeout(() => {
-            if (chartRef.current) {
-              const fullRange = chartRef.current.timeScale().getVisibleLogicalRange();
-              if (fullRange) lockedLogicalRangeRef.current = fullRange;
-              updateBandsCoords();
-            }
-          }, 100);
-        } else {
-          zoomToCycle(activeCycleTabRef.current);
-        }
-      } else {
-        if (lockedLogicalRangeRef.current && chartRef.current) {
-          chartRef.current.timeScale().setVisibleLogicalRange(lockedLogicalRangeRef.current);
-        } else if (currentRange && chartRef.current) {
-          chartRef.current.timeScale().setVisibleLogicalRange(currentRange);
+      chartRef.current?.timeScale().fitContent();
+      const fullRange = chartRef.current?.timeScale().getVisibleLogicalRange();
+      if (fullRange) currentLogicalRangeRef.current = fullRange;
+      updateBandsCoords();
+    } else {
+      const isCandleCountChanged = uniqueCandles.length !== prevCandlesCountRef.current;
+
+      if (isCandleCountChanged) {
+        // A whole new day candle was appended (happens once per 24 hours)
+        candleSeriesRef.current.setData(uniqueCandles);
+        volSeriesRef.current.setData(uniqueVol);
+        emaSeriesRef.current.setData(uniqueEma);
+        prevCandlesCountRef.current = uniqueCandles.length;
+
+        // Restore the user's exact current viewport (#1 Priority)
+        if (currentLogicalRangeRef.current && chartRef.current) {
+          chartRef.current.timeScale().setVisibleLogicalRange(currentLogicalRangeRef.current);
         }
         updateBandsCoords();
-      }
-    } else {
-      // High-performance single bar update: 0ms lag, no full re-render
-      const lastCandle = uniqueCandles[uniqueCandles.length - 1];
-      const lastVol = uniqueVol[uniqueVol.length - 1];
-      const lastEma = uniqueEma[uniqueEma.length - 1];
+      } else {
+        // High-performance live price poll (every 10s): in-place update ONLY!
+        const lastCandle = uniqueCandles[uniqueCandles.length - 1];
+        const lastVol = uniqueVol[uniqueVol.length - 1];
+        const lastEma = uniqueEma[uniqueEma.length - 1];
 
-      if (lastCandle) candleSeriesRef.current.update(lastCandle);
-      if (lastVol) volSeriesRef.current.update(lastVol);
-      if (lastEma) emaSeriesRef.current.update(lastEma);
+        if (lastCandle) candleSeriesRef.current.update(lastCandle);
+        if (lastVol) volSeriesRef.current.update(lastVol);
+        if (lastEma) emaSeriesRef.current.update(lastEma);
 
-      // Preserve view range strictly
-      if (lockedLogicalRangeRef.current && chartRef.current) {
-        chartRef.current.timeScale().setVisibleLogicalRange(lockedLogicalRangeRef.current);
+        // DO NOT TOUCH OR RESET THE TIME SCALE!
+        // The user's zoom, pan, and scroll operations are 100% PRESERVED as #1 Priority!
+        updateBandsCoords();
       }
-      updateBandsCoords();
     }
-  }, [chartData, emaData, data, updateBandsCoords, zoomToCycle]);
+  }, [chartData, emaData, data, updateBandsCoords]);
 
   // Draw Founder Orders Lines on Chart ONLY for Cycle 4 or when specifically looking at current cycle
   useEffect(() => {
@@ -745,50 +749,45 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       {/* 2. CHART VIEWPORT WITH PRECISE 50D/50D CYCLE BACKGROUND OVERLAYS */}
       <div className="relative flex-1 w-full overflow-hidden rounded-xl bg-white" style={{ height: '520px' }}>
         
-        {/* Cycle 50d/50d Colored Background Shading Zones */}
+        {/* Cycle 50d/50d Colored Background Shading Zones (Zero-lag direct DOM styling) */}
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" style={{ bottom: '26px' }}>
-          {bandsCoords.map((band) => {
-            if (!band.visible) return null;
-            return (
-              <React.Fragment key={band.id}>
-                {/* 1st 50 Days: Subtle Jade Green Area */}
-                {band.p1Width > 0 && (
-                  <div
-                    className="absolute top-0 bottom-0 border-l border-emerald-400/50 bg-emerald-500/[0.045]"
-                    style={{
-                      left: `${band.p1Left}px`,
-                      width: `${band.p1Width}px`,
-                    }}
-                  >
-                    <div className="p-2 text-[10px] font-mono font-bold text-emerald-700 flex items-center gap-1">
-                      <span>{band.label}</span>
-                      <span className="font-normal text-[9px] text-emerald-600/80">
-                        {isEn ? '1st 50d' : '前50天'}
-                      </span>
-                    </div>
-                  </div>
-                )}
+          {cycleBands.map((c) => (
+            <React.Fragment key={c.id}>
+              {/* 1st 50 Days: Subtle Jade Green Area */}
+              <div
+                ref={(el) => {
+                  if (!bandsMapRef.current[c.id]) bandsMapRef.current[c.id] = { p1: null, p2: null };
+                  bandsMapRef.current[c.id].p1 = el;
+                }}
+                className="absolute top-0 bottom-0 border-l border-emerald-400/50 bg-emerald-500/[0.045]"
+                style={{ display: 'none' }}
+              >
+                <div className="p-2 text-[10px] font-mono font-bold text-emerald-700 flex items-center gap-1">
+                  <span>{c.label}</span>
+                  <span className="font-normal text-[9px] text-emerald-600/80">
+                    {isEn ? '1st 50d' : '前50天'}
+                  </span>
+                </div>
+              </div>
 
-                {/* 2nd 50 Days: Subtle Rose Red Area */}
-                {band.p2Width > 0 && (
-                  <div
-                    className="absolute top-0 bottom-0 border-l border-dashed border-rose-400/50 border-r border-solid bg-rose-500/[0.045]"
-                    style={{
-                      left: `${band.p2Left}px`,
-                      width: `${band.p2Width}px`,
-                    }}
-                  >
-                    <div className="p-2 text-[10px] font-mono font-bold text-rose-700 flex items-center gap-1">
-                      <span>{band.label}</span>
-                      <span className="font-normal text-[9px] text-rose-600/80">
-                        {isEn ? '2nd 50d' : '后50天'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
+              {/* 2nd 50 Days: Subtle Rose Red Area */}
+              <div
+                ref={(el) => {
+                  if (!bandsMapRef.current[c.id]) bandsMapRef.current[c.id] = { p1: null, p2: null };
+                  bandsMapRef.current[c.id].p2 = el;
+                }}
+                className="absolute top-0 bottom-0 border-l border-dashed border-rose-400/50 border-r border-solid bg-rose-500/[0.045]"
+                style={{ display: 'none' }}
+              >
+                <div className="p-2 text-[10px] font-mono font-bold text-rose-700 flex items-center gap-1">
+                  <span>{c.label}</span>
+                  <span className="font-normal text-[9px] text-rose-600/80">
+                    {isEn ? '2nd 50d' : '后50天'}
+                  </span>
+                </div>
+              </div>
+            </React.Fragment>
+          ))}
         </div>
 
         {/* The Lightweight-Charts canvas on top (transparent background) */}
