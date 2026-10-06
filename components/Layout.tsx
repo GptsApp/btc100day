@@ -1,8 +1,7 @@
-import React, { ReactNode, useState, lazy, Suspense } from 'react';
-import { Sparkles, BarChart2, BookOpen, Languages, Command, Menu, ExternalLink } from 'lucide-react';
+import React, { ReactNode, useState } from 'react';
+import { Languages, Menu, ExternalLink, FileSpreadsheet } from 'lucide-react';
 import { Language } from '../types';
-
-const Aurora = lazy(() => import('./Aurora'));
+import { DotBackground } from './animata/DotBackground';
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,11 +16,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 80; // height of sticky header
+      const offset = 80;
       const rootElement = document.getElementById('root');
 
       if (rootElement) {
-        // Since body is fixed, we need to scroll the root element
         const elementRect = element.getBoundingClientRect();
         const rootRect = rootElement.getBoundingClientRect();
         const scrollTop = rootElement.scrollTop;
@@ -41,148 +39,193 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-white relative overflow-x-hidden" style={{ backgroundColor: 'rgb(6, 0, 16)' }}>
-      <div className="fixed inset-0 z-0" style={{ height: '150vh' }}>
-        <div className="hidden md:block w-full h-full">
-          <Suspense fallback={null}>
-            <Aurora
-              colorStops={["#7cff67", "#b19eef", "#5227ff"]}
-              blend={0.5}
-              amplitude={1.0}
-              speed={0.5}
-            />
-          </Suspense>
-        </div>
-        <div className="md:hidden bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-green-900/20 w-full h-full min-h-screen"></div>
-      </div>
-      {/* Top Navigation Bar (Fixed) */}
-      <header className="fixed top-0 left-0 right-0 h-[68px] bg-black/60 backdrop-blur-2xl z-50 border-b border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] supports-[backdrop-filter]:bg-black/60">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between">
-          
-          {/* Logo Area */}
-          <div className="flex items-center gap-3">
-             {/* Mobile Menu Button */}
-             <button
+    <DotBackground>
+      <div className="min-h-screen flex flex-col font-sans text-slate-900 bg-[#f8fafc]">
+        
+        {/* Institutional Research Journal Header */}
+        <header className="sticky top-0 z-50 h-[64px] border-b border-slate-200/90 bg-white/95 backdrop-blur-sm">
+          <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
+            
+            {/* Left: Publication Meta & Logo */}
+            <div className="flex items-center gap-4">
+              <button
                 onClick={() => setIsMenuOpen(true)}
-                className="md:hidden p-2 -ml-2 text-white hover:text-[#7cff67] hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+                className="md:hidden p-1.5 -ml-1 text-slate-500 hover:text-slate-900 rounded transition-colors"
                 aria-label="Menu"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-5 h-5" />
               </button>
 
-             <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
-               const rootElement = document.getElementById('root');
-               if (rootElement) {
-                 rootElement.scrollTo({ top: 0, behavior: 'smooth' });
-               }
-             }}>
-                <div className="w-12 h-12 border-2 border-white/60 rounded-full flex items-center justify-center text-white shadow-sm hover:shadow-md transition-shadow">
-                   <span className="font-mono font-black text-lg flex items-center justify-center gap-1"><span className="mt-[1px]">1</span><span className="inline-block -rotate-90 text-2xl">B</span></span>
+              <div
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => {
+                  const rootElement = document.getElementById('root');
+                  if (rootElement) rootElement.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                <div className="w-8 h-8 rounded-full border-2 border-slate-900 flex items-center justify-center text-slate-900 shadow-xs">
+                  <span className="font-mono font-black text-[11px] flex items-center justify-center gap-0.5">
+                    <span className="mt-[1px]">1</span>
+                    <span className="inline-block -rotate-90 text-sm">B</span>
+                  </span>
                 </div>
-                <span className="font-bold text-lg text-white tracking-tight">BTC100.DAY</span>
-             </div>
-          </div>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-20">
-            <button onClick={() => scrollToSection('chart')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.chart}</button>
-            <button onClick={() => scrollToSection('theory-steps')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.steps}</button>
-            <button onClick={() => scrollToSection('insight')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.ai}</button>
-            <button onClick={() => scrollToSection('faq')} className="text-sm font-medium text-white/90 hover:text-[#7cff67] transition-colors text-shadow">{t.nav.faq}</button>
-            <a href="https://wsnb.online/" target="_blank" rel="dofollow" className="text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors text-shadow">{t.nav.bitmex}</a>
-          </nav>
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm text-slate-900 tracking-tight font-mono leading-tight">BTC100.DAY</span>
+                  <span className="text-[10px] font-mono text-slate-500 tracking-wider uppercase">Institutional Research</span>
+                </div>
+              </div>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-4">
-             <span className="text-xs text-white/60 font-mono">v1.3.6</span>
-             <button
-               onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
-               className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-medium text-white/90 hover:text-[#7cff67] hover:border-[#7cff67] hover:bg-white/20 transition-all cursor-pointer shadow-sm text-shadow"
-             >
-               <Languages className="w-3.5 h-3.5" />
-               <span>{lang === 'en' ? 'English' : '中文'}</span>
-             </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Menu Bottom Sheet */}
-      {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm transition-opacity duration-200" onClick={() => setIsMenuOpen(false)}>
-          <div
-            className="fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur-2xl rounded-t-3xl p-6 transform translate-y-0 transition-transform duration-300 border-t border-white/10 shadow-[0_-8px_32px_rgba(0,0,0,0.4)] supports-[backdrop-filter]:bg-black/60"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-6"></div>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <button onClick={() => handleNavClick('chart')} className="flex items-center gap-2 p-4 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/20 transition-colors">
-                <BarChart2 className="w-5 h-5 text-white" />
-                <span className="text-sm font-medium text-white text-shadow">{t.nav.chart}</span>
-              </button>
-              <button onClick={() => handleNavClick('theory-steps')} className="flex items-center gap-2 p-4 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/20 transition-colors">
-                <BookOpen className="w-5 h-5 text-white" />
-                <span className="text-sm font-medium text-white text-shadow">{t.nav.steps}</span>
-              </button>
-              <button onClick={() => handleNavClick('insight')} className="flex items-center gap-2 p-4 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/20 transition-colors">
-                <Sparkles className="w-5 h-5 text-white" />
-                <span className="text-sm font-medium text-white text-shadow">{t.nav.ai}</span>
-              </button>
-              <button onClick={() => handleNavClick('faq')} className="flex items-center gap-2 p-4 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/20 transition-colors">
-                <Command className="w-5 h-5 text-white" />
-                <span className="text-sm font-medium text-white text-shadow">{t.nav.faq}</span>
-              </button>
+              {/* Research Volume / Meta pill */}
+              <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-slate-200 text-[11px] font-mono text-slate-500">
+                <span className="font-semibold text-slate-700">MACRO DISPATCH</span>
+                <span>•</span>
+                <span>OCTOBER 2026</span>
+              </div>
             </div>
 
-            <a
-              href="https://wsnb.online/"
-              target="_blank"
-              rel="dofollow"
-              className="flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-2xl border border-orange-400/30 hover:from-orange-500/30 hover:to-yellow-500/30 transition-all"
-            >
-              <ExternalLink className="w-5 h-5 text-orange-400" />
-              <span className="text-sm font-medium text-orange-400 text-shadow">{t.nav.bitmex}</span>
-            </a>
+            {/* Middle Nav: Understated Editorial Typography */}
+            <nav className="hidden md:flex items-center gap-6 text-xs font-mono">
+              <button
+                onClick={() => scrollToSection('chart')}
+                className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              >
+                {t.nav.chart}
+              </button>
+              <button
+                onClick={() => scrollToSection('cycle-overlay')}
+                className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              >
+                {t.nav.overlay}
+              </button>
+              <button
+                onClick={() => scrollToSection('theory-steps')}
+                className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              >
+                {t.nav.steps}
+              </button>
+              <button
+                onClick={() => scrollToSection('faq')}
+                className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              >
+                {t.nav.faq}
+              </button>
+            </nav>
 
+            {/* Right Side: External Real-Time Feeds */}
+            <div className="flex items-center gap-3">
+              <a
+                href="https://beta.trasia.xyz/perps?watch=0xdae4df7207feb3b350e4284c8efe5f7dac37f637"
+                target="_blank"
+                rel="noreferrer"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-xs font-mono text-slate-700 transition-colors"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#0d9488]"></span>
+                <span>Trasia 实盘链上数据</span>
+                <ExternalLink className="w-3 h-3 text-slate-400" />
+              </a>
+
+              <button
+                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+                className="flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-xs font-mono text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-xs"
+              >
+                <Languages className="w-3.5 h-3.5 text-slate-400" />
+                <span>{lang === 'en' ? 'EN' : '中'}</span>
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 pt-[72px] pb-12 relative z-10">
-        <div className="p-4 md:px-8 max-w-7xl mx-auto space-y-6">
-          {children}
-        </div>
-      </main>
+        {/* Mobile menu sheet */}
+        {isMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-xs" onClick={() => setIsMenuOpen(false)}>
+            <div
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 border-t border-slate-200 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-4"></div>
+
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <button
+                  onClick={() => handleNavClick('chart')}
+                  className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-left text-xs font-mono text-slate-900 font-medium"
+                >
+                  {t.nav.chart}
+                </button>
+                <button
+                  onClick={() => handleNavClick('cycle-overlay')}
+                  className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-left text-xs font-mono text-slate-900 font-medium"
+                >
+                  {t.nav.overlay}
+                </button>
+                <button
+                  onClick={() => handleNavClick('theory-steps')}
+                  className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-left text-xs font-mono text-slate-900 font-medium"
+                >
+                  {t.nav.steps}
+                </button>
+                <button
+                  onClick={() => handleNavClick('faq')}
+                  className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-left text-xs font-mono text-slate-900 font-medium"
+                >
+                  {t.nav.faq}
+                </button>
+              </div>
+
+              <a
+                href="https://beta.trasia.xyz/perps?watch=0xdae4df7207feb3b350e4284c8efe5f7dac37f637"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 p-3 bg-slate-100 rounded-xl border border-slate-200 text-xs font-mono text-slate-700"
+              >
+                <span>查看 @Paulwei 链上实盘</span>
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content Area */}
+        <main className="flex-1 py-6 md:py-8 relative z-10">
+          <div className="px-4 md:px-8 max-w-[1400px] mx-auto space-y-6">
+            {children}
+          </div>
+        </main>
         
-      <footer className="py-8 bg-black/20 backdrop-blur-2xl border-t border-white/10 relative z-10">
-         <div className="max-w-7xl mx-auto px-4 md:px-8 text-center space-y-3">
-            <p className="text-xs font-semibold text-white text-shadow">2025 © BTC100.DAY. All rights reserved.</p>
-            <p className="text-xs text-white/70 text-shadow">Theory from <a href="https://x.com/coolish" target="_blank" rel="noreferrer" className="hover:text-[#7cff67] hover:underline font-medium">@Paulwei</a> • Built with ❤️ by <a href="https://x.com/WeWill_Rocky" target="_blank" rel="noreferrer" className="hover:text-[#7cff67] hover:underline font-medium">@Rocky</a></p>
-         </div>
-      </footer>
-    </div>
+        {/* Research Footer */}
+        <footer className="py-8 border-t border-slate-200/90 bg-white text-xs font-mono text-slate-500">
+          <div className="max-w-[1400px] mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+            <div>
+              <span className="font-bold text-slate-800">BTC100.DAY RESEARCH DISPATCH</span>
+              <span className="mx-2">•</span>
+              <span>Theory founded by <a href="https://x.com/coolish" target="_blank" rel="noreferrer" className="text-slate-900 hover:underline font-semibold">@Paulwei</a></span>
+              <span className="mx-2">•</span>
+              <span>Engineering by <a href="https://x.com/WeWill_Rocky" target="_blank" rel="noreferrer" className="text-slate-900 hover:underline font-semibold">@Rocky</a></span>
+            </div>
+            <div className="text-[11px] text-slate-400">
+              Quantitative methodology for empirical cycle study. Not retail financial advice.
+            </div>
+          </div>
+        </footer>
+      </div>
+    </DotBackground>
   );
 };
 
-const NavItem = ({ onClick, icon, label, active = false }: { onClick: () => void, icon: React.ReactNode, label: string, active?: boolean }) => (
-  <button 
-    onClick={onClick} 
-    className={`
-      flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all w-full text-left
-      ${active ? 'bg-white/20 backdrop-blur-sm text-[#7cff67] border border-white/30' : 'text-gray-300 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20'}
-    `}
-  >
-    {icon}
-    {label}
-  </button>
-);
-
 const translations = {
   en: {
-    nav: { chart: 'Chart & Data', steps: 'Methodology', ai: 'AI Analyst', faq: 'FAQ', bitmex: 'Bitmex Dashboard' },
+    nav: {
+      chart: 'K-LINE TRAJECTORY',
+      overlay: 'CYCLE OVERLAY',
+      steps: 'METHODOLOGY',
+      faq: 'RESEARCH FAQ',
+    },
   },
   zh: {
-    nav: { chart: '市场数据', steps: '操作指南', ai: 'AI 分析', faq: '常见问题', bitmex: 'Bitmex实盘看板' },
+    nav: {
+      chart: '日线轨迹',
+      overlay: '周期归一化',
+      steps: '操作指南',
+      faq: '研报与答疑',
+    },
   }
 };

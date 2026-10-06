@@ -1,24 +1,26 @@
 import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Layout } from './components/Layout';
-import { ModernChart } from './components/CandleChart';
-import { AnalysisPanel } from './components/AnalysisPanel';
+import { TradingCockpit } from './components/TradingCockpit';
+import { CycleOverlayChart } from './components/CycleOverlayChart';
+import { FounderOrdersPanel } from './components/FounderOrdersPanel';
 import { fetchMarketStats, fetchCandleData } from './services/cryptoService';
-import { MarketStats, CandleData, Language, HighlightPeriod } from './types';
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { fetchFounderRealtimeState } from './services/founderService';
+import { MarketStats, CandleData, Language, HighlightPeriod, FounderRealtimeState } from './types';
 
-const InsightCard = lazy(() => import('./components/InsightCard').then(m => ({ default: m.InsightCard })));
 const FAQSection = lazy(() => import('./components/FAQSection').then(m => ({ default: m.FAQSection })));
 const TheorySteps = lazy(() => import('./components/TheorySteps').then(m => ({ default: m.TheorySteps })));
 
 const LazyFallback = () => (
-  <div className="flex items-center justify-center py-12">
-    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+  <div className="flex items-center justify-center py-8">
+    <div className="w-5 h-5 border-2 border-[#1e293b] border-t-[#00ff88] rounded-full animate-spin"></div>
   </div>
 );
 
 const App = () => {
   const [stats, setStats] = useState<MarketStats | null>(null);
   const [candles, setCandles] = useState<CandleData[]>([]);
+  const [founderState, setFounderState] = useState<FounderRealtimeState | null>(null);
+  const [showFounderOnChart, setShowFounderOnChart] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>('zh');
@@ -27,15 +29,17 @@ const App = () => {
     const initData = async () => {
       setLoading(true);
       try {
-        const [statsData, candlesData] = await Promise.all([
+        const [statsData, candlesData, founderData] = await Promise.all([
           fetchMarketStats(),
-          fetchCandleData('max')
+          fetchCandleData('max'),
+          fetchFounderRealtimeState()
         ]);
         setStats(statsData);
         setCandles(candlesData);
+        setFounderState(founderData);
       } catch (e) {
         console.error("Initialization error:", e);
-        setError(lang === 'en' ? 'Failed to load market data. Please refresh.' : '加载市场数据失败，请刷新页面重试。');
+        setError(lang === 'en' ? 'Failed to stream market feed. Please refresh.' : '行情数据流同步异常，请刷新重试。');
       } finally {
         setLoading(false);
       }
@@ -50,18 +54,27 @@ const App = () => {
       }
     };
 
+    const updateFounder = async () => {
+      try {
+        const f = await fetchFounderRealtimeState();
+        if (f) setFounderState(f);
+      } catch (e) {
+        console.error("Founder sync error:", e);
+      }
+    };
+
     initData();
 
-    // Update price every 10 seconds to reduce load
-    const interval = setInterval(updatePrice, 10000);
+    const priceInterval = setInterval(updatePrice, 10000);
+    const founderInterval = setInterval(updateFounder, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(priceInterval);
+      clearInterval(founderInterval);
+    };
   }, []);
 
-  const t = translations[lang];
-  const isPositive = stats ? stats.change24hPercent >= 0 : true;
-
-  // Update last candle with real-time price so chart stays in sync with header
+  // Live candlestick sync
   const liveCandles = useMemo(() => {
     if (candles.length === 0 || !stats?.currentPrice) return candles;
     const result = [...candles];
@@ -75,7 +88,7 @@ const App = () => {
     return result;
   }, [candles, stats?.currentPrice]);
 
-  // Defined from User Request for the Chart
+  // Verified cycles
   const highlightPeriods: HighlightPeriod[] = useMemo(() => {
     const isEn = lang === 'en';
     return [
@@ -83,30 +96,29 @@ const App = () => {
         label: isEn ? "Cycle 1" : "周期 1",
         startDate: "2023-10-14",
         endDate: "2024-01-22",
-        description: isEn ? "Uniform Distribution" : "均匀分布",
-        characteristics: isEn ? "Balanced gains front & back" : "前后涨幅相对均衡"
+        description: isEn ? "Uniform Distribution (+82.4%)" : "均匀分布型 (+82.4%)",
+        characteristics: isEn ? "Balanced gains front & back, 77.2% above EMA15" : "前后半段均衡推进，77.2%天数收在EMA15上方"
       },
       {
         label: isEn ? "Cycle 2" : "周期 2",
         startDate: "2024-01-22",
         endDate: "2024-04-29",
-        description: isEn ? "Fast Start, Slow End" : "前快后慢",
-        characteristics: isEn ? "Front-running effect, overdrafting space" : "抢跑效应，提前透支空间"
+        description: isEn ? "Front-Running (+86.5%)" : "前快后慢型 (+86.5%)",
+        characteristics: isEn ? "Front-running effect, overdrafting upside by Day 50" : "抢跑效应，前50天即透支绝大部分空间"
       },
       {
         label: isEn ? "Cycle 3" : "周期 3",
         startDate: "2024-09-07",
         endDate: "2024-12-16",
-        description: isEn ? "Slow Start, Fast End" : "前慢后快",
-        characteristics: isEn ? "Accumulation first, acceleration later" : "前期蓄力，后期加速"
+        description: isEn ? "Late Acceleration (+99.0%)" : "前慢后快型 (+99.0%)",
+        characteristics: isEn ? "Grinding near EMA15 then vertical parabolic surge" : "前30天贴线蓄力洗盘，后半程垂直加速爆拉"
       },
       {
-        label: isEn ? "Cycle 4" : "周期 4",
-        startDate: "2025-04-09",
-        endDate: "2025-07-18",
-        description: isEn ? "Fast Start, Slow End" : "前快后慢",
-        characteristics: isEn ? "Late major cycle, mixed speeds" : "大周期后期，快慢刀交替",
-        isPrediction: true
+        label: isEn ? "Cycle 4 (Active)" : "周期 4 (当前运行)",
+        startDate: "2026-08-17",
+        endDate: "2026-11-25",
+        description: isEn ? "Active Bull Wave (+32.2%)" : "当前单边主升浪 (+32.2%)",
+        characteristics: isEn ? "3-Filter confirmed spring reclaims, holding EMA15 for 49 days" : "三维过滤已确认诱空反包，稳健踩在EMA15上方达49天",
       }
     ];
   }, [lang]);
@@ -116,110 +128,39 @@ const App = () => {
       
       {/* Error Banner */}
       {error && (
-        <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 flex items-center justify-between">
-          <span className="text-sm text-red-300">{error}</span>
-          <button onClick={() => { setError(null); window.location.reload(); }} className="text-xs text-white bg-white/10 px-3 py-1 rounded-lg hover:bg-white/20 transition-colors">
-            {lang === 'en' ? 'Retry' : '重试'}
+        <div className="bg-[#ff3b69]/10 border border-[#ff3b69]/30 rounded p-2.5 flex items-center justify-between font-mono text-xs text-[#ff3b69]">
+          <span>{error}</span>
+          <button onClick={() => { setError(null); window.location.reload(); }} className="px-2 py-0.5 bg-[#ff3b69]/20 hover:bg-[#ff3b69]/30 text-white rounded">
+            {lang === 'en' ? 'RETRY' : '重试'}
           </button>
         </div>
       )}
 
-      {/* Chart Section with Stats Header */}
-      <div id="chart" className="animated-border bg-black/60 backdrop-blur-xl rounded-[24px] p-1 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative">
-        <div className="px-4 md:px-6 py-5 border-b border-white/10">
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              
-              {/* Left Side: Single Line Stats - Strict No Wrap */}
-              <div className="flex items-center gap-3 md:gap-4 overflow-hidden whitespace-nowrap">
-                 <div className="flex items-center gap-2 shrink-0">
-                   <img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" alt="BTC" className="w-7 h-7 rounded-full shadow-sm" />
-                   <h2 className="text-2xl md:text-4xl font-bold text-white text-shadow tracking-tight">BTCUSDT</h2>
-                 </div>
-                 
-                 <div className="w-px h-5 bg-white/30 mx-1 shrink-0"></div>
+      {/* 1. Integrated Trading Cockpit with Real-time Founder Overlays & Integrated Orders Panel */}
+      <TradingCockpit
+        stats={stats}
+        candles={liveCandles}
+        highlights={highlightPeriods}
+        loading={loading}
+        lang={lang}
+        founderPosition={founderState?.position}
+        founderOrders={founderState?.orders}
+        showFounderLayers={showFounderOnChart}
+        onToggleFounderLayers={() => setShowFounderOnChart(!showFounderOnChart)}
+        microstructure={founderState?.microstructure}
+      />
 
-                 <div className="flex items-baseline gap-2 md:gap-3 shrink-0">
-                    <span className="text-2xl md:text-4xl font-semibold text-white text-shadow tracking-tight font-mono">
-                      {stats ? `$${stats.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '-------'}
-                    </span>
-                    <span className={`inline-flex items-center gap-0.5 text-sm font-medium text-shadow ${isPositive ? 'text-[#7cff67]' : 'text-[#ff6b6b]'}`}>
-                        {isPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                        {stats ? Math.abs(stats.change24hPercent).toFixed(2) : '--'}%
-                        <span className="hidden sm:inline text-white/60 font-normal ml-1 text-xs uppercase">24h</span>
-                    </span>
-                 </div>
-              </div>
+      {/* 2. 100-Day Normalized Cycle Overlay Chart (All Cycles Day 0 Aligned) */}
+      <CycleOverlayChart candles={liveCandles} lang={lang} />
 
-              {/* Right Side: Legend */}
-              <div className="hidden md:flex flex-wrap items-center gap-4 text-xs text-white text-shadow">
-                <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-lg px-2 py-1 rounded-full border border-white/30 relative before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-white/10 before:to-transparent before:pointer-events-none shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <span>{t.price}</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-lg px-2 py-1 rounded-full border border-white/30 relative before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-white/10 before:to-transparent before:pointer-events-none shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
-                    <div className="w-5 h-0.5 bg-white opacity-80 rounded-full"></div>
-                    <span>EMA15</span>
-                </div>
-                 <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-lg px-2 py-1 rounded-full border border-white/30 relative before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-white/10 before:to-transparent before:pointer-events-none shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
-                    <div className="w-2 h-2 bg-[#10b981] opacity-50 border border-[#10b981] border-dashed"></div>
-                    <span>{t.first50}</span>
-                </div>
-                 <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-lg px-2 py-1 rounded-full border border-white/30 relative before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-white/10 before:to-transparent before:pointer-events-none shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
-                    <div className="w-2 h-2 bg-[#ef4444] opacity-50 border border-[#ef4444] border-dashed"></div>
-                    <span>{t.last50}</span>
-                </div>
-             </div>
-
-           </div>
-        </div>
-        
-        {/* Analysis Panel */}
-        <div className="px-4 md:px-6 pt-6 border-b border-white/15">
-           <AnalysisPanel candles={liveCandles} currentPrice={stats?.currentPrice || 0} lang={lang} />
-        </div>
-
-        <div className="w-full p-2 md:p-4 relative" style={{ height: '500px' }}>
-           {loading && candles.length === 0 ? (
-             <div className="absolute inset-0 flex flex-col items-center justify-center z-10 gap-4">
-               <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-               <span className="text-xs text-white/50">{lang === 'en' ? 'Loading market data...' : '正在加载市场数据...'}</span>
-             </div>
-           ) : (
-             <div style={{ width: '100%', height: '100%' }}>
-               <ModernChart data={liveCandles} highlights={highlightPeriods} />
-             </div>
-           )}
-        </div>
-      </div>
-
-      {/* Step by Step Theory Guide (Wrapped in ID for nav) */}
+      {/* 4. Operational Methodology & Research FAQ */}
       <Suspense fallback={<LazyFallback />}>
-        <div id="theory-steps">
-          <TheorySteps lang={lang} />
-        </div>
-
-        {/* AI Insight Section */}
-        <InsightCard stats={stats} history={liveCandles} lang={lang} />
-
-        {/* FAQ Section */}
+        <TheorySteps lang={lang} />
         <FAQSection lang={lang} />
       </Suspense>
 
     </Layout>
   );
-};
-
-const translations = {
-  en: {
-    price: "Price",
-    first50: "1st 50 Days",
-    last50: "Last 50 Days"
-  },
-  zh: {
-    price: "价格",
-    first50: "前50天",
-    last50: "后50天"
-  }
 };
 
 export default App;

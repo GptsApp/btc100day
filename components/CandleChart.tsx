@@ -1,61 +1,79 @@
 import React, { useMemo } from 'react';
 import { ComposedChart, Area, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceArea, ReferenceLine, Line } from 'recharts';
-import { CandleData, HighlightPeriod } from '../types';
+import { CandleData, HighlightPeriod, FounderLiveOrder, FounderLivePosition } from '../types';
 import { calculateEMA } from '../services/cryptoService';
 
 interface CandleChartProps {
   data: CandleData[];
   height?: number;
   highlights?: HighlightPeriod[];
+  founderPosition?: FounderLivePosition | null;
+  founderOrders?: FounderLiveOrder[];
+  showFounderLayers?: boolean;
 }
 
-const CustomTooltip = ({ active, payload, label, highlights }: any) => {
+const CustomTooltip = ({ active, payload, label, highlights, founderOrders, founderPosition }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const emaValue = payload.find((p: any) => p.dataKey === 'ema')?.value;
     const volume = data.volume;
     
     const currentTime = data.time;
-    const activePeriod = highlights.find((h: HighlightPeriod) => {
+    const activePeriod = highlights?.find((h: HighlightPeriod) => {
        const start = new Date(h.startDate).getTime();
        const end = new Date(h.endDate).getTime();
        return currentTime >= start && currentTime <= end;
     });
 
-    return (
-      <div className="bg-black/90 backdrop-blur border border-white/20 shadow-xl rounded-lg p-4 text-xs font-sans z-50 min-w-[200px]">
-        <p className="text-white mb-3 font-medium">{new Date(data.time).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+    const emaDiff = emaValue ? ((data.close - emaValue) / emaValue * 100) : 0;
 
-        <div className="space-y-2 mb-4">
+    return (
+      <div className="bg-[#090d15]/95 backdrop-blur-md border border-[#232f48] shadow-2xl rounded p-3 text-xs font-mono z-50 min-w-[220px]">
+        <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-[#1a2233]">
+          <span className="text-[#94a3b8] font-medium">{new Date(data.time).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          <span className="text-[10px] text-[#64748b]">1D BAR</span>
+        </div>
+
+        <div className="space-y-1.5 mb-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-white flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#f59e0b]"></div>Price</span>
-            <span className="font-semibold text-white">${data.close.toLocaleString()}</span>
+            <span className="text-[#94a3b8] flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+              CLOSE
+            </span>
+            <span className="font-bold text-white font-mono-numbers">${data.close.toLocaleString()}</span>
           </div>
+
           {emaValue && (
-             <div className="flex items-center justify-between gap-4">
-              <span className="text-white flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-white opacity-80"></div>EMA15</span>
-              <span className="font-semibold text-white">${emaValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-[#94a3b8] flex items-center gap-1.5">
+                <span className="w-2 h-0.5 bg-white"></span>
+                EMA15
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-[#e2e8f0] font-mono-numbers">${Math.round(emaValue).toLocaleString()}</span>
+                <span className={`text-[10px] ${emaDiff >= 0 ? 'text-[#00ff88]' : 'text-[#ff3b69]'}`}>
+                  ({emaDiff >= 0 ? '+' : ''}{emaDiff.toFixed(1)}%)
+                </span>
+              </div>
             </div>
           )}
-           <div className="flex items-center justify-between gap-4">
-              <span className="text-white flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-white opacity-60"></div>Vol</span>
-              <span className="font-semibold text-white">{volume ? `$${(volume/1000000).toFixed(1)}M` : '-'}</span>
-            </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-[#94a3b8] flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#38bdf8]/60"></span>
+              VOL
+            </span>
+            <span className="font-medium text-[#94a3b8] font-mono-numbers">{volume ? `$${(volume/1000000).toFixed(1)}M` : '-'}</span>
+          </div>
         </div>
 
         {activePeriod && (
-          <div className="mt-2 pt-3 border-t border-white/20 animate-in fade-in duration-300">
-             <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-white">{activePeriod.label}</span>
-                <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded border border-blue-400/30">Active</span>
+          <div className="pt-2 border-t border-[#1a2233] text-[11px]">
+             <div className="flex items-center justify-between mb-0.5">
+                <span className="font-bold text-white font-mono">{activePeriod.label}</span>
+                <span className="text-[9px] bg-[#00ff88]/10 text-[#00ff88] px-1 rounded font-mono">TRACKED</span>
              </div>
-             <div className="text-white space-y-1">
-                <p className="font-medium">{activePeriod.description}</p>
-                <p className="text-white/70 text-[10px] leading-tight">{activePeriod.characteristics}</p>
-             </div>
-             <div className="mt-2 text-[10px] text-white/60">
-                {activePeriod.startDate} - {activePeriod.endDate}
-             </div>
+             <p className="text-[#94a3b8] text-[10px] leading-tight">{activePeriod.description}</p>
           </div>
         )}
       </div>
@@ -64,13 +82,17 @@ const CustomTooltip = ({ active, payload, label, highlights }: any) => {
   return null;
 };
 
-export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] }) => {
+export const ModernChart: React.FC<CandleChartProps> = ({
+  data,
+  highlights = [],
+  founderPosition = null,
+  founderOrders = [],
+  showFounderLayers = true
+}) => {
    const CHART_START = new Date('2023-01-01').getTime();
 
-   // Calculate EMA on FULL dataset for accuracy
    const emaData = useMemo(() => calculateEMA(data, 15), [data]);
    
-   // Merge EMA into data, then filter for chart display range
    const chartData = useMemo(() => {
      return data
        .map((d, i) => ({
@@ -80,12 +102,11 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
        .filter(d => d.time >= CHART_START);
    }, [data, emaData]);
 
-   // Use filtered chartData for axis calculations
    const minPrice = useMemo(() => chartData.length > 0 ? Math.min(...chartData.map(d => d.low)) : 0, [chartData]);
-   const maxPrice = useMemo(() => chartData.length > 0 ? Math.max(...chartData.map(d => d.high)) : 100000, [chartData]);
+   const maxPrice = useMemo(() => chartData.length > 0 ? Math.max(...chartData.map(d => d.high), 106000) : 106000, [chartData]);
    const maxVolume = useMemo(() => chartData.length > 0 ? Math.max(...chartData.map(d => d.volume || 0)) : 1, [chartData]);
 
-   const padding = (maxPrice - minPrice) * 0.1;
+   const padding = (maxPrice - minPrice) * 0.08;
 
    const referenceAreas = useMemo(() => highlights.flatMap((h, index) => {
      const start = new Date(h.startDate).getTime();
@@ -99,88 +120,92 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
          id: `${h.label}-part1`,
          x1: start,
          x2: mid,
-         label: '50d',
          cycleLabel: `C${cycleNum}`,
          color: '#00ff88',
-         bgOpacity: 0.25,
-         strokeOpacity: 1.0,
+         bgOpacity: 0.04,
+         strokeOpacity: 0.25,
          showLabel: true,
-         labelX: start + (25 * dayMs)
        },
        {
          id: `${h.label}-part2`,
          x1: mid,
          x2: end,
-         label: '50d',
          cycleLabel: '',
-         color: '#ff3366',
-         bgOpacity: 0.25,
-         strokeOpacity: 1.0,
+         color: '#ff3b69',
+         bgOpacity: 0.04,
+         strokeOpacity: 0.25,
          showLabel: false,
-         labelX: 0
        }
      ];
    }), [highlights]);
 
+   // Compute Founder Orders Key Clusters for Horizontal Line Markers
+   const keyOrderLevels = useMemo(() => {
+     if (!showFounderLayers || !founderOrders || founderOrders.length === 0) return [];
+     
+     // Select the most strategic levels to render cleanly
+     const targets = [
+       { px: 104222, label: '104.2k (Top Exit)', side: 'A' },
+       { px: 100222, label: '100.2k (100k Wall)', side: 'A' },
+       { px: 95222, label: '95.2k (0.3 BTC TP)', side: 'A' },
+       { px: 83186, label: '83.2k (EMA15 Bid)', side: 'B' },
+       { px: 80262, label: '80.3k (Breakout Bid)', side: 'B' },
+     ];
+
+     return targets;
+   }, [showFounderLayers, founderOrders]);
+
    return (
     <div
-      className="w-full h-full font-sans select-none touch-none outline-none focus:outline-none relative"
+      className="w-full h-full select-none touch-none outline-none focus:outline-none relative font-mono"
       style={{ minWidth: '300px', minHeight: '400px' }}
     >
-      {/* Watermark */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-        <div className="text-white/10 font-bold tracking-wider select-none w-[70%] text-center" style={{ fontSize: 'clamp(2rem, 8vw, 6rem)' }}>
-          BTC100.DAY
-        </div>
-      </div>
       <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={400} className="focus:outline-none">
         <ComposedChart
           data={chartData}
-          margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
+          margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
           className="focus:outline-none"
         >
           <defs>
-            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ff8c00" stopOpacity={0.4}/>
-              <stop offset="95%" stopColor="#ff8c00" stopOpacity={0}/>
+            <linearGradient id="colorPriceTerminal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25}/>
+              <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
             </linearGradient>
           </defs>
           
-          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.6} horizontal={true} vertical={false} syncWithTicks={true} />
+          <CartesianGrid strokeDasharray="2 2" stroke="#162032" horizontal={true} vertical={false} />
           
           <XAxis
             dataKey="time"
             tickFormatter={(t) => {
               const date = new Date(t);
-              const year = date.getFullYear();
+              const year = String(date.getFullYear()).slice(2);
               const month = String(date.getMonth() + 1).padStart(2, '0');
-              return `${year}${month}`;
+              return `${year}/${month}`;
             }}
-            axisLine={false}
-            tickLine={true}
-            tick={{ fill: '#ffffff', fontSize: 10, fontFamily: 'Inter' }}
-            minTickGap={50}
+            axisLine={{ stroke: '#1e293b' }}
+            tickLine={false}
+            tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+            minTickGap={45}
             type="number"
             domain={['dataMin', 'dataMax']}
             scale="time"
           />
           
-          {/* Price Axis - Hide on very small screens if needed, or keep compact */}
           <YAxis
             yAxisId="price"
             domain={[minPrice - padding, maxPrice + padding]}
             orientation="right"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#ffffff', fontSize: 10, fontFamily: 'Inter' }}
-            width={35}
+            tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+            width={40}
             tickFormatter={(val) => `$${(val/1000).toFixed(0)}k`}
           />
 
-          {/* Volume Axis (Hidden/Scaled) */}
           <YAxis 
             yAxisId="volume"
-            domain={[0, maxVolume * 5]} // Increased scale divisor to make bars smaller (bottom 20%)
+            domain={[0, maxVolume * 6]}
             orientation="left"
             axisLine={false}
             tickLine={false}
@@ -189,23 +214,12 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
           />
           
           <Tooltip
-            content={<CustomTooltip highlights={highlights} />}
-            cursor={{ stroke: '#ffffff', strokeWidth: 1, strokeDasharray: '4 4', strokeOpacity: 0.6 }}
+            content={<CustomTooltip highlights={highlights} founderOrders={founderOrders} founderPosition={founderPosition} />}
+            cursor={{ stroke: '#475569', strokeWidth: 1, strokeDasharray: '3 3' }}
             isAnimationActive={false}
           />
 
-          {/* Price Grid Lines */}
-          {[44000, 79000, 114000].map((price) => (
-            <ReferenceLine
-              key={price}
-              yAxisId="price"
-              y={price}
-              stroke="#ffffff"
-              strokeDasharray="3 3"
-              strokeOpacity={0.4}
-            />
-          ))}
-
+          {/* Reference Areas for 50d/50d Cycles */}
           {referenceAreas.map((ref) => (
             <ReferenceArea
               yAxisId="price"
@@ -217,49 +231,88 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
               fill={ref.color}
               fillOpacity={ref.bgOpacity}
               stroke={ref.color}
-              strokeDasharray="3 3"
+              strokeDasharray="2 2"
               strokeOpacity={ref.strokeOpacity}
               strokeWidth={1}
               label={ref.showLabel ? {
                 value: ref.cycleLabel,
                 position: 'insideTopLeft',
-                fill: '#ffffff',
-                fontSize: 14,
+                fill: '#94a3b8',
+                fontSize: 11,
                 fontWeight: 'bold',
-                offset: 10
+                offset: 8
               } : undefined}
             />
           ))}
 
-          {/* Volume Bar - White with opacity */}
+          {/* Founder Entry Price Horizontal Ray */}
+          {showFounderLayers && founderPosition && founderPosition.entryPrice > 0 && (
+            <ReferenceLine
+              yAxisId="price"
+              y={founderPosition.entryPrice}
+              stroke="#00ff88"
+              strokeDasharray="3 3"
+              strokeOpacity={0.7}
+              strokeWidth={1.2}
+              label={{
+                value: `@Paulwei Entry $${Math.round(founderPosition.entryPrice).toLocaleString()}`,
+                position: 'insideBottomRight',
+                fill: '#00ff88',
+                fontSize: 10,
+                offset: 4
+              }}
+            />
+          )}
+
+          {/* Founder Strategic Limit Orders Rails */}
+          {showFounderLayers && keyOrderLevels.map(lvl => (
+            <ReferenceLine
+              yAxisId="price"
+              key={lvl.px}
+              y={lvl.px}
+              stroke={lvl.side === 'B' ? '#38bdf8' : '#f59e0b'}
+              strokeDasharray="2 4"
+              strokeOpacity={0.6}
+              strokeWidth={1}
+              label={{
+                value: `@Paulwei ${lvl.side === 'B' ? 'BID' : 'TP'}: ${lvl.label}`,
+                position: 'insideRight',
+                fill: lvl.side === 'B' ? '#38bdf8' : '#f59e0b',
+                fontSize: 9,
+                offset: 4
+              }}
+            />
+          ))}
+
+          {/* Volume Bars */}
           <Bar
             yAxisId="volume"
             dataKey="volume"
-            fill="#ffffff"
-            fillOpacity={0.3}
+            fill="#334155"
+            fillOpacity={0.6}
             barSize={2}
             isAnimationActive={false}
           />
 
-          {/* Price Area */}
+          {/* Price Area Curve */}
           <Area
             yAxisId="price"
             type="monotone"
             dataKey="close"
-            stroke="#ff8c00"
-            strokeWidth={window.innerWidth < 768 ? 2 : 3}
+            stroke="#f59e0b"
+            strokeWidth={1.75}
             fillOpacity={1}
-            fill="url(#colorPrice)"
+            fill="url(#colorPriceTerminal)"
             isAnimationActive={true}
           />
           
-          {/* EMA Line */}
+          {/* EMA15 Line */}
           <Line
              yAxisId="price"
              type="monotone"
              dataKey="ema"
              stroke="#ffffff"
-             strokeOpacity={0.8}
+             strokeOpacity={0.9}
              strokeWidth={1.5}
              dot={false}
              isAnimationActive={true}
@@ -269,4 +322,4 @@ export const ModernChart: React.FC<CandleChartProps> = ({ data, highlights = [] 
       </ResponsiveContainer>
     </div>
    );
-}
+};
