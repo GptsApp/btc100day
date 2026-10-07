@@ -117,6 +117,21 @@ export interface WhaleSentinelAlert {
 }
 
 // Real-time On-chain / Hyperliquid Position & Order Types for @Paulwei
+export interface FounderLiveFill {
+  tid: number;
+  oid: number;
+  coin: string;
+  side: 'B' | 'A'; // 'B' = Buy (Long), 'A' = Ask (Sell/Short)
+  dir: string;     // 'Open Long' | 'Close Long' | etc.
+  price: number;
+  size: number;
+  valueUsd: number;
+  closedPnl: number;
+  fee: number;
+  timestamp: number;
+  hash: string;
+}
+
 export interface FounderLiveOrder {
   oid: number;
   coin: string;
@@ -149,10 +164,16 @@ export interface FounderRealtimeState {
   address: string;
   position: FounderLivePosition | null;
   orders: FounderLiveOrder[];
+  fills: FounderLiveFill[];
   buyOrdersTotalSize: number;
   sellOrdersTotalSize: number;
   buyOrdersAvgPrice: number;
   sellOrdersAvgPrice: number;
+  recentFillsBuySize: number;
+  recentFillsSellSize: number;
+  recentFillsBuyAvgPrice: number;
+  recentFillsSellAvgPrice: number;
+  recentFillsRealizedPnl: number;
   updatedAt: number;
   microstructure?: MicrostructureData;
 }

@@ -178,14 +178,80 @@ export const fetchFounderRealtimeState = async (): Promise<FounderRealtimeState 
       ? sellOrders.reduce((sum, o) => sum + o.price * o.size, 0) / sellOrdersTotalSize
       : 0;
 
+    // Parse and aggregate recent 3-month fills (group same oid + price to merge split fills)
+    const rawFillsList: any[] = Array.isArray(rawFills)
+      ? rawFills.filter((f: any) => f && f.coin === 'BTC' && f.time >= threeMonthsAgo)
+      : [];
+
+    const mergedFillsMap = new Map<string, FounderLiveFill>();
+    rawFillsList.forEach((f: any) => {
+      const px = parseFloat(f.px || '0');
+      const sz = parseFloat(f.sz || '0');
+      const pnl = parseFloat(f.closedPnl || '0');
+      const fee = parseFloat(f.fee || '0');
+      const side = (f.side === 'A' ? 'A' : 'B') as 'B' | 'A';
+      const oid = Number(f.oid || f.tid || f.time);
+      const key = `${oid}_${px}`;
+
+      const existing = mergedFillsMap.get(key);
+      if (existing) {
+        existing.size = Number((existing.size + sz).toFixed(5));
+        existing.valueUsd = existing.price * existing.size;
+        existing.closedPnl = Number((existing.closedPnl + pnl).toFixed(2));
+        existing.fee = Number((existing.fee + fee).toFixed(4));
+        if (f.time > existing.timestamp) existing.timestamp = f.time;
+      } else {
+        mergedFillsMap.set(key, {
+          tid: Number(f.tid || f.time),
+          oid,
+          coin: f.coin || 'BTC',
+          side,
+          dir: f.dir || (side === 'B' ? 'Open Long' : 'Close Long'),
+          price: px,
+          size: Number(sz.toFixed(5)),
+          valueUsd: px * sz,
+          closedPnl: Number(pnl.toFixed(2)),
+          fee: Number(fee.toFixed(4)),
+          timestamp: Number(f.time),
+          hash: f.hash || '',
+        });
+      }
+    });
+
+    const fills: FounderLiveFill[] = Array.from(mergedFillsMap.values()).sort(
+      (a, b) => b.timestamp - a.timestamp
+    );
+
+    const buyFills = fills.filter(f => f.side === 'B');
+    const sellFills = fills.filter(f => f.side === 'A');
+
+    const recentFillsBuySize = buyFills.reduce((sum, f) => sum + f.size, 0);
+    const recentFillsSellSize = sellFills.reduce((sum, f) => sum + f.size, 0);
+
+    const recentFillsBuyAvgPrice = recentFillsBuySize > 0
+      ? buyFills.reduce((sum, f) => sum + f.price * f.size, 0) / recentFillsBuySize
+      : 0;
+
+    const recentFillsSellAvgPrice = recentFillsSellSize > 0
+      ? sellFills.reduce((sum, f) => sum + f.price * f.size, 0) / recentFillsSellSize
+      : 0;
+
+    const recentFillsRealizedPnl = fills.reduce((sum, f) => sum + f.closedPnl, 0);
+
     const result: FounderRealtimeState = {
       address: FOUNDER_ADDRESS,
       position,
       orders,
+      fills,
       buyOrdersTotalSize: Number(buyOrdersTotalSize.toFixed(4)),
       sellOrdersTotalSize: Number(sellOrdersTotalSize.toFixed(4)),
       buyOrdersAvgPrice: Math.round(buyOrdersAvgPrice),
       sellOrdersAvgPrice: Math.round(sellOrdersAvgPrice),
+      recentFillsBuySize: Number(recentFillsBuySize.toFixed(4)),
+      recentFillsSellSize: Number(recentFillsSellSize.toFixed(4)),
+      recentFillsBuyAvgPrice: Math.round(recentFillsBuyAvgPrice),
+      recentFillsSellAvgPrice: Math.round(recentFillsSellAvgPrice),
+      recentFillsRealizedPnl: Number(recentFillsRealizedPnl.toFixed(2)),
       updatedAt: Date.now(),
       microstructure,
     };

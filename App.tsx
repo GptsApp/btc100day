@@ -145,6 +145,7 @@ const App = () => {
         lang={lang}
         founderPosition={founderState?.position}
         founderOrders={founderState?.orders}
+        founderFills={founderState?.fills}
         showFounderLayers={showFounderOnChart}
         onToggleFounderLayers={() => setShowFounderOnChart(!showFounderOnChart)}
         microstructure={founderState?.microstructure}

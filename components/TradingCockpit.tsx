@@ -6,6 +6,7 @@ import {
   Language,
   HighlightPeriod,
   FounderLiveOrder,
+  FounderLiveFill,
   FounderLivePosition,
   MicrostructureData,
 } from '../types';
@@ -35,6 +36,7 @@ interface TradingCockpitProps {
   lang: Language;
   founderPosition?: FounderLivePosition | null;
   founderOrders?: FounderLiveOrder[];
+  founderFills?: FounderLiveFill[];
   showFounderLayers?: boolean;
   onToggleFounderLayers?: () => void;
   microstructure?: MicrostructureData;
@@ -48,6 +50,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
   lang,
   founderPosition = null,
   founderOrders = [],
+  founderFills = [],
   showFounderLayers = true,
   onToggleFounderLayers,
   microstructure,
@@ -58,7 +61,9 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
   const isPositive = change24hPercent >= 0;
 
   const [activeTab, setActiveTab] = useState<'founder' | 'tactical' | 'calculator' | 'microstructure'>('founder');
+  const [founderSubView, setFounderSubView] = useState<'orders' | 'fills'>('orders');
   const [orderFilter, setOrderFilter] = useState<'all' | 'sell' | 'buy'>('all');
+  const [fillFilter, setFillFilter] = useState<'all' | 'buy' | 'sell'>('all');
   const [selectedOrderPrice, setSelectedOrderPrice] = useState<number | null>(null);
 
   // Wall Street Position Sizer State
@@ -81,6 +86,29 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
     if (orderFilter === 'buy') return buyOrders;
     return founderOrders;
   }, [founderOrders, sellOrders, buyOrders, orderFilter]);
+
+  const buyFills = useMemo(() => founderFills.filter(f => f.side === 'B'), [founderFills]);
+  const sellFills = useMemo(() => founderFills.filter(f => f.side === 'A'), [founderFills]);
+  const totalBuyFillsBtc = useMemo(() => Number(buyFills.reduce((sum, f) => sum + f.size, 0).toFixed(2)), [buyFills]);
+  const totalSellFillsBtc = useMemo(() => Number(sellFills.reduce((sum, f) => sum + f.size, 0).toFixed(2)), [sellFills]);
+  const buyFillsAvgPx = useMemo(
+    () => (totalBuyFillsBtc > 0 ? Math.round(buyFills.reduce((sum, f) => sum + f.price * f.size, 0) / totalBuyFillsBtc) : 0),
+    [buyFills, totalBuyFillsBtc]
+  );
+  const sellFillsAvgPx = useMemo(
+    () => (totalSellFillsBtc > 0 ? Math.round(sellFills.reduce((sum, f) => sum + f.price * f.size, 0) / totalSellFillsBtc) : 0),
+    [sellFills, totalSellFillsBtc]
+  );
+  const realizedFillsPnl = useMemo(
+    () => Math.round(founderFills.reduce((sum, f) => sum + f.closedPnl, 0)),
+    [founderFills]
+  );
+
+  const filteredFills = useMemo(() => {
+    if (fillFilter === 'buy') return buyFills;
+    if (fillFilter === 'sell') return sellFills;
+    return founderFills;
+  }, [founderFills, buyFills, sellFills, fillFilter]);
 
   // Wall Street Kelly / Fixed-Fractional Position Sizing Math
   const positionSizer = useMemo(() => {
@@ -222,6 +250,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                 highlights={highlights}
                 founderPosition={founderPosition}
                 founderOrders={founderOrders}
+                founderFills={founderFills}
                 showFounderLayers={showFounderLayers}
                 onToggleFounderLayers={onToggleFounderLayers}
                 selectedOrderPrice={selectedOrderPrice}
@@ -335,6 +364,38 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   </div>
                 )}
 
+                {/* Sub-View Switcher: Open Orders vs 3-Month Fills */}
+                <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs">
+                  <button
+                    onClick={() => setFounderSubView('orders')}
+                    className={`py-1.5 px-2.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      founderSubView === 'orders'
+                        ? 'bg-white text-slate-900 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>{isEn ? 'Open Orders' : '实时挂单'}</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-700 font-mono">
+                      {founderOrders.length}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setFounderSubView('fills')}
+                    className={`py-1.5 px-2.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      founderSubView === 'fills'
+                        ? 'bg-white text-slate-900 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>{isEn ? '3M Fills' : '近3月成交'}</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                      {founderFills.length}
+                    </span>
+                  </button>
+                </div>
+
+                {founderSubView === 'orders' ? (
+                  <>
                 {/* Filter Selector */}
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5">
@@ -425,6 +486,136 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   <span className="text-slate-900 font-bold mr-1.5 font-mono">💡 周期心法:</span>
                   魏神已在 $93k~$104k 挂设 2.35 BTC 止盈网，下方 $83,186 挂单紧咬 EMA15，严格践行 Day 70 前分批被动兑现纪律。
                 </div>
+                  </>
+                ) : (
+                  <>
+                    {/* 3-Month Fills Summary Strip */}
+                    <div className="grid grid-cols-3 gap-1.5 bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 text-[11px]">
+                      <div>
+                        <span className="text-slate-500 block">{isEn ? '3M ACCUMULATED' : '3月接多合计'}</span>
+                        <span className="text-emerald-700 font-bold">{totalBuyFillsBtc} BTC</span>
+                        <span className="text-[10px] text-slate-400 block">${buyFillsAvgPx.toLocaleString()} 均价</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block">{isEn ? '3M CLOSED' : '3月止盈合计'}</span>
+                        <span className="text-amber-700 font-bold">{totalSellFillsBtc} BTC</span>
+                        <span className="text-[10px] text-slate-400 block">${sellFillsAvgPx.toLocaleString()} 均价</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block">{isEn ? 'REALIZED PnL' : '已落袋盈亏'}</span>
+                        <span className="text-emerald-700 font-bold">+${realizedFillsPnl.toLocaleString()}</span>
+                        <span className="text-[10px] text-slate-400 block">{founderFills.length} 笔成交</span>
+                      </div>
+                    </div>
+
+                    {/* Fill Filter Selector */}
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setFillFilter('all')}
+                          className={`px-3 py-1 rounded-full cursor-pointer transition-colors ${
+                            fillFilter === 'all' ? 'bg-slate-900 text-white font-bold' : 'text-slate-600 hover:text-slate-900 bg-slate-100'
+                          }`}
+                        >
+                          {isEn ? `All (${founderFills.length})` : `全部 (${founderFills.length})`}
+                        </button>
+                        <button
+                          onClick={() => setFillFilter('buy')}
+                          className={`px-3 py-1 rounded-full cursor-pointer transition-colors ${
+                            fillFilter === 'buy' ? 'bg-slate-900 text-white font-bold' : 'text-slate-600 hover:text-slate-900 bg-slate-100'
+                          }`}
+                        >
+                          {isEn ? `Open Long (${buyFills.length})` : `接多建仓 (${buyFills.length})`}
+                        </button>
+                        <button
+                          onClick={() => setFillFilter('sell')}
+                          className={`px-3 py-1 rounded-full cursor-pointer transition-colors ${
+                            fillFilter === 'sell' ? 'bg-slate-900 text-white font-bold' : 'text-slate-600 hover:text-slate-900 bg-slate-100'
+                          }`}
+                        >
+                          {isEn ? `Close (${sellFills.length})` : `平多止盈 (${sellFills.length})`}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Fills List */}
+                    <div className="max-h-[265px] overflow-y-auto space-y-1.5 pr-1">
+                      {filteredFills.length === 0 ? (
+                        <div className="p-4 text-center text-slate-400 text-xs">
+                          {isEn ? 'No fills in last 3 months' : '近3个月暂无匹配成交记录'}
+                        </div>
+                      ) : (
+                        filteredFills.map((f) => {
+                          const isBuy = f.side === 'B';
+                          const isSelected = selectedOrderPrice === f.price;
+                          const d = new Date(f.timestamp);
+                          const dateStr = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+                          return (
+                            <div
+                              key={`${f.oid}_${f.timestamp}`}
+                              onClick={() => setSelectedOrderPrice(isSelected ? null : f.price)}
+                              className={`p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between text-xs ${
+                                isSelected
+                                  ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                                  : 'bg-slate-50/70 border-slate-200/80 hover:border-slate-300 hover:bg-slate-100/60'
+                              }`}
+                              title="点击在K线图上高亮该成交价位"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full shrink-0 ${isBuy ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                                      ${f.price.toLocaleString()}
+                                    </span>
+                                    <span className={`text-[11px] ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                                      {f.size} BTC
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] text-slate-400">
+                                    {dateStr}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <span
+                                    className={`text-[10px] px-1.5 py-0.5 rounded-full border ${
+                                      isSelected
+                                        ? 'border-slate-700 bg-slate-800 text-slate-200'
+                                        : isBuy
+                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                        : 'border-amber-200 bg-amber-50 text-amber-700'
+                                    }`}
+                                  >
+                                    {isBuy ? (isEn ? 'Open Long' : '接多成交') : (isEn ? 'Close Long' : '止盈平多')}
+                                  </span>
+                                </div>
+                                <div className={`text-[10px] mt-0.5 font-medium ${
+                                  f.closedPnl > 0
+                                    ? (isSelected ? 'text-emerald-300' : 'text-emerald-600')
+                                    : (isSelected ? 'text-slate-300' : 'text-slate-500')
+                                }`}>
+                                  {f.closedPnl > 0
+                                    ? `+${Math.round(f.closedPnl).toLocaleString()} PnL`
+                                    : `${Math.round(f.valueUsd).toLocaleString()}`}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {/* Fills Insight */}
+                    <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/80 text-xs text-slate-700 leading-relaxed font-sans">
+                      <span className="text-emerald-900 font-bold mr-1.5 font-mono">📈 实盘轨迹:</span>
+                      近3个月魏神从 $62.4k~$68.7k 底部密集建仓，沿 EMA15 一路在 $75.7k~$83.2k 逢回踩接多，完美印证百日单边波段加仓逻辑。
+                    </div>
+                  </>
+                )}
 
               </div>
             )}

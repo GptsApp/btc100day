@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import {
   createChart,
+  createSeriesMarkers,
   CandlestickSeries,
   LineSeries,
   HistogramSeries,
   IChartApi,
   ISeriesApi,
+  ISeriesMarkersPluginApi,
   LineStyle,
 } from 'lightweight-charts';
-import { CandleData, HighlightPeriod, FounderLiveOrder, FounderLivePosition } from '../types';
+import { CandleData, HighlightPeriod, FounderLiveOrder, FounderLiveFill, FounderLivePosition } from '../types';
 import { calculateEMA } from '../services/cycleAnalysis';
 import { RotateCcw, Eye, EyeOff, Compass } from 'lucide-react';
 
@@ -17,6 +19,7 @@ interface RealCandleChartProps {
   highlights: HighlightPeriod[];
   founderPosition?: FounderLivePosition | null;
   founderOrders?: FounderLiveOrder[];
+  founderFills?: FounderLiveFill[];
   showFounderLayers?: boolean;
   onToggleFounderLayers?: () => void;
   selectedOrderPrice?: number | null;
@@ -39,6 +42,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   highlights,
   founderPosition,
   founderOrders = [],
+  founderFills = [],
   showFounderLayers = true,
   onToggleFounderLayers,
   selectedOrderPrice = null,
@@ -48,6 +52,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const markersPluginRef = useRef<ISeriesMarkersPluginApi<any> | null>(null);
   const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const volSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
   const priceLinesRef = useRef<any[]>([]);
@@ -320,6 +325,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       wickDownColor: '#f43f5e',
     });
     candleSeriesRef.current = candleSeries;
+    markersPluginRef.current = createSeriesMarkers(candleSeries, []);
 
     // EMA15 Line (Solid Dark Slate Blue)
     const emaSeries = chart.addSeries(LineSeries, {
@@ -404,6 +410,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      markersPluginRef.current = null;
       if (chartRef.current) {
         chartRef.current.remove();
         chartRef.current = null;
@@ -573,7 +580,69 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
     // ONLY show founder orders when viewing Cycle 4 specifically!
     const shouldShowForCycle = activeCycleTab === 'c4';
 
-    if (!showFounderLayers || !shouldShowForCycle) return;
+    // Update 3-month fill markers on candlestick series (visible in 'all' or 'c4')
+    if (markersPluginRef.current) {
+      if (!showFounderLayers || (activeCycleTab !== 'all' && activeCycleTab !== 'c4') || !founderFills.length) {
+        markersPluginRef.current.setMarkers([]);
+      } else {
+        const availableDates = new Set(chartDates);
+        const dailyGroups = new Map<string, { side: 'B' | 'A'; totalSize: number; weightedPx: number; count: number }>();
+
+        founderFills.forEach((f) => {
+          const d = new Date(f.timestamp);
+          const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          if (!availableDates.has(dateStr)) return;
+          const key = `${dateStr}_${f.side}`;
+          const prev = dailyGroups.get(key);
+          if (prev) {
+            const nextSz = prev.totalSize + f.size;
+            prev.weightedPx = (prev.weightedPx * prev.totalSize + f.price * f.size) / nextSz;
+            prev.totalSize = nextSz;
+            prev.count += 1;
+          } else {
+            dailyGroups.set(key, {
+              side: f.side,
+              totalSize: f.size,
+              weightedPx: f.price,
+              count: 1,
+            });
+          }
+        });
+
+        const markers = Array.from(dailyGroups.entries())
+          .map(([key, g]) => {
+            const time = key.split('_')[0];
+            const isBuy = g.side === 'B';
+            const szStr = Number(g.totalSize.toFixed(3));
+            const pxStr = Math.round(g.weightedPx / 100) / 10; // e.g. 83.2k
+            return {
+              time,
+              position: (isBuy ? 'belowBar' : 'aboveBar') as 'belowBar' | 'aboveBar',
+              color: isBuy ? '#059669' : '#d97706',
+              shape: (isBuy ? 'arrowUp' : 'arrowDown') as 'arrowUp' | 'arrowDown',
+              text: isBuy ? `B ${szStr} @${pxStr}k` : `S ${szStr} @${pxStr}k`,
+            };
+          })
+          .sort((a, b) => a.time.localeCompare(b.time));
+
+        markersPluginRef.current.setMarkers(markers);
+      }
+    }
+
+    if (!showFounderLayers || !shouldShowForCycle) {
+      if (showFounderLayers && selectedOrderPrice) {
+        const highlighted = candleSeriesRef.current.createPriceLine({
+          price: selectedOrderPrice,
+          color: '#0f172a',
+          lineWidth: 2,
+          lineStyle: LineStyle.Solid,
+          axisLabelVisible: true,
+          title: `SELECTED: $${selectedOrderPrice.toLocaleString()}`,
+        });
+        priceLinesRef.current.push(highlighted);
+      }
+      return;
+    }
 
     // Founder Entry Price
     if (founderPosition && founderPosition.entryPrice > 0) {
@@ -677,7 +746,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
         priceLinesRef.current.push(highlighted);
       }
     }
-  }, [showFounderLayers, founderPosition, founderOrders, selectedOrderPrice, activeCycleTab]);
+  }, [showFounderLayers, founderPosition, founderOrders, founderFills, chartDates, selectedOrderPrice, activeCycleTab]);
 
   const activeDisplay = crosshairData || latestBar;
   const isUp = activeDisplay ? activeDisplay.close >= activeDisplay.open : true;
