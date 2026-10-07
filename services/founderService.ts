@@ -1,17 +1,18 @@
-import type { FounderRealtimeState, FounderLiveOrder, FounderLivePosition, MicrostructureData } from '../types';
+import type { FounderRealtimeState, FounderLiveOrder, FounderLiveFill, FounderLivePosition, MicrostructureData } from '../types';
 
 export const FOUNDER_ADDRESS = '0xdae4df7207feb3b350e4284c8efe5f7dac37f637';
 const HYPERLIQUID_API = 'https://api.hyperliquid.xyz/info';
 
-const CACHE_KEY = 'btc100_founder_live_cache';
+const CACHE_KEY = 'btc100_founder_live_cache_v2';
 const CACHE_TTL = 30 * 1000; // 30s cache
+const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
 
 export const fetchFounderRealtimeState = async (): Promise<FounderRealtimeState | null> => {
   try {
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (Date.now() - parsed.updatedAt < CACHE_TTL) {
+      if (Date.now() - parsed.updatedAt < CACHE_TTL && Array.isArray(parsed.data?.fills)) {
         return parsed.data;
       }
     }
@@ -20,7 +21,8 @@ export const fetchFounderRealtimeState = async (): Promise<FounderRealtimeState 
   }
 
   try {
-    const [ordersRes, stateRes, metaRes] = await Promise.all([
+    const threeMonthsAgo = Date.now() - THREE_MONTHS_MS;
+    const [ordersRes, stateRes, metaRes, fillsRes] = await Promise.all([
       fetch(HYPERLIQUID_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,6 +46,16 @@ export const fetchFounderRealtimeState = async (): Promise<FounderRealtimeState 
           type: 'metaAndAssetCtxs',
         }),
       }).catch(() => null),
+      fetch(HYPERLIQUID_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'userFillsByTime',
+          user: FOUNDER_ADDRESS,
+          startTime: threeMonthsAgo,
+          aggregateByTime: true,
+        }),
+      }).catch(() => null),
     ]);
 
     if (!ordersRes.ok || !stateRes.ok) {
@@ -56,6 +68,14 @@ export const fetchFounderRealtimeState = async (): Promise<FounderRealtimeState 
     if (metaRes && metaRes.ok) {
       try {
         rawMeta = await metaRes.json();
+      } catch {
+        // ignore
+      }
+    }
+    let rawFills: any = [];
+    if (fillsRes && fillsRes.ok) {
+      try {
+        rawFills = await fillsRes.json();
       } catch {
         // ignore
       }
