@@ -415,9 +415,9 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
 
                 <div className="pt-3 border-t border-slate-200/80 space-y-1.5 text-[11px] font-mono text-slate-600">
                   {p.criteria.map((c, i) => (
-                    <div key={i} className="flex items-center gap-1.5">
-                      <span className="w-1 h-1 rounded-full bg-slate-400"></span>
-                      <span className="truncate">{c}</span>
+                    <div key={i} className="flex items-start gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-slate-400 shrink-0 mt-1.5"></span>
+                      <span className="leading-snug">{c}</span>
                     </div>
                   ))}
                 </div>

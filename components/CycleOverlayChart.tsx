@@ -115,11 +115,11 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
             <GitCompare className="w-5 h-5 text-slate-800" />
           </div>
           <div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-base font-bold text-slate-900 font-mono tracking-tight">
                 {isEn ? '100-DAY CYCLE NORMALIZED OVERLAY & MONTE CARLO CONE' : '历史 100 天周期归一化重叠对照 & 蒙特卡洛置信通道'}
               </h3>
-              <span className="text-[11px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full font-mono">
+              <span className="text-[11px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full font-mono whitespace-nowrap shrink-0">
                 Day 0 → 100
               </span>
             </div>
@@ -134,25 +134,25 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
         {/* Current Cycle Status Pill */}
         {currentPoint && (
           <div
-            className={`flex items-center gap-2.5 border rounded-full px-4 py-1.5 shrink-0 font-mono text-xs ${
+            className={`flex flex-wrap items-center gap-2 border rounded-2xl md:rounded-full px-3.5 py-1.5 shrink-0 font-mono text-xs ${
               radar.isUncertainPhase
                 ? 'bg-amber-50 border-amber-300 text-amber-900'
                 : 'bg-slate-50 border-slate-200'
             }`}
             title={radar.isUncertainPhase ? (isEn ? 'Moat rebound watch in progress' : '护城河反抽观察中') : undefined}
           >
-            <span className={`w-2 h-2 rounded-full animate-pulse ${radar.isUncertainPhase ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
-            <span className={radar.isUncertainPhase ? 'text-amber-800 font-semibold' : 'text-slate-500'}>
+            <span className={`w-2 h-2 rounded-full animate-pulse shrink-0 ${radar.isUncertainPhase ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+            <span className={`whitespace-nowrap ${radar.isUncertainPhase ? 'text-amber-800 font-semibold' : 'text-slate-500'}`}>
               {radar.isUncertainPhase
                 ? (isEn ? 'Cycle 4 (Pending):' : '周期 4 (待定):')
                 : (isEn ? 'Cycle 4:' : '周期 4:')}
             </span>
-            <span className="font-bold text-slate-900">Day {currentPoint.day}</span>
-            <span className="font-bold text-emerald-600">
+            <span className="font-bold text-slate-900 whitespace-nowrap">Day {currentPoint.day}</span>
+            <span className="font-bold text-emerald-600 whitespace-nowrap">
               ({currentPoint.current !== undefined && currentPoint.current >= 0 ? `+${currentPoint.current}%` : `${currentPoint.current}%`})
             </span>
             {radar.isUncertainPhase && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 font-sans font-semibold">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 font-sans font-semibold whitespace-nowrap">
                 {isEn ? 'Moat Watch' : '护城河反抽观察中'}
               </span>
             )}

@@ -787,14 +787,14 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   return (
     <div className="flex flex-col h-[640px] font-mono text-xs select-none relative">
       
-      {/* 1. FIXED HEIGHT TOOLBAR (38px height, never jitters or pushes chart) */}
-      <div className="h-[38px] min-h-[38px] max-h-[38px] flex items-center justify-between gap-3 px-1 mb-1 border-b border-slate-100 text-slate-500 overflow-hidden">
+      {/* 1. TOOLBAR (responsive flex-wrap, never clips badges) */}
+      <div className="min-h-[38px] py-1.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 px-1 mb-1 border-b border-slate-100 text-slate-500">
         
         {/* Left: O/H/L/C numbers + EMA15 + Single Line Tag */}
         {activeDisplay && (
-          <div className="flex items-center gap-3 whitespace-nowrap overflow-hidden text-[11px]">
-            <span className="text-slate-900 font-bold shrink-0">{activeDisplay.time}</span>
-            <div className="flex items-center gap-2 font-mono shrink-0">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] min-w-0">
+            <span className="text-slate-900 font-bold shrink-0 whitespace-nowrap">{activeDisplay.time}</span>
+            <div className="flex items-center gap-1.5 font-mono shrink-0 whitespace-nowrap">
               <span>O:<strong className="text-slate-900 ml-0.5">${activeDisplay.open.toLocaleString()}</strong></span>
               <span>H:<strong className="text-emerald-600 ml-0.5">${activeDisplay.high.toLocaleString()}</strong></span>
               <span>L:<strong className="text-rose-600 ml-0.5">${activeDisplay.low.toLocaleString()}</strong></span>
@@ -806,13 +806,13 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
 
             <div className="h-3 w-px bg-slate-200 shrink-0 hidden sm:block"></div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
               <span className="w-2 h-0.5 bg-slate-900 rounded-full"></span>
               <span className="text-slate-600">EMA15:<strong className="text-slate-900 ml-1">${activeDisplay.ema.toLocaleString()}</strong></span>
             </div>
 
             {latestBar && latestBar.close < latestBar.ema && atrDefenseFloor > 0 && (
-              <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full shrink-0 font-bold">
+              <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap font-bold">
                 {isEn
                   ? `⚠️ Moat Buffer (Floor $${atrDefenseFloor.toLocaleString()})`
                   : `⚠️ 护城河缓冲中 (防守底线 $${atrDefenseFloor.toLocaleString()})`}
@@ -820,7 +820,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
             )}
 
             {activeDisplay.cycleInfo && (
-              <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full shrink-0 font-medium">
+              <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap font-medium">
                 {activeDisplay.cycleInfo}
               </span>
             )}
@@ -828,24 +828,24 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
         )}
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
           {onToggleFounderLayers && (activeCycleTab === 'c4' || activeCycleTab === 'all') && (
             <button
               onClick={onToggleFounderLayers}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border transition-colors cursor-pointer ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                 showFounderLayers
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-300 font-bold'
                   : 'bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-900'
               }`}
             >
-              {showFounderLayers ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+              {showFounderLayers ? <Eye className="w-3 h-3 shrink-0" /> : <EyeOff className="w-3 h-3 shrink-0" />}
               <span>{isEn ? '@Paulwei Rails' : '魏神挂单轨'}</span>
             </button>
           )}
 
           <button
             onClick={() => zoomToCycle('all')}
-            className="p-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer shrink-0"
             title={isEn ? 'Reset Zoom (All)' : '重置全景视图'}
           >
             <RotateCcw className="w-3.5 h-3.5" />

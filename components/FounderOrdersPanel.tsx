@@ -93,38 +93,38 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-5 gap-2 my-3 text-xs font-mono">
           
           <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded">
-            <div className="text-[10px] text-[#8b949e]">{isEn ? 'ACTIVE POSITION' : '当前实盘持仓'}</div>
-            <div className="text-sm font-bold text-white mt-0.5 flex items-baseline gap-1">
+            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'ACTIVE POSITION' : '当前实盘持仓'}</div>
+            <div className="text-sm font-bold text-white mt-0.5 flex items-baseline gap-1 whitespace-nowrap">
               <span>{position.size.toFixed(2)} BTC</span>
               <span className="text-[10px] text-[#8b949e]">(${Math.round(position.positionValue).toLocaleString()})</span>
             </div>
           </div>
 
           <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded">
-            <div className="text-[10px] text-[#8b949e]">{isEn ? 'ENTRY PRICE' : '建仓均价'}</div>
-            <div className="text-sm font-bold text-[#00ff88] mt-0.5">
+            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'ENTRY PRICE' : '建仓均价'}</div>
+            <div className="text-sm font-bold text-[#00ff88] mt-0.5 whitespace-nowrap">
               ${Math.round(position.entryPrice).toLocaleString()}
             </div>
           </div>
 
           <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded">
-            <div className="text-[10px] text-[#8b949e]">{isEn ? 'UNREALIZED PnL' : '未实现浮盈'}</div>
-            <div className="text-sm font-bold text-[#00ff88] mt-0.5 flex items-baseline gap-1">
+            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'UNREALIZED PnL' : '未实现浮盈'}</div>
+            <div className="text-sm font-bold text-[#00ff88] mt-0.5 flex items-baseline gap-1 whitespace-nowrap">
               <span>+${Math.round(position.unrealizedPnl).toLocaleString()}</span>
               <span className="text-[10px] font-normal">(+{pnlPercent.toFixed(1)}%)</span>
             </div>
           </div>
 
           <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded">
-            <div className="text-[10px] text-[#8b949e]">{isEn ? 'LEVERAGE & MARGIN' : '实盘杠杆率'}</div>
-            <div className="text-sm font-bold text-white mt-0.5">
+            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'LEVERAGE & MARGIN' : '实盘杠杆率'}</div>
+            <div className="text-sm font-bold text-white mt-0.5 whitespace-nowrap">
               1.18x <span className="text-[10px] text-[#00ff88] font-normal">{isEn ? '(Safe)' : '(极致风控)'}</span>
             </div>
           </div>
 
           <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded col-span-2 md:col-span-1">
-            <div className="text-[10px] text-[#8b949e]">{isEn ? 'LIQUIDATION PRICE' : '强平价格'}</div>
-            <div className="text-sm font-bold text-[#8b949e] mt-0.5">
+            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'LIQUIDATION PRICE' : '强平价格'}</div>
+            <div className="text-sm font-bold text-[#8b949e] mt-0.5 whitespace-nowrap">
               ${Math.round(position.liquidationPrice).toLocaleString()}
             </div>
           </div>
@@ -134,10 +134,10 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
 
       {/* 3. Real Orders Filter & Stats Summary */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 pb-2 text-xs font-mono">
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setFilter('all')}
-            className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer whitespace-nowrap ${
               filter === 'all' ? 'bg-[#1b2230] text-white font-bold' : 'text-[#8b949e] hover:text-white'
             }`}
           >
@@ -146,7 +146,7 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
 
           <button
             onClick={() => setFilter('sell')}
-            className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer whitespace-nowrap ${
               filter === 'sell' ? 'bg-[#f59e0b]/20 text-[#f59e0b] font-bold border border-[#f59e0b]/30' : 'text-[#8b949e] hover:text-[#f59e0b]'
             }`}
           >
@@ -155,7 +155,7 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
 
           <button
             onClick={() => setFilter('buy')}
-            className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer whitespace-nowrap ${
               filter === 'buy' ? 'bg-[#38bdf8]/20 text-[#38bdf8] font-bold border border-[#38bdf8]/30' : 'text-[#8b949e] hover:text-[#38bdf8]'
             }`}
           >
@@ -163,21 +163,21 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
           </button>
         </div>
 
-        <div className="text-[11px] text-[#8b949e] flex items-center gap-3">
-          <span>{isEn ? 'TP Grid Total:' : '止盈挂单合计:'} <strong className="text-white">{sellOrdersTotalSize} BTC</strong> (~${sellOrdersAvgPrice.toLocaleString()})</span>
+        <div className="text-[11px] text-[#8b949e] flex flex-wrap items-center gap-3">
+          <span className="whitespace-nowrap">{isEn ? 'TP Grid Total:' : '止盈挂单合计:'} <strong className="text-white">{sellOrdersTotalSize} BTC</strong> (~${sellOrdersAvgPrice.toLocaleString()})</span>
           <span>•</span>
-          <span>{isEn ? 'Bid Grid Total:' : '接多挂单合计:'} <strong className="text-white">{buyOrdersTotalSize} BTC</strong> (~${buyOrdersAvgPrice.toLocaleString()})</span>
+          <span className="whitespace-nowrap">{isEn ? 'Bid Grid Total:' : '接多挂单合计:'} <strong className="text-white">{buyOrdersTotalSize} BTC</strong> (~${buyOrdersAvgPrice.toLocaleString()})</span>
         </div>
       </div>
 
       {/* 4. Orders Visual Grid / Table */}
       <div className="max-h-[300px] overflow-y-auto rounded-lg border border-[#1b2230] bg-[#090d15] divide-y divide-[#141a24] text-xs font-mono">
         <div className="grid grid-cols-12 px-3 py-2 text-[10px] text-[#64748b] bg-[#0c1017] sticky top-0 z-10 uppercase tracking-wider">
-          <span className="col-span-2">{isEn ? 'DIRECTION' : '方向'}</span>
-          <span className="col-span-3">{isEn ? 'PRICE (USDT)' : '挂单价格'}</span>
-          <span className="col-span-2">{isEn ? 'SIZE' : '数量 (BTC)'}</span>
-          <span className="col-span-2">{isEn ? 'VALUE' : '订单金额'}</span>
-          <span className="col-span-3 text-right">{isEn ? '100-DAY CYCLE INTENT' : '周期战术意图'}</span>
+          <span className="col-span-2 whitespace-nowrap">{isEn ? 'DIRECTION' : '方向'}</span>
+          <span className="col-span-3 whitespace-nowrap">{isEn ? 'PRICE (USDT)' : '挂单价格'}</span>
+          <span className="col-span-2 whitespace-nowrap">{isEn ? 'SIZE' : '数量 (BTC)'}</span>
+          <span className="col-span-2 whitespace-nowrap">{isEn ? 'VALUE' : '订单金额'}</span>
+          <span className="col-span-3 text-right whitespace-nowrap">{isEn ? '100-DAY CYCLE INTENT' : '周期战术意图'}</span>
         </div>
 
         {filteredOrders.map(o => {
@@ -207,32 +207,32 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
               className="grid grid-cols-12 px-3 py-2 items-center hover:bg-[#121722] transition-colors"
             >
               {/* Direction */}
-              <div className="col-span-2 flex items-center gap-1 font-bold">
-                <span className={`w-1.5 h-1.5 rounded-full ${isBuy ? 'bg-[#00ff88]' : 'bg-[#f59e0b]'}`}></span>
+              <div className="col-span-2 flex items-center gap-1 font-bold whitespace-nowrap">
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isBuy ? 'bg-[#00ff88]' : 'bg-[#f59e0b]'}`}></span>
                 <span className={isBuy ? 'text-[#00ff88]' : 'text-[#f59e0b]'}>
                   {isBuy ? (isEn ? 'BUY' : '接多') : (isEn ? 'SELL' : '止盈')}
                 </span>
               </div>
 
               {/* Price */}
-              <div className="col-span-3 font-bold text-white flex items-center gap-1">
+              <div className="col-span-3 font-bold text-white flex items-center gap-1 whitespace-nowrap">
                 <span>${o.price.toLocaleString()}</span>
                 {o.price >= 99000 && <span className="text-[9px] text-[#f59e0b] bg-[#f59e0b]/10 px-1 rounded">100k+</span>}
               </div>
 
               {/* Size */}
-              <div className="col-span-2 text-[#cbd5e1]">
+              <div className="col-span-2 text-[#cbd5e1] whitespace-nowrap">
                 {o.size} BTC
               </div>
 
               {/* Value */}
-              <div className="col-span-2 text-[#8b949e]">
+              <div className="col-span-2 text-[#8b949e] whitespace-nowrap">
                 ${Math.round(o.valueUsd).toLocaleString()}
               </div>
 
               {/* Strategy Role */}
               <div className="col-span-3 text-right">
-                <span className={`text-[10px] px-1.5 py-0.5 rounded border ${badgeColor}`}>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded border whitespace-nowrap ${badgeColor}`}>
                   {isEn ? roleTagEn : roleTagZh}
                 </span>
               </div>
