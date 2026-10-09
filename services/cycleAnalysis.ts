@@ -12,6 +12,18 @@ export interface CycleMetrics {
   volTrend: number;
   change7d: number;
   change30d: number;
+  isUncertainPhase?: boolean;
+  activeDipDays?: number;
+  activeDipMaxDepth?: number;
+  isIntradayReclaim?: boolean;
+}
+
+export interface StreakDetails {
+  streak: number;
+  isUncertain: boolean;
+  activeDipDays: number;
+  activeDipMaxDepth: number;
+  isIntradayReclaim: boolean;
 }
 
 export interface CycleCriteria {
@@ -240,19 +252,41 @@ const emptyMetrics = (): CycleMetrics => ({
 });
 
 /**
- * Institutional-grade EMA15 Consecutive Above Calculation (3-Filter Engine with Shakeout/Spring Recognition):
+ * Institutional-grade EMA15 Consecutive Above Calculation (3-Filter Engine with Shakeout/Spring & Active ATR Moat Recognition):
  * 1. Holding condition: candle.close >= EMA15.
  * 2. Shakeout / Bear Trap handling (e.g. 9.10 - 9.18 cluster):
  *    - Contiguous dip cluster duration <= 5 trading days.
- *    - Max cluster drawdown depth <= 3.0%.
+ *    - Max cluster drawdown depth <= 3.0% OR held within ATR defense moat (maxAtrRatio <= 1.05).
  *    - Reclaim confirmation: The cluster was subsequently reclaimed by a daily close back >= EMA15.
  *    - If all hold, the entire shakeout cluster counts towards the cycle streak!
- * 3. Catastrophic Guard: Any single day crash > 4.5% terminates the streak immediately.
- * 4. Breakdown confirmation: 2 consecutive days below EMA15 with depth > 2.0% that fail to reclaim terminates the streak.
+ * 3. Active Tail Moat Test (Uncertain Phase):
+ *    - If the current tail cluster is <= 5 days AND (maxDepth <= 3.0% OR maxAtrRatio <= 1.05) AND there was a prior bull streak (> 0 days above EMA15 before the dip),
+ *      the cycle streak is provisionally preserved and flagged as `isUncertain = true`.
+ * 4. Catastrophic Guard: Any single day crash > 4.5% (below EMA15) terminates the streak immediately.
  */
-export const calculateConsecutiveAbove = (candles: CandleData[], emaData: { time: number; ema: number }[]): number => {
-  if (!candles?.length || !emaData?.length) return 0;
+export const calculateStreakDetails = (
+  candles: CandleData[],
+  emaData: { time: number; ema: number }[],
+  atrData?: { time: number; atr: number }[]
+): StreakDetails => {
+  if (!candles?.length || !emaData?.length) {
+    return {
+      streak: 0,
+      isUncertain: false,
+      activeDipDays: 0,
+      activeDipMaxDepth: 0,
+      isIntradayReclaim: false,
+    };
+  }
+
+  const computedAtr = atrData && atrData.length === candles.length ? atrData : calculateATR(candles, 14);
+
   let streak = 0;
+  let isUncertain = false;
+  let activeDipDays = 0;
+  let activeDipMaxDepth = 0;
+  let isIntradayReclaim = false;
+  let pendingTailClusterLen = 0;
   let i = candles.length - 1;
 
   while (i >= 0) {
@@ -261,7 +295,7 @@ export const calculateConsecutiveAbove = (candles: CandleData[], emaData: { time
 
     if (!emaVal) break;
 
-    // Direct holding
+    // Direct holding above EMA15
     if (c.close >= emaVal) {
       streak++;
       i--;
@@ -271,34 +305,92 @@ export const calculateConsecutiveAbove = (candles: CandleData[], emaData: { time
     // Encountered candle below EMA15: inspect the contiguous dip cluster backwards
     let clusterLen = 0;
     let maxDepth = 0;
+    let maxAtrRatio = 0;
+    let maxSingleDayCrash = 0;
     let clusterIdx = i;
 
     while (clusterIdx >= 0 && candles[clusterIdx].close < (emaData[clusterIdx]?.ema || 0)) {
       const e = emaData[clusterIdx]?.ema || candles[clusterIdx].close;
-      const depth = ((e - candles[clusterIdx].close) / e) * 100;
+      const closeVal = candles[clusterIdx].close;
+      const depth = ((e - closeVal) / e) * 100;
       if (depth > maxDepth) maxDepth = depth;
+
+      const atrVal = computedAtr[clusterIdx]?.atr || (e * 0.025);
+      const atrRatio = atrVal > 0 ? (e - closeVal) / atrVal : 999;
+      if (atrRatio > maxAtrRatio) maxAtrRatio = atrRatio;
+
+      if (clusterIdx > 0 && candles[clusterIdx - 1].close > 0) {
+        const prevClose = candles[clusterIdx - 1].close;
+        const singleDrop = ((prevClose - closeVal) / prevClose) * 100;
+        if (singleDrop > maxSingleDayCrash) maxSingleDayCrash = singleDrop;
+      }
+
       clusterLen++;
       clusterIdx--;
     }
 
+    // Catastrophic single-day crash guard (> 4.5% drop into deep breakdown)
+    if (maxSingleDayCrash > 4.5 && maxDepth > 3.0 && maxAtrRatio > 1.05) {
+      break;
+    }
+
     // Check if cluster was reclaimed in forward timeline
     const isReclaimed = i < candles.length - 1 && candles[i + 1].close >= (emaData[i + 1]?.ema || 0);
+    const withinMoatOrShallow = maxDepth <= 3.0 || maxAtrRatio <= 1.05;
 
-    // Valid Shakeout / Bear Trap Spring (e.g. Sept 10-18 cluster)
-    if (isReclaimed && maxDepth <= 3.0 && clusterLen <= 5) {
+    // Valid Reclaimed Shakeout / Bear Trap Spring
+    if (isReclaimed && clusterLen <= 5 && withinMoatOrShallow) {
       streak += clusterLen;
       i = clusterIdx;
-    } else if (i === candles.length - 1 && maxDepth <= 2.0 && clusterLen <= 2) {
-      // Active shallow test at current candle
-      streak += clusterLen;
-      i = clusterIdx;
+    } else if (i === candles.length - 1 && clusterLen <= 5 && withinMoatOrShallow) {
+      // Active tail dip within ATR moat / shallow threshold:
+      // Only preserve if there was an established bull streak prior to this tail dip!
+      if (clusterIdx >= 0 && candles[clusterIdx].close >= (emaData[clusterIdx]?.ema || 0)) {
+        const lastCandle = candles[candles.length - 1];
+        pendingTailClusterLen = clusterLen;
+        isUncertain = true;
+        activeDipDays = clusterLen;
+        activeDipMaxDepth = roundMetric(maxDepth);
+        isIntradayReclaim =
+          lastCandle.close > lastCandle.open ||
+          (candles.length >= 2 && lastCandle.close > candles[candles.length - 2].close);
+        streak += clusterLen;
+        i = clusterIdx;
+      } else {
+        break;
+      }
     } else {
       // True breakdown
       break;
     }
   }
 
-  return streak;
+  // Safety check: if the only counted days were the tail dip without any prior candle above EMA15, reset to 0
+  if (isUncertain && streak <= pendingTailClusterLen) {
+    return {
+      streak: 0,
+      isUncertain: false,
+      activeDipDays: 0,
+      activeDipMaxDepth: 0,
+      isIntradayReclaim: false,
+    };
+  }
+
+  return {
+    streak,
+    isUncertain,
+    activeDipDays,
+    activeDipMaxDepth,
+    isIntradayReclaim,
+  };
+};
+
+export const calculateConsecutiveAbove = (
+  candles: CandleData[],
+  emaData: { time: number; ema: number }[],
+  atrData?: { time: number; atr: number }[]
+): number => {
+  return calculateStreakDetails(candles, emaData, atrData).streak;
 };
 
 /**
@@ -308,11 +400,13 @@ export const calculateCycleMetrics = (candles: CandleData[], currentPrice: numbe
   if (!candles?.length || candles.length < MIN_CANDLES_FOR_ANALYSIS) return emptyMetrics();
 
   const emaData = calculateEMA(candles, EMA_PERIOD);
+  const atrData = calculateATR(candles, 14);
   const lastCandle = candles[candles.length - 1];
   const lastEMA = emaData[emaData.length - 1]?.ema || lastCandle.close;
   const emaDistance = ((currentPrice - lastEMA) / lastEMA) * 100;
 
-  const consecutiveAbove = calculateConsecutiveAbove(candles, emaData);
+  const streakDetails = calculateStreakDetails(candles, emaData, atrData);
+  const consecutiveAbove = streakDetails.streak;
 
   const recentCandles = candles.slice(-30);
 
@@ -347,6 +441,10 @@ export const calculateCycleMetrics = (candles: CandleData[], currentPrice: numbe
     volTrend: roundMetric((volumeRatio - 1) * 100),
     change7d: roundMetric(calculateCloseToCloseChange(candles, currentPrice, 7)),
     change30d: roundMetric(calculateCloseToCloseChange(candles, currentPrice, 30)),
+    isUncertainPhase: streakDetails.isUncertain,
+    activeDipDays: streakDetails.activeDipDays,
+    activeDipMaxDepth: streakDetails.activeDipMaxDepth,
+    isIntradayReclaim: streakDetails.isIntradayReclaim,
   };
 };
 
@@ -470,6 +568,7 @@ export const calculateTacticalRadar = (
 
   const emaData = calculateEMA(candles, EMA_PERIOD);
   const lastEMA = emaData[emaData.length - 1]?.ema || currentPrice;
+  const ema15Price = Math.round(lastEMA);
   const emaDistance = ((currentPrice - lastEMA) / lastEMA) * 100;
   const metrics = calculateCycleMetrics(candles, currentPrice);
 
@@ -477,13 +576,23 @@ export const calculateTacticalRadar = (
   const atrData = calculateATR(candles, 14);
   const currentATR = Math.round(atrData[atrData.length - 1]?.atr || (currentPrice * 0.02));
   const atrDefenseFloor = Math.round(lastEMA - currentATR); // EMA15 - 1.0 * ATR14
+  const streakDetails = calculateStreakDetails(candles, emaData, atrData);
 
   const donchianData = calculateDonchian(candles, 20);
   const donchian20High = Math.round(donchianData[donchianData.length - 1]?.high || currentPrice);
   const isDonchianBreakout = currentPrice >= donchian20High;
 
   // Active Cycle Day: Directly driven by the validated continuous cycle streak
-  const currentCycleDay = metrics.consecutiveAbove;
+  const currentCycleDay = streakDetails.streak;
+  const isUncertainPhase = streakDetails.isUncertain && currentCycleDay > 0;
+  const activeDipDays = streakDetails.activeDipDays;
+  const activeDipMaxDepth = streakDetails.activeDipMaxDepth;
+  const isIntradayReclaim = streakDetails.isIntradayReclaim;
+
+  const emaReclaimDistance = Math.max(0, Math.round(ema15Price - currentPrice));
+  const emaReclaimPercent = currentPrice > 0 ? roundMetric(Math.max(0, ((ema15Price - currentPrice) / currentPrice) * 100)) : 0;
+  const moatBufferRemaining = Math.max(0, Math.round(currentPrice - atrDefenseFloor));
+  const moatBufferPercent = currentPrice > 0 ? roundMetric(Math.max(0, ((currentPrice - atrDefenseFloor) / currentPrice) * 100)) : 0;
 
   // Calculate Donchian level at Cycle Launch (Day 0) to know if cycle launch was confirmed
   let cycleLaunchDonchianHigh: number | undefined = undefined;
@@ -520,8 +629,18 @@ export const calculateTacticalRadar = (
       stance = isDonchianBreakout ? 'long_aggressive' : 'long_hold';
     }
   } else {
-    // Under EMA15: Check whether it is above the dynamic ATR defense floor
-    if (currentPrice >= atrDefenseFloor) {
+    // Under EMA15: Check whether it is above the dynamic ATR defense floor or preserved in active moat streak
+    if (currentPrice >= atrDefenseFloor && isUncertainPhase) {
+      if (isIntradayReclaim) {
+        state = 'moat_reclaim_watch';
+        stateLabel = isEn ? 'Moat Rebound (Reclaiming EMA15)' : '护城河反抽中 (周期悬念待定)';
+        stance = 'cautious_watch';
+      } else {
+        state = 'shakeout_test';
+        stateLabel = isEn ? 'ATR Moat Test (Shakeout Zone)' : 'ATR 护城河测试 (洗盘缓冲区)';
+        stance = 'cautious_watch';
+      }
+    } else if (currentPrice >= atrDefenseFloor && currentCycleDay > 0) {
       state = 'shakeout_test';
       stateLabel = isEn ? 'ATR Moat Test (Shakeout Zone)' : 'ATR 护城河测试 (洗盘缓冲区)';
       stance = 'cautious_watch';
@@ -541,6 +660,7 @@ export const calculateTacticalRadar = (
   if (metrics.volTrend > 10) score += 5;
   if (metrics.maxDrawdownPercent < 10) score += 5;
   if (state === 'spring_reclaim') score += 5;
+  if (state === 'moat_reclaim_watch') score -= 5;
   if (state === 'shakeout_test') score -= 10;
   if (state === 'true_breakdown') score -= 35;
   if (piCycle.state === 'critical') score -= 30;
@@ -550,11 +670,17 @@ export const calculateTacticalRadar = (
   // Determine Stage name
   let cycleStageName = isEn ? 'Observation (0-30d)' : '观察蓄力期 (Day 0-30)';
   if (currentCycleDay >= 30 && currentCycleDay < 70) {
-    cycleStageName = isEn ? 'Golden Confirmation (30-70d)' : '黄金确认期 (Day 30-70)';
+    cycleStageName = isUncertainPhase
+      ? (isEn ? 'Golden Window • Pending Reclaim' : '黄金窗口 • 悬念待定 (护城河保护)')
+      : (isEn ? 'Golden Confirmation (30-70d)' : '黄金确认期 (Day 30-70)');
   } else if (currentCycleDay >= 70 && currentCycleDay <= 100) {
-    cycleStageName = isEn ? 'Warning & Exit (70-100d)' : '高位预警分批撤离 (Day 70-100)';
+    cycleStageName = isUncertainPhase
+      ? (isEn ? 'Warning Zone • Pending Reclaim' : '预警窗口 • 悬念待定 (护城河保护)')
+      : (isEn ? 'Warning & Exit (70-100d)' : '高位预警分批撤离 (Day 70-100)');
   } else if (currentCycleDay > 100) {
     cycleStageName = isEn ? 'Rest Period (100d+)' : '周期休整期 (100天+)';
+  } else if (isUncertainPhase && currentCycleDay > 0) {
+    cycleStageName = isEn ? 'Observation • Pending Reclaim' : '蓄力期 • 悬念待定 (护城河保护)';
   }
 
   const invalidationPrice = atrDefenseFloor;
@@ -564,20 +690,32 @@ export const calculateTacticalRadar = (
     {
       label: isEn ? 'Dual Momentum (EMA15 + Donchian 20D)' : '双重动能启动 (EMA15 + 唐奇安 20D)',
       value: currentCycleDay >= 30
-        ? (isEn ? 'Confirmed at Day 0' : '已于起涨点突破确认')
+        ? (isUncertainPhase ? (isEn ? 'Pending Reclaim' : '待收复确认') : (isEn ? 'Confirmed at Day 0' : '已于起涨点突破确认'))
         : isDonchianBreakout
         ? (isEn ? '20D Breakout' : '突破20日新高')
         : `${emaDistance >= 0 ? '+' : ''}${emaDistance.toFixed(2)}%`,
       passed: currentCycleDay >= 30 || (emaDistance >= 0 && isDonchianBreakout),
       hint: currentCycleDay >= 30
-        ? (isEn ? `Day 0 breakout confirmed ($${cycleLaunchDonchianHigh?.toLocaleString() || '---'})` : `起涨点已突破 $${cycleLaunchDonchianHigh?.toLocaleString() || '---'}，单边已运行 ${currentCycleDay} 天`)
-        : (isEn ? `EMA15: $${Math.round(lastEMA).toLocaleString()} | 20D High: $${donchian20High.toLocaleString()}` : `EMA15: $${Math.round(lastEMA).toLocaleString()} | 20日高点: $${donchian20High.toLocaleString()}`)
+        ? (isUncertainPhase
+            ? (isEn
+                ? `Day 0 confirmed ($${cycleLaunchDonchianHigh?.toLocaleString() || '---'}), need +$${emaReclaimDistance.toLocaleString()} to reclaim EMA15`
+                : `起涨点已确认 ($${cycleLaunchDonchianHigh?.toLocaleString() || '---'})，还差 $${emaReclaimDistance.toLocaleString()} 收复均线`)
+            : (isEn
+                ? `Day 0 breakout confirmed ($${cycleLaunchDonchianHigh?.toLocaleString() || '---'})`
+                : `起涨点已突破 $${cycleLaunchDonchianHigh?.toLocaleString() || '---'}，单边已运行 ${currentCycleDay} 天`))
+        : (isEn ? `EMA15: $${ema15Price.toLocaleString()} | 20D High: $${donchian20High.toLocaleString()}` : `EMA15: $${ema15Price.toLocaleString()} | 20日高点: $${donchian20High.toLocaleString()}`)
     },
     {
       label: isEn ? 'Consecutive Above EMA15 Streak' : '连续收在均线上方天数',
-      value: `${metrics.consecutiveAbove} ${isEn ? 'Days' : '天'}`,
+      value: isUncertainPhase
+        ? `${metrics.consecutiveAbove} ${isEn ? 'Days (Pending)' : '天 (待定)'}`
+        : `${metrics.consecutiveAbove} ${isEn ? 'Days' : '天'}`,
       passed: metrics.consecutiveAbove >= 5,
-      hint: isEn ? 'Target: >= 5 days for trend confirmation' : '门槛：≥5天确认右侧单边'
+      hint: isUncertainPhase
+        ? (isEn
+            ? `Dip day ${activeDipDays}/5 (max -${activeDipMaxDepth}%), held ATR moat`
+            : `护城河洗盘第 ${activeDipDays}/5 天 (最大偏离 -${activeDipMaxDepth}%)，未破位暂保周期`)
+        : (isEn ? 'Target: >= 5 days for trend confirmation' : '门槛：≥5天确认右侧单边')
     },
     {
       label: isEn ? 'ATR Dynamic Moat (Washout Filter)' : 'ATR 动态护城河 (洗盘容错滤网)',
@@ -610,6 +748,11 @@ export const calculateTacticalRadar = (
   } else if (state === 'spring_reclaim') {
     headline = isEn ? 'Spring Reclaim: Bear Trap Confirmed, Add on Pullback' : '均线诱空反包确认，回踩即最佳顺势加仓点';
     positionAdvice = '80% ~ 100%';
+  } else if (state === 'moat_reclaim_watch') {
+    headline = isEn
+      ? `Moat Rebound Day ${activeDipDays}/5: +$${emaReclaimDistance.toLocaleString()} to Confirm Spring Reclaim`
+      : `护城河反抽第 ${activeDipDays}/5 天：还差 $${emaReclaimDistance.toLocaleString()} 收复 EMA15 确认假摔`;
+    positionAdvice = '60% ~ 75%';
   } else if (state === 'shakeout_test') {
     headline = isEn ? 'Testing ATR Moat: Do Not Panic, Protected by Volatility Band' : '测试 ATR 护城河：切勿恐慌交出筹码，波动带提供弹性保护';
     positionAdvice = '50% ~ 60%';
@@ -625,9 +768,17 @@ export const calculateTacticalRadar = (
     stance,
     currentCycleDay,
     cycleStageName,
-    ema15Price: Math.round(lastEMA),
+    ema15Price,
     invalidationPrice,
     riskRewardRatio: currentCycleDay < 50 ? '1 : 3.8' : '1 : 2.1',
+    isUncertainPhase,
+    activeDipDays,
+    activeDipMaxDepth,
+    isIntradayReclaim,
+    emaReclaimDistance,
+    emaReclaimPercent,
+    moatBufferRemaining,
+    moatBufferPercent,
     donchian20High,
     isDonchianBreakout,
     cycleLaunchDonchianHigh,

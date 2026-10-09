@@ -37,7 +37,9 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({ candles, currentPr
     },
     cautious_watch: {
       bg: 'bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/30',
-      label: isEn ? 'SHAKEOUT TEST' : '均线洗盘 / 观察防守'
+      label: radar.state === 'moat_reclaim_watch'
+        ? (isEn ? 'MOAT REBOUND / PENDING' : '护城河反抽 / 周期暂保')
+        : (isEn ? 'SHAKEOUT TEST' : '均线洗盘 / 观察防守')
     },
     defensive_exit: {
       bg: 'bg-[#ff3b69]/10 text-[#ff3b69] border-[#ff3b69]/30',

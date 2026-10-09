@@ -76,18 +76,25 @@ export const TacticalSummary: React.FC<TacticalSummaryProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 pt-3 text-xs font-mono">
         
         {/* 1. Cycle Day */}
-        <div className="bg-[#12161f] border border-[#1e232d] px-3 py-2 rounded">
+        <div className={`bg-[#12161f] border px-3 py-2 rounded ${radar.isUncertainPhase ? 'border-amber-500/40' : 'border-[#1e232d]'}`}>
           <div className="text-[10px] text-[#8b949e] mb-1">{isEn ? 'CYCLE DAY' : '周期进度'}</div>
           <div className="text-base font-bold text-white">
-            Day {radar.currentCycleDay} <span className="text-[#8b949e] text-xs font-normal">/ 100</span>
+            Day {radar.currentCycleDay}
+            {radar.isUncertainPhase && (
+              <span className="text-amber-400 text-xs font-semibold ml-1">{isEn ? '(Pending)' : '(待定)'}</span>
+            )}{' '}
+            <span className="text-[#8b949e] text-xs font-normal">/ 100</span>
           </div>
         </div>
 
         {/* 2. EMA15 Streak */}
-        <div className="bg-[#12161f] border border-[#1e232d] px-3 py-2 rounded">
+        <div className={`bg-[#12161f] border px-3 py-2 rounded ${radar.isUncertainPhase ? 'border-amber-500/40' : 'border-[#1e232d]'}`}>
           <div className="text-[10px] text-[#8b949e] mb-1">{isEn ? 'EMA15 STREAK' : '均线上方连跑'}</div>
-          <div className="text-base font-bold text-[#00c076]">
+          <div className={`text-base font-bold ${radar.isUncertainPhase ? 'text-amber-400' : 'text-[#00c076]'}`}>
             {radar.currentCycleDay} {isEn ? 'Days' : '天'}
+            {radar.isUncertainPhase && (
+              <span className="text-xs font-normal ml-1">{isEn ? '(Hold)' : '(暂保)'}</span>
+            )}
           </div>
         </div>
 

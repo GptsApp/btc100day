@@ -12,7 +12,7 @@ import {
   ReferenceArea
 } from 'recharts';
 import { CandleData, Language, NormalizedCyclePoint } from '../types';
-import { buildNormalizedCycleData } from '../services/cycleAnalysis';
+import { buildNormalizedCycleData, calculateTacticalRadar } from '../services/cycleAnalysis';
 import { GitCompare, TrendingUp, ShieldCheck } from 'lucide-react';
 import { BentoCard } from './animata/BentoCard';
 
@@ -27,6 +27,11 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
   const overlayData: NormalizedCyclePoint[] = useMemo(() => {
     return buildNormalizedCycleData(candles);
   }, [candles]);
+
+  const radar = useMemo(() => {
+    const latestClose = candles[candles.length - 1]?.close || 0;
+    return calculateTacticalRadar(candles, latestClose, lang);
+  }, [candles, lang]);
 
   const currentPoint = useMemo(() => {
     for (let i = overlayData.length - 1; i >= 0; i--) {
@@ -128,13 +133,29 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
 
         {/* Current Cycle Status Pill */}
         {currentPoint && (
-          <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-full px-4 py-1.5 shrink-0 font-mono text-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-slate-500">{isEn ? 'Cycle 4:' : '周期 4:'}</span>
+          <div
+            className={`flex items-center gap-2.5 border rounded-full px-4 py-1.5 shrink-0 font-mono text-xs ${
+              radar.isUncertainPhase
+                ? 'bg-amber-50 border-amber-300 text-amber-900'
+                : 'bg-slate-50 border-slate-200'
+            }`}
+            title={radar.isUncertainPhase ? (isEn ? 'Moat rebound watch in progress' : '护城河反抽观察中') : undefined}
+          >
+            <span className={`w-2 h-2 rounded-full animate-pulse ${radar.isUncertainPhase ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+            <span className={radar.isUncertainPhase ? 'text-amber-800 font-semibold' : 'text-slate-500'}>
+              {radar.isUncertainPhase
+                ? (isEn ? 'Cycle 4 (Pending):' : '周期 4 (待定):')
+                : (isEn ? 'Cycle 4:' : '周期 4:')}
+            </span>
             <span className="font-bold text-slate-900">Day {currentPoint.day}</span>
             <span className="font-bold text-emerald-600">
               ({currentPoint.current !== undefined && currentPoint.current >= 0 ? `+${currentPoint.current}%` : `${currentPoint.current}%`})
             </span>
+            {radar.isUncertainPhase && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 font-sans font-semibold">
+                {isEn ? 'Moat Watch' : '护城河反抽观察中'}
+              </span>
+            )}
           </div>
         )}
       </div>

@@ -164,16 +164,33 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
         </BentoCard>
 
         {/* Cycle 4 Progress */}
-        <BentoCard className="p-4 flex flex-col justify-between">
-          <div className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-medium">
-            {isEn ? 'CYCLE 4 STAGE' : '周期 4 进度'}
+        <BentoCard className={`p-4 flex flex-col justify-between ${radar.isUncertainPhase ? 'border-amber-300/90 bg-amber-50/25' : ''}`}>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-medium">
+              {isEn ? 'CYCLE 4 STAGE' : '周期 4 进度'}
+            </span>
+            {radar.isUncertainPhase && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-mono font-bold text-amber-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                {isEn ? 'PENDING' : '待定'}
+              </span>
+            )}
           </div>
           <div className="mt-1 flex items-baseline gap-1">
             <span className="text-2xl font-mono font-bold text-slate-900">Day {radar.currentCycleDay}</span>
             <span className="text-xs font-mono text-slate-400">/ 100</span>
+            {radar.isUncertainPhase && (
+              <span className="text-[11px] font-mono font-semibold text-amber-700 ml-0.5">
+                {isEn ? '(Hold)' : '(暂保)'}
+              </span>
+            )}
           </div>
           <div className="text-xs font-mono text-slate-600 truncate mt-1">
-            {radar.cycleStageName}
+            {radar.isUncertainPhase
+              ? (isEn
+                  ? `Reclaim +$${radar.emaReclaimDistance?.toLocaleString()} | Moat -$${radar.moatBufferRemaining?.toLocaleString()}`
+                  : `距收复 +$${radar.emaReclaimDistance?.toLocaleString()} | 距破位 -$${radar.moatBufferRemaining?.toLocaleString()}`)
+              : radar.cycleStageName}
           </div>
         </BentoCard>
 
@@ -188,8 +205,18 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
               ({emaDiff >= 0 ? '+' : ''}{emaDiff.toFixed(1)}%)
             </span>
           </div>
-          <div className="text-xs font-mono text-slate-600 mt-1">
-            {emaDiff >= 0 ? (isEn ? 'Above Line' : '站稳线上') : (isEn ? 'Testing' : '贴线洗盘')}
+          <div className={`text-xs font-mono mt-1 truncate ${emaDiff < 0 && radar.isUncertainPhase ? 'text-amber-700 font-semibold' : 'text-slate-600'}`}>
+            {emaDiff >= 0
+              ? (isEn ? 'Above Line' : '站稳线上')
+              : radar.isUncertainPhase
+              ? (radar.isIntradayReclaim
+                  ? (isEn
+                      ? `Rebounding • +$${radar.emaReclaimDistance?.toLocaleString()} to Reclaim`
+                      : `跌破反抽 • 差 $${radar.emaReclaimDistance?.toLocaleString()} 收复`)
+                  : (isEn
+                      ? `Testing Line • Day ${radar.activeDipDays}/5`
+                      : `贴线洗盘 • 第 ${radar.activeDipDays}/5 天`))
+              : (isEn ? 'Testing' : '贴线洗盘')}
           </div>
         </BentoCard>
 
@@ -644,6 +671,84 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                     <span className="text-sm font-bold text-emerald-700 mt-0.5 block">${(radar.atrDefenseFloor || radar.invalidationPrice).toLocaleString()}</span>
                   </div>
                 </div>
+
+                {/* Uncertain Phase Resolution Box */}
+                {radar.isUncertainPhase && (() => {
+                  const floorPrice = radar.atrDefenseFloor || radar.invalidationPrice;
+                  const moatRange = Math.max(1, radar.ema15Price - floorPrice);
+                  const progressPct = Math.max(0, Math.min(100, Math.round(((currentPrice - floorPrice) / moatRange) * 100)));
+
+                  return (
+                    <div className="p-3 bg-amber-50/80 border border-amber-300 rounded-xl space-y-2.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-amber-950 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                          <span>{isEn ? 'UNCERTAIN PHASE RESOLUTION' : '不确定阶段双向判定卡'}</span>
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 font-bold">
+                          {isEn ? `Day ${radar.activeDipDays}/5 in Moat` : `灰区第 ${radar.activeDipDays}/5 天`}
+                        </span>
+                      </div>
+
+                      <p className="text-[11px] text-amber-900 font-sans leading-relaxed">
+                        {isEn
+                          ? `Why still Day ${radar.currentCycleDay} instead of 0? Price is in the ATR moat buffer (Day ${radar.activeDipDays}/5, max dip -${radar.activeDipMaxDepth}%)${radar.isIntradayReclaim ? ' and rebounding intraday' : ''}. Cycle streak is provisionally preserved.`
+                          : `为何仍显示 Day ${radar.currentCycleDay} 而未归零？当前处于 EMA15 与 ATR 防守线之间的灰区第 ${radar.activeDipDays}/5 天（最大偏离 -${radar.activeDipMaxDepth}%）${radar.isIntradayReclaim ? '，且日内已出现反抽' : ''}，护城河机制暂保周期不断裂。`}
+                      </p>
+
+                      {/* Visual Progress Bar between ATR Defense Floor (0%) and EMA15 (100%) */}
+                      <div className="space-y-1 pt-0.5">
+                        <div className="flex items-center justify-between text-[10px] font-mono">
+                          <span className="text-rose-700 font-semibold">
+                            {isEn ? 'Moat Floor' : '防守底线'} ${floorPrice.toLocaleString()}
+                          </span>
+                          <span className="text-slate-900 font-bold">
+                            {isEn ? 'Now' : '当前'} ${Math.round(currentPrice).toLocaleString()} ({progressPct}%)
+                          </span>
+                          <span className="text-emerald-700 font-semibold">
+                            EMA15 ${radar.ema15Price.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-amber-200/70 rounded-full overflow-hidden flex items-center p-0.5">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 transition-all duration-300"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Dual Resolution Outcomes */}
+                      <div className="space-y-1.5 pt-1 border-t border-amber-200/80 font-sans text-[11px]">
+                        <div className="flex items-start gap-1.5 text-emerald-900">
+                          <span className="shrink-0">🟢</span>
+                          <span>
+                            <strong className="font-mono">
+                              {isEn
+                                ? `Reclaim Confirmed (≥ $${radar.ema15Price.toLocaleString()}): `
+                                : `收复确认 (≥ $${radar.ema15Price.toLocaleString()})：`}
+                            </strong>
+                            {isEn
+                              ? `Confirmed as Spring Reclaim (+$${radar.emaReclaimDistance?.toLocaleString()} needed), officially continuing Day ${radar.currentCycleDay}.`
+                              : `确认为诱空假摔 (Spring Reclaim)，还差 $${radar.emaReclaimDistance?.toLocaleString()}，周期正式延续 Day ${radar.currentCycleDay}。`}
+                          </span>
+                        </div>
+                        <div className="flex items-start gap-1.5 text-rose-900">
+                          <span className="shrink-0">🔴</span>
+                          <span>
+                            <strong className="font-mono">
+                              {isEn
+                                ? `Breakdown Reset (< $${radar.invalidationPrice.toLocaleString()} or >5d): `
+                                : `破位归零 (< $${radar.invalidationPrice.toLocaleString()} 或洗盘超5天)：`}
+                            </strong>
+                            {isEn
+                              ? 'ATR moat pierced, 100-day cycle officially resets to Day 0.'
+                              : '护城河击穿，本轮百日周期正式重置为 Day 0。'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* 3 Pillars Highlight Bar */}
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 text-xs">

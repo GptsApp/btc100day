@@ -43,7 +43,7 @@ export interface HighlightPeriod {
 }
 
 // Tactical Signal & Decision Engine Types
-export type TacticalState = 'healthy_bull' | 'shakeout_test' | 'spring_reclaim' | 'true_breakdown' | 'observation' | 'rest';
+export type TacticalState = 'healthy_bull' | 'shakeout_test' | 'moat_reclaim_watch' | 'spring_reclaim' | 'true_breakdown' | 'observation' | 'rest';
 
 export interface TacticalRadarData {
   state: TacticalState;
@@ -55,6 +55,15 @@ export interface TacticalRadarData {
   ema15Price: number;
   invalidationPrice: number; // Invalid if close < EMA15 - 1.0 ATR
   riskRewardRatio: string;
+  // Uncertain Phase (EMA15 Dip & Reclaim Watch within ATR Moat)
+  isUncertainPhase?: boolean;
+  activeDipDays?: number;
+  activeDipMaxDepth?: number;
+  isIntradayReclaim?: boolean;
+  emaReclaimDistance?: number;
+  emaReclaimPercent?: number;
+  moatBufferRemaining?: number;
+  moatBufferPercent?: number;
   // Quantitative 3-Pillar Indicators
   donchian20High?: number;
   isDonchianBreakout?: boolean;

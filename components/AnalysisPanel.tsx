@@ -40,20 +40,25 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ candles, currentPr
       </div>
 
       {/* 2. Consecutive Above Streak (New 3-Filter Rule Applied) */}
-      <div className="bg-[#0b0e14] border border-[#1e2330] rounded-lg p-3 flex flex-col justify-between hover:border-[#00ff88]/40 transition-colors relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-12 h-12 bg-[#00ff88]/5 rounded-bl-full pointer-events-none"></div>
+      <div className={`bg-[#0b0e14] border rounded-lg p-3 flex flex-col justify-between transition-colors relative overflow-hidden ${stats.isUncertainPhase ? 'border-amber-500/50 hover:border-amber-400' : 'border-[#1e2330] hover:border-[#00ff88]/40'}`}>
+        <div className={`absolute top-0 right-0 w-12 h-12 rounded-bl-full pointer-events-none ${stats.isUncertainPhase ? 'bg-amber-500/10' : 'bg-[#00ff88]/5'}`}></div>
         <div className="flex items-center justify-between text-[11px] text-[#718096] uppercase font-mono tracking-wider">
-          <span className="text-[#00ff88]">{isEn ? 'EMA15 STREAK' : 'EMA15 连跑天数'}</span>
-          <Flame className="w-3.5 h-3.5 text-[#00ff88]" />
+          <span className={stats.isUncertainPhase ? 'text-amber-400' : 'text-[#00ff88]'}>{isEn ? 'EMA15 STREAK' : 'EMA15 连跑天数'}</span>
+          <Flame className={`w-3.5 h-3.5 ${stats.isUncertainPhase ? 'text-amber-400' : 'text-[#00ff88]'}`} />
         </div>
         <div className="my-1.5 flex items-baseline gap-1">
           <span className="text-2xl font-bold font-mono text-white tracking-tight">{stats.consecutiveAbove}</span>
-          <span className="text-xs text-[#a0aec0] font-mono">{isEn ? 'DAYS' : '天'}</span>
+          <span className="text-xs text-[#a0aec0] font-mono">
+            {isEn ? 'DAYS' : '天'}
+            {stats.isUncertainPhase ? (isEn ? ' (Pending)' : ' (待定)') : ''}
+          </span>
         </div>
         <div className="flex items-center justify-between text-[10px] font-mono">
-          <span className="text-[#00ff88] flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse"></span>
-            {isEn ? '3-Filter Safe' : '三维过滤保护'}
+          <span className={`${stats.isUncertainPhase ? 'text-amber-400' : 'text-[#00ff88]'} flex items-center gap-1`}>
+            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${stats.isUncertainPhase ? 'bg-amber-400' : 'bg-[#00ff88]'}`}></span>
+            {stats.isUncertainPhase
+              ? (isEn ? `Moat Day ${stats.activeDipDays}/5` : `护城河第 ${stats.activeDipDays}/5 天`)
+              : (isEn ? '3-Filter Safe' : '三维过滤保护')}
           </span>
           <span className="text-[#718096]">{stats.consecutiveAbove >= 30 ? (isEn ? 'Confirmed' : '确认期') : (isEn ? 'Accumulating' : '蓄力期')}</span>
         </div>

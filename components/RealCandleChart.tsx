@@ -11,7 +11,7 @@ import {
   LineStyle,
 } from 'lightweight-charts';
 import { CandleData, HighlightPeriod, FounderLiveOrder, FounderLiveFill, FounderLivePosition } from '../types';
-import { calculateEMA } from '../services/cycleAnalysis';
+import { calculateEMA, calculateATR } from '../services/cycleAnalysis';
 import { RotateCcw, Eye, EyeOff, Compass } from 'lucide-react';
 
 interface RealCandleChartProps {
@@ -95,6 +95,17 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   const emaData = useMemo(() => {
     return calculateEMA(data, 15);
   }, [data]);
+
+  const atrData = useMemo(() => {
+    return calculateATR(data, 14);
+  }, [data]);
+
+  const atrDefenseFloor = useMemo(() => {
+    if (data.length === 0 || emaData.length === 0 || atrData.length === 0) return 0;
+    const lastEma = emaData[emaData.length - 1]?.ema || 0;
+    const lastAtr = atrData[atrData.length - 1]?.atr || 0;
+    return Math.round(lastEma - lastAtr);
+  }, [data, emaData, atrData]);
 
   // Date list in chronological order
   const chartDates = useMemo(() => {
@@ -629,6 +640,26 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       }
     }
 
+    // Draw ATR Defense Floor price line when viewing c4 or all and latest close is below EMA15
+    if (
+      (activeCycleTab === 'c4' || activeCycleTab === 'all') &&
+      latestBar &&
+      latestBar.close < latestBar.ema &&
+      atrDefenseFloor > 0
+    ) {
+      const moatLine = candleSeriesRef.current.createPriceLine({
+        price: atrDefenseFloor,
+        color: '#e11d48',
+        lineWidth: 1,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: isEn
+          ? `ATR Moat Floor $${atrDefenseFloor.toLocaleString()}`
+          : `ATR 防守底线 $${atrDefenseFloor.toLocaleString()}`,
+      });
+      priceLinesRef.current.push(moatLine);
+    }
+
     if (!showFounderLayers || !shouldShowForCycle) {
       if (showFounderLayers && selectedOrderPrice) {
         const highlighted = candleSeriesRef.current.createPriceLine({
@@ -746,7 +777,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
         priceLinesRef.current.push(highlighted);
       }
     }
-  }, [showFounderLayers, founderPosition, founderOrders, founderFills, chartDates, selectedOrderPrice, activeCycleTab]);
+  }, [showFounderLayers, founderPosition, founderOrders, founderFills, chartDates, selectedOrderPrice, activeCycleTab, latestBar, atrDefenseFloor, isEn]);
 
   const activeDisplay = crosshairData || latestBar;
   const isUp = activeDisplay ? activeDisplay.close >= activeDisplay.open : true;
@@ -779,6 +810,14 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
               <span className="w-2 h-0.5 bg-slate-900 rounded-full"></span>
               <span className="text-slate-600">EMA15:<strong className="text-slate-900 ml-1">${activeDisplay.ema.toLocaleString()}</strong></span>
             </div>
+
+            {latestBar && latestBar.close < latestBar.ema && atrDefenseFloor > 0 && (
+              <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full shrink-0 font-bold">
+                {isEn
+                  ? `⚠️ Moat Buffer (Floor $${atrDefenseFloor.toLocaleString()})`
+                  : `⚠️ 护城河缓冲中 (防守底线 $${atrDefenseFloor.toLocaleString()})`}
+              </span>
+            )}
 
             {activeDisplay.cycleInfo && (
               <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full shrink-0 font-medium">
