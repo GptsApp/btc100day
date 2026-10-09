@@ -15,7 +15,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Layers,
-  ExternalLink,
   ShieldAlert,
   CheckCircle2,
   Zap,
@@ -300,68 +299,56 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
           
           <div>
             {/* Panel Navigation Tabs (4 Institutional Navigation Lanes) */}
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-              <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-full border border-slate-200/80 overflow-x-auto">
+            <div className="pb-3 mb-3 border-b border-slate-100">
+              <div className="grid grid-cols-4 gap-1 bg-slate-100/90 p-1 rounded-full border border-slate-200/80 w-full">
                 <button
                   onClick={() => setActiveTab('founder')}
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                  className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                     activeTab === 'founder'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Layers className="w-3 h-3" />
+                  <Layers className="w-3 h-3 shrink-0" />
                   <span>@Paulwei</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('tactical')}
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                  className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                     activeTab === 'tactical'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Zap className="w-3 h-3" />
+                  <Zap className="w-3 h-3 shrink-0" />
                   <span>{isEn ? 'Radar' : '雷达'}</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('calculator')}
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                  className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                     activeTab === 'calculator'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Calculator className="w-3 h-3" />
+                  <Calculator className="w-3 h-3 shrink-0" />
                   <span>{isEn ? 'Sizer' : '仓位计算'}</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('microstructure')}
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                  className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                     activeTab === 'microstructure'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Activity className="w-3 h-3" />
+                  <Activity className="w-3 h-3 shrink-0" />
                   <span>{isEn ? 'Micro' : '微观流'}</span>
                 </button>
               </div>
-
-              {/* Trasia Link */}
-              <a
-                href="https://beta.trasia.xyz/perps?watch=0xdae4df7207feb3b350e4284c8efe5f7dac37f637"
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors font-medium shrink-0 ml-1"
-                title="View on Trasia"
-              >
-                <span>Trasia</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
             </div>
 
             {/* TAB 1: FOUNDER LIVE ORDERS */}

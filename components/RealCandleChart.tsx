@@ -49,6 +49,8 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   lang = 'zh',
 }) => {
   const isEn = lang === 'en';
+  const isEnRef = useRef<boolean>(isEn);
+  isEnRef.current = isEn;
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
@@ -402,8 +404,8 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
         let cycleDetails = '';
         if (activeCycle) {
           const midMs = new Date(activeCycle.mid).getTime();
-          const partStr = curDateMs <= midMs ? '前50天' : '后50天';
-          cycleDetails = `${activeCycle.name} [${partStr}]`;
+          const partStr = curDateMs <= midMs ? (isEnRef.current ? '1st 50d' : '前50天') : (isEnRef.current ? '2nd 50d' : '后50天');
+          cycleDetails = `${activeCycle.label} · ${partStr}`;
         }
 
         setCrosshairData({
@@ -787,20 +789,20 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   return (
     <div className="flex flex-col h-[640px] font-mono text-xs select-none relative">
       
-      {/* 1. TOOLBAR (responsive flex-wrap, never clips badges) */}
-      <div className="min-h-[38px] py-1.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 px-1 mb-1 border-b border-slate-100 text-slate-500">
+      {/* 1. TOOLBAR (strict single-line fixed height, zero layout jitter) */}
+      <div className="h-[38px] min-h-[38px] max-h-[38px] flex items-center justify-between gap-2 px-1 mb-1 border-b border-slate-100 text-slate-500 overflow-hidden">
         
         {/* Left: O/H/L/C numbers + EMA15 + Single Line Tag */}
         {activeDisplay && (
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] min-w-0">
+          <div className="flex items-center gap-2 text-[11px] min-w-0 overflow-hidden">
             <span className="text-slate-900 font-bold shrink-0 whitespace-nowrap">{activeDisplay.time}</span>
             <div className="flex items-center gap-1.5 font-mono shrink-0 whitespace-nowrap">
-              <span>O:<strong className="text-slate-900 ml-0.5">${activeDisplay.open.toLocaleString()}</strong></span>
-              <span>H:<strong className="text-emerald-600 ml-0.5">${activeDisplay.high.toLocaleString()}</strong></span>
-              <span>L:<strong className="text-rose-600 ml-0.5">${activeDisplay.low.toLocaleString()}</strong></span>
-              <span>C:<strong className={`ml-0.5 ${isUp ? 'text-emerald-600' : 'text-rose-600'}`}>${activeDisplay.close.toLocaleString()}</strong></span>
+              <span>O:<strong className="text-slate-900 ml-0.5">${Math.round(activeDisplay.open).toLocaleString()}</strong></span>
+              <span>H:<strong className="text-emerald-600 ml-0.5">${Math.round(activeDisplay.high).toLocaleString()}</strong></span>
+              <span>L:<strong className="text-rose-600 ml-0.5">${Math.round(activeDisplay.low).toLocaleString()}</strong></span>
+              <span>C:<strong className={`ml-0.5 ${isUp ? 'text-emerald-600' : 'text-rose-600'}`}>${Math.round(activeDisplay.close).toLocaleString()}</strong></span>
               <span className={`font-semibold ${isUp ? 'text-emerald-600' : 'text-rose-600'}`}>
-                ({isUp ? '+' : ''}{priceChangePct.toFixed(2)}%)
+                ({isUp ? '+' : ''}{priceChangePct.toFixed(1)}%)
               </span>
             </div>
 
@@ -811,19 +813,17 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
               <span className="text-slate-600">EMA15:<strong className="text-slate-900 ml-1">${activeDisplay.ema.toLocaleString()}</strong></span>
             </div>
 
-            {latestBar && latestBar.close < latestBar.ema && atrDefenseFloor > 0 && (
+            {!crosshairData && latestBar && latestBar.close < latestBar.ema && atrDefenseFloor > 0 ? (
               <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap font-bold">
                 {isEn
-                  ? `⚠️ Moat Buffer (Floor $${atrDefenseFloor.toLocaleString()})`
-                  : `⚠️ 护城河缓冲中 (防守底线 $${atrDefenseFloor.toLocaleString()})`}
+                  ? `⚠️ Moat Floor $${atrDefenseFloor.toLocaleString()}`
+                  : `⚠️ 护城河防守 $${atrDefenseFloor.toLocaleString()}`}
               </span>
-            )}
-
-            {activeDisplay.cycleInfo && (
+            ) : activeDisplay.cycleInfo ? (
               <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap font-medium">
                 {activeDisplay.cycleInfo}
               </span>
-            )}
+            ) : null}
           </div>
         )}
 
@@ -903,7 +903,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       </div>
 
       {/* 3. 1-CLICK CYCLE ZOOM CONTROLLER */}
-      <div className="h-[48px] min-h-[48px] max-h-[48px] flex items-center justify-between gap-2 pt-2 border-t border-slate-100 text-[11px] overflow-x-auto">
+      <div className="h-[46px] min-h-[46px] max-h-[46px] flex items-center justify-between gap-2 pt-2 border-t border-slate-100 text-[11px] overflow-x-auto no-scrollbar">
         
         {/* Left Label */}
         <div className="flex items-center gap-1.5 text-slate-500 shrink-0 pr-1">
