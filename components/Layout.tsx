@@ -120,7 +120,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                 rel="noreferrer"
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-xs font-mono text-slate-700 transition-colors"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#0d9488]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                 <span>Trasia 实盘链上数据</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
               </a>

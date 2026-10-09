@@ -38,9 +38,9 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
       <BentoCard className="p-4 md:p-5" glow>
       
       {/* 1. Header Bar: Profile & Address & External Trasia Link */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#1b2230]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#00ff88]/10 border border-[#00ff88]/30 flex items-center justify-center text-[#00ff88]">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
             <Layers className="w-4 h-4" />
           </div>
 
@@ -48,22 +48,22 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
             <div className="flex items-center gap-2">
               <h3 className="text-sm md:text-base font-bold text-white font-mono tracking-tight flex items-center gap-1.5">
                 <span>@Paulwei</span>
-                <span className="text-[#8b949e] font-normal text-xs">{isEn ? '(Founder Real-Time Orders)' : '(100天理论创始人实时挂单)'}</span>
+                <span className="text-slate-400 font-normal text-xs">{isEn ? '(Founder Real-Time Orders)' : '(100天理论创始人实时挂单)'}</span>
               </h3>
-              <span className="text-[10px] bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20 px-1.5 py-0.2 rounded font-mono flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse"></span>
+              <span className="text-[10px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-1.5 py-0.2 rounded font-mono flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 HYPERLIQUID SYNC
               </span>
             </div>
             
-            <p className="text-[11px] text-[#8b949e] font-mono flex items-center gap-2">
+            <p className="text-[11px] text-slate-400 font-mono flex items-center gap-2">
               <span>0xdae4…f637</span>
               <span>•</span>
               <a
                 href={`https://beta.trasia.xyz/perps?watch=${founderState.address}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#38bdf8] hover:underline flex items-center gap-0.5"
+                className="text-emerald-500 hover:underline flex items-center gap-0.5"
               >
                 {isEn ? 'View on Trasia' : '在 Trasia 链上查看'}
                 <ExternalLink className="w-3 h-3" />
@@ -78,8 +78,8 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
             onClick={() => setShowOnChart(!showOnChart)}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono border transition-all cursor-pointer ${
               showOnChart
-                ? 'bg-[#00ff88]/10 border-[#00ff88]/40 text-[#00ff88]'
-                : 'bg-[#121620] border-[#1e2638] text-[#8b949e] hover:text-white'
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-500'
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
             }`}
           >
             {showOnChart ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -92,39 +92,39 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
       {position && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-2 my-3 text-xs font-mono">
           
-          <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded">
-            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'ACTIVE POSITION' : '当前实盘持仓'}</div>
+          <div className="bg-slate-900 border border-slate-800 p-2.5 rounded">
+            <div className="text-[10px] text-slate-400 whitespace-nowrap">{isEn ? 'ACTIVE POSITION' : '当前实盘持仓'}</div>
             <div className="text-sm font-bold text-white mt-0.5 flex items-baseline gap-1 whitespace-nowrap">
               <span>{position.size.toFixed(2)} BTC</span>
-              <span className="text-[10px] text-[#8b949e]">(${Math.round(position.positionValue).toLocaleString()})</span>
+              <span className="text-[10px] text-slate-400">(${Math.round(position.positionValue).toLocaleString()})</span>
             </div>
           </div>
 
-          <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded">
-            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'ENTRY PRICE' : '建仓均价'}</div>
-            <div className="text-sm font-bold text-[#00ff88] mt-0.5 whitespace-nowrap">
+          <div className="bg-slate-900 border border-slate-800 p-2.5 rounded">
+            <div className="text-[10px] text-slate-400 whitespace-nowrap">{isEn ? 'ENTRY PRICE' : '建仓均价'}</div>
+            <div className="text-sm font-bold text-emerald-500 mt-0.5 whitespace-nowrap">
               ${Math.round(position.entryPrice).toLocaleString()}
             </div>
           </div>
 
-          <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded">
-            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'UNREALIZED PnL' : '未实现浮盈'}</div>
-            <div className="text-sm font-bold text-[#00ff88] mt-0.5 flex items-baseline gap-1 whitespace-nowrap">
+          <div className="bg-slate-900 border border-slate-800 p-2.5 rounded">
+            <div className="text-[10px] text-slate-400 whitespace-nowrap">{isEn ? 'UNREALIZED PnL' : '未实现浮盈'}</div>
+            <div className="text-sm font-bold text-emerald-500 mt-0.5 flex items-baseline gap-1 whitespace-nowrap">
               <span>+${Math.round(position.unrealizedPnl).toLocaleString()}</span>
               <span className="text-[10px] font-normal">(+{pnlPercent.toFixed(1)}%)</span>
             </div>
           </div>
 
-          <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded">
-            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'LEVERAGE & MARGIN' : '实盘杠杆率'}</div>
+          <div className="bg-slate-900 border border-slate-800 p-2.5 rounded">
+            <div className="text-[10px] text-slate-400 whitespace-nowrap">{isEn ? 'LEVERAGE & MARGIN' : '实盘杠杆率'}</div>
             <div className="text-sm font-bold text-white mt-0.5 whitespace-nowrap">
-              1.18x <span className="text-[10px] text-[#00ff88] font-normal">{isEn ? '(Safe)' : '(极致风控)'}</span>
+              1.18x <span className="text-[10px] text-emerald-500 font-normal">{isEn ? '(Safe)' : '(极致风控)'}</span>
             </div>
           </div>
 
-          <div className="bg-[#121620] border border-[#1e2638] p-2.5 rounded col-span-2 md:col-span-1">
-            <div className="text-[10px] text-[#8b949e] whitespace-nowrap">{isEn ? 'LIQUIDATION PRICE' : '强平价格'}</div>
-            <div className="text-sm font-bold text-[#8b949e] mt-0.5 whitespace-nowrap">
+          <div className="bg-slate-900 border border-slate-800 p-2.5 rounded col-span-2 md:col-span-1">
+            <div className="text-[10px] text-slate-400 whitespace-nowrap">{isEn ? 'LIQUIDATION PRICE' : '强平价格'}</div>
+            <div className="text-sm font-bold text-slate-400 mt-0.5 whitespace-nowrap">
               ${Math.round(position.liquidationPrice).toLocaleString()}
             </div>
           </div>
@@ -138,7 +138,7 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
           <button
             onClick={() => setFilter('all')}
             className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer whitespace-nowrap ${
-              filter === 'all' ? 'bg-[#1b2230] text-white font-bold' : 'text-[#8b949e] hover:text-white'
+              filter === 'all' ? 'bg-slate-800 text-white font-bold' : 'text-slate-400 hover:text-white'
             }`}
           >
             {isEn ? `All Orders (${orders.length})` : `全部挂单 (${orders.length})`}
@@ -147,7 +147,7 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
           <button
             onClick={() => setFilter('sell')}
             className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer whitespace-nowrap ${
-              filter === 'sell' ? 'bg-[#f59e0b]/20 text-[#f59e0b] font-bold border border-[#f59e0b]/30' : 'text-[#8b949e] hover:text-[#f59e0b]'
+              filter === 'sell' ? 'bg-amber-500/20 text-amber-500 font-bold border border-amber-500/30' : 'text-slate-400 hover:text-amber-500'
             }`}
           >
             {isEn ? `Take-Profit (${orders.filter(o => o.side === 'A').length})` : `高位阶梯止盈 (${orders.filter(o => o.side === 'A').length})`}
@@ -156,14 +156,14 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
           <button
             onClick={() => setFilter('buy')}
             className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer whitespace-nowrap ${
-              filter === 'buy' ? 'bg-[#38bdf8]/20 text-[#38bdf8] font-bold border border-[#38bdf8]/30' : 'text-[#8b949e] hover:text-[#38bdf8]'
+              filter === 'buy' ? 'bg-emerald-500/20 text-emerald-500 font-bold border border-emerald-500/30' : 'text-slate-400 hover:text-emerald-500'
             }`}
           >
             {isEn ? `EMA15 Bids (${orders.filter(o => o.side === 'B').length})` : `EMA15 回踩接多 (${orders.filter(o => o.side === 'B').length})`}
           </button>
         </div>
 
-        <div className="text-[11px] text-[#8b949e] flex flex-wrap items-center gap-3">
+        <div className="text-[11px] text-slate-400 flex flex-wrap items-center gap-3">
           <span className="whitespace-nowrap">{isEn ? 'TP Grid Total:' : '止盈挂单合计:'} <strong className="text-white">{sellOrdersTotalSize} BTC</strong> (~${sellOrdersAvgPrice.toLocaleString()})</span>
           <span>•</span>
           <span className="whitespace-nowrap">{isEn ? 'Bid Grid Total:' : '接多挂单合计:'} <strong className="text-white">{buyOrdersTotalSize} BTC</strong> (~${buyOrdersAvgPrice.toLocaleString()})</span>
@@ -171,8 +171,8 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
       </div>
 
       {/* 4. Orders Visual Grid / Table */}
-      <div className="max-h-[300px] overflow-y-auto rounded-lg border border-[#1b2230] bg-[#090d15] divide-y divide-[#141a24] text-xs font-mono">
-        <div className="grid grid-cols-12 px-3 py-2 text-[10px] text-[#64748b] bg-[#0c1017] sticky top-0 z-10 uppercase tracking-wider">
+      <div className="max-h-[300px] overflow-y-auto rounded-lg border border-slate-800 bg-slate-950 divide-y divide-slate-800/80 text-xs font-mono">
+        <div className="grid grid-cols-12 px-3 py-2 text-[10px] text-slate-500 bg-slate-900 sticky top-0 z-10 uppercase tracking-wider">
           <span className="col-span-2 whitespace-nowrap">{isEn ? 'DIRECTION' : '方向'}</span>
           <span className="col-span-3 whitespace-nowrap">{isEn ? 'PRICE (USDT)' : '挂单价格'}</span>
           <span className="col-span-2 whitespace-nowrap">{isEn ? 'SIZE' : '数量 (BTC)'}</span>
@@ -185,31 +185,31 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
           
           let roleTagZh = '逢低加仓网格';
           let roleTagEn = 'Dip Accumulator';
-          let badgeColor = 'text-[#38bdf8] bg-[#38bdf8]/10 border-[#38bdf8]/20';
+          let badgeColor = 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
 
           if (o.cycleRole === 'ema15_defense') {
             roleTagZh = '贴线 EMA15 接针';
             roleTagEn = 'EMA15 Defense Bid';
-            badgeColor = 'text-[#00ff88] bg-[#00ff88]/10 border-[#00ff88]/20';
+            badgeColor = 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
           } else if (o.cycleRole === 'blowoff_top_exit') {
             roleTagZh = '100天见顶清仓网';
             roleTagEn = '100D Blowoff Exit';
-            badgeColor = 'text-[#ff3b69] bg-[#ff3b69]/10 border-[#ff3b69]/20';
+            badgeColor = 'text-amber-500 bg-amber-500/10 border-amber-500/20';
           } else if (o.cycleRole === 'ladder_take_profit') {
             roleTagZh = '阶梯式被动止盈';
             roleTagEn = 'Ladder Take Profit';
-            badgeColor = 'text-[#f59e0b] bg-[#f59e0b]/10 border-[#f59e0b]/20';
+            badgeColor = 'text-amber-500 bg-amber-500/10 border-amber-500/20';
           }
 
           return (
             <div
               key={o.oid}
-              className="grid grid-cols-12 px-3 py-2 items-center hover:bg-[#121722] transition-colors"
+              className="grid grid-cols-12 px-3 py-2 items-center hover:bg-slate-900/60 transition-colors"
             >
               {/* Direction */}
               <div className="col-span-2 flex items-center gap-1 font-bold whitespace-nowrap">
-                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isBuy ? 'bg-[#00ff88]' : 'bg-[#f59e0b]'}`}></span>
-                <span className={isBuy ? 'text-[#00ff88]' : 'text-[#f59e0b]'}>
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isBuy ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                <span className={isBuy ? 'text-emerald-500' : 'text-amber-500'}>
                   {isBuy ? (isEn ? 'BUY' : '接多') : (isEn ? 'SELL' : '止盈')}
                 </span>
               </div>
@@ -217,16 +217,16 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
               {/* Price */}
               <div className="col-span-3 font-bold text-white flex items-center gap-1 whitespace-nowrap">
                 <span>${o.price.toLocaleString()}</span>
-                {o.price >= 99000 && <span className="text-[9px] text-[#f59e0b] bg-[#f59e0b]/10 px-1 rounded">100k+</span>}
+                {o.price >= 99000 && <span className="text-[9px] text-amber-500 bg-amber-500/10 px-1 rounded">100k+</span>}
               </div>
 
               {/* Size */}
-              <div className="col-span-2 text-[#cbd5e1] whitespace-nowrap">
+              <div className="col-span-2 text-slate-300 whitespace-nowrap">
                 {o.size} BTC
               </div>
 
               {/* Value */}
-              <div className="col-span-2 text-[#8b949e] whitespace-nowrap">
+              <div className="col-span-2 text-slate-400 whitespace-nowrap">
                 ${Math.round(o.valueUsd).toLocaleString()}
               </div>
 
@@ -242,8 +242,8 @@ export const FounderOrdersPanel: React.FC<FounderOrdersPanelProps> = ({
       </div>
 
       {/* 5. Strategy Philosophy Reflection */}
-      <div className="mt-3 p-3 bg-[#10141d] rounded-lg border border-[#1b2332] text-xs font-mono text-[#8b949e] flex items-start gap-2.5">
-        <ShieldCheck className="w-4 h-4 text-[#00ff88] shrink-0 mt-0.5" />
+      <div className="mt-3 p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs font-mono text-slate-400 flex items-start gap-2.5">
+        <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
         <div className="leading-relaxed">
           <strong className="text-white mr-1.5">{isEn ? 'Theory & Execution Alignment:' : '知行合一量化实证：'}</strong>
           {isEn

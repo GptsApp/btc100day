@@ -12,7 +12,7 @@ const TheorySteps = lazy(() => import('./components/TheorySteps').then(m => ({ d
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-8">
-    <div className="w-5 h-5 border-2 border-[#1e293b] border-t-[#00ff88] rounded-full animate-spin"></div>
+    <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
   </div>
 );
 
@@ -128,9 +128,9 @@ const App = () => {
       
       {/* Error Banner */}
       {error && (
-        <div className="bg-[#ff3b69]/10 border border-[#ff3b69]/30 rounded p-2.5 flex items-center justify-between font-mono text-xs text-[#ff3b69]">
+        <div className="bg-amber-50 border border-amber-200 rounded p-2.5 flex items-center justify-between font-mono text-xs text-amber-800">
           <span>{error}</span>
-          <button onClick={() => { setError(null); window.location.reload(); }} className="px-2 py-0.5 bg-[#ff3b69]/20 hover:bg-[#ff3b69]/30 text-white rounded">
+          <button onClick={() => { setError(null); window.location.reload(); }} className="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white rounded">
             {lang === 'en' ? 'RETRY' : '重试'}
           </button>
         </div>

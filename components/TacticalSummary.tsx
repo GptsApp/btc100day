@@ -26,32 +26,32 @@ export const TacticalSummary: React.FC<TacticalSummaryProps> = ({
   const emaDiff = radar.ema15Price > 0 ? ((currentPrice - radar.ema15Price) / radar.ema15Price * 100) : 0;
 
   return (
-    <div className="bg-[#0e1117] border border-[#1e232d] rounded-lg p-3 md:p-4 text-[#e6edf3]">
+    <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-4 text-slate-100">
       
       {/* Top Main Line: Price + Cycle Status + Hard Defense */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-[#1b2028]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-slate-800">
         
         {/* Left: Ticker & Live Price */}
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2 whitespace-nowrap">
             <span className="font-bold text-lg md:text-xl text-white font-mono tracking-tight">BTC/USDT</span>
-            <span className="text-[11px] text-[#8b949e] bg-[#161b22] px-1.5 py-0.5 rounded font-mono">1D</span>
+            <span className="text-[11px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">1D</span>
           </div>
 
           <div className="flex items-baseline gap-2 font-mono whitespace-nowrap">
             <span className="text-2xl md:text-3xl font-bold text-white tracking-tight">
               ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </span>
-            <span className={`text-xs font-semibold flex items-center ${isPositive ? 'text-[#00c076]' : 'text-[#f43f5e]'}`}>
+            <span className={`text-xs font-semibold flex items-center ${isPositive ? 'text-emerald-500' : 'text-slate-400'}`}>
               {isPositive ? '+' : ''}{change24hPercent.toFixed(2)}%
             </span>
           </div>
 
-          <div className="h-4 w-px bg-[#21262d] hidden sm:block"></div>
+          <div className="h-4 w-px bg-slate-800 hidden sm:block"></div>
 
           {/* Stance Tag */}
-          <div className="flex items-center gap-1.5 bg-[#161b22] border border-[#30363d] px-2.5 py-1 rounded text-xs font-mono whitespace-nowrap">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00c076] shrink-0"></span>
+          <div className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded text-xs font-mono whitespace-nowrap">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
             <span className="text-white font-medium">{radar.stateLabel}</span>
           </div>
         </div>
@@ -59,15 +59,15 @@ export const TacticalSummary: React.FC<TacticalSummaryProps> = ({
         {/* Right: Key Decision Anchors */}
         <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
           <div className="whitespace-nowrap">
-            <span className="text-[#8b949e] mr-1.5">{isEn ? 'CYCLE STAGE:' : '周期阶段:'}</span>
+            <span className="text-slate-400 mr-1.5">{isEn ? 'CYCLE STAGE:' : '周期阶段:'}</span>
             <span className="text-white font-medium">{radar.cycleStageName}</span>
           </div>
 
-          <div className="h-3 w-px bg-[#21262d] hidden sm:block"></div>
+          <div className="h-3 w-px bg-slate-800 hidden sm:block"></div>
 
           <div className="whitespace-nowrap">
-            <span className="text-[#8b949e] mr-1.5">{isEn ? 'STOP LOSS:' : '防守止损:'}</span>
-            <span className="text-[#f43f5e] font-semibold">${radar.invalidationPrice.toLocaleString()}</span>
+            <span className="text-slate-400 mr-1.5">{isEn ? 'STOP LOSS:' : '防守止损:'}</span>
+            <span className="text-amber-500 font-semibold">${radar.invalidationPrice.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -76,21 +76,21 @@ export const TacticalSummary: React.FC<TacticalSummaryProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-3 text-xs font-mono">
         
         {/* 1. Cycle Day */}
-        <div className={`bg-[#12161f] border px-3 py-2 rounded ${radar.isUncertainPhase ? 'border-amber-500/40' : 'border-[#1e232d]'}`}>
-          <div className="text-[10px] text-[#8b949e] mb-1 whitespace-nowrap">{isEn ? 'CYCLE DAY' : '周期进度'}</div>
+        <div className={`bg-slate-800/60 border px-3 py-2 rounded ${radar.isUncertainPhase ? 'border-amber-500/40' : 'border-slate-800'}`}>
+          <div className="text-[10px] text-slate-400 mb-1 whitespace-nowrap">{isEn ? 'CYCLE DAY' : '周期进度'}</div>
           <div className="text-base font-bold text-white whitespace-nowrap">
             Day {radar.currentCycleDay}
             {radar.isUncertainPhase && (
-              <span className="text-amber-400 text-xs font-semibold ml-1">{isEn ? '(Pending)' : '(待定)'}</span>
+              <span className="text-amber-500 text-xs font-semibold ml-1">{isEn ? '(Pending)' : '(待定)'}</span>
             )}{' '}
-            <span className="text-[#8b949e] text-xs font-normal">/ 100</span>
+            <span className="text-slate-400 text-xs font-normal">/ 100</span>
           </div>
         </div>
 
         {/* 2. EMA15 Streak */}
-        <div className={`bg-[#12161f] border px-3 py-2 rounded ${radar.isUncertainPhase ? 'border-amber-500/40' : 'border-[#1e232d]'}`}>
-          <div className="text-[10px] text-[#8b949e] mb-1 whitespace-nowrap">{isEn ? 'EMA15 STREAK' : '均线上方连跑'}</div>
-          <div className={`text-base font-bold whitespace-nowrap ${radar.isUncertainPhase ? 'text-amber-400' : 'text-[#00c076]'}`}>
+        <div className={`bg-slate-800/60 border px-3 py-2 rounded ${radar.isUncertainPhase ? 'border-amber-500/40' : 'border-slate-800'}`}>
+          <div className="text-[10px] text-slate-400 mb-1 whitespace-nowrap">{isEn ? 'EMA15 STREAK' : '均线上方连跑'}</div>
+          <div className={`text-base font-bold whitespace-nowrap ${radar.isUncertainPhase ? 'text-amber-500' : 'text-emerald-500'}`}>
             {radar.currentCycleDay} {isEn ? 'Days' : '天'}
             {radar.isUncertainPhase && (
               <span className="text-xs font-normal ml-1">{isEn ? '(Hold)' : '(暂保)'}</span>
@@ -99,37 +99,37 @@ export const TacticalSummary: React.FC<TacticalSummaryProps> = ({
         </div>
 
         {/* 3. EMA15 Price & Bias */}
-        <div className="bg-[#12161f] border border-[#1e232d] px-3 py-2 rounded">
-          <div className="text-[10px] text-[#8b949e] mb-1 whitespace-nowrap">{isEn ? 'EMA15 BIAS' : 'EMA15 乖离率'}</div>
+        <div className="bg-slate-800/60 border border-slate-800 px-3 py-2 rounded">
+          <div className="text-[10px] text-slate-400 mb-1 whitespace-nowrap">{isEn ? 'EMA15 BIAS' : 'EMA15 乖离率'}</div>
           <div className="text-base font-bold text-white flex items-baseline gap-1 whitespace-nowrap">
             <span>${radar.ema15Price.toLocaleString()}</span>
-            <span className={`text-xs ${emaDiff >= 0 ? 'text-[#00c076]' : 'text-[#f43f5e]'}`}>
+            <span className={`text-xs ${emaDiff >= 0 ? 'text-emerald-500' : 'text-amber-500'}`}>
               ({emaDiff >= 0 ? '+' : ''}{emaDiff.toFixed(1)}%)
             </span>
           </div>
         </div>
 
         {/* 4. Target Zone */}
-        <div className="bg-[#12161f] border border-[#1e232d] px-3 py-2 rounded">
-          <div className="text-[10px] text-[#8b949e] mb-1 whitespace-nowrap">{isEn ? 'TARGET ZONE' : '波段目标'}</div>
-          <div className="text-base font-bold text-[#e6edf3] whitespace-nowrap">
+        <div className="bg-slate-800/60 border border-slate-800 px-3 py-2 rounded">
+          <div className="text-[10px] text-slate-400 mb-1 whitespace-nowrap">{isEn ? 'TARGET ZONE' : '波段目标'}</div>
+          <div className="text-base font-bold text-slate-100 whitespace-nowrap">
             {radar.tacticalAdvice.targetZone}
           </div>
         </div>
 
         {/* 5. Recommended Exposure */}
-        <div className="bg-[#12161f] border border-[#1e232d] px-3 py-2 rounded">
-          <div className="text-[10px] text-[#8b949e] mb-1 whitespace-nowrap">{isEn ? 'EXPOSURE' : '建议仓位'}</div>
-          <div className="text-base font-bold text-[#00c076] whitespace-nowrap">
+        <div className="bg-slate-800/60 border border-slate-800 px-3 py-2 rounded">
+          <div className="text-[10px] text-slate-400 mb-1 whitespace-nowrap">{isEn ? 'EXPOSURE' : '建议仓位'}</div>
+          <div className="text-base font-bold text-emerald-500 whitespace-nowrap">
             {radar.tacticalAdvice.positionAdvice}
           </div>
         </div>
 
         {/* 6. Score */}
-        <div className="bg-[#12161f] border border-[#1e232d] px-3 py-2 rounded">
-          <div className="text-[10px] text-[#8b949e] mb-1 whitespace-nowrap">{isEn ? 'BULL SCORE' : '多头动能分'}</div>
+        <div className="bg-slate-800/60 border border-slate-800 px-3 py-2 rounded">
+          <div className="text-[10px] text-slate-400 mb-1 whitespace-nowrap">{isEn ? 'BULL SCORE' : '多头动能分'}</div>
           <div className="text-base font-bold text-white whitespace-nowrap">
-            {radar.score} <span className="text-[#8b949e] text-xs font-normal">/ 100</span>
+            {radar.score} <span className="text-slate-400 text-xs font-normal">/ 100</span>
           </div>
         </div>
 

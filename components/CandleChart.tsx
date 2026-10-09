@@ -28,16 +28,16 @@ const CustomTooltip = ({ active, payload, label, highlights, founderOrders, foun
     const emaDiff = emaValue ? ((data.close - emaValue) / emaValue * 100) : 0;
 
     return (
-      <div className="bg-[#090d15]/95 backdrop-blur-md border border-[#232f48] shadow-2xl rounded p-3 text-xs font-mono z-50 min-w-[220px]">
-        <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-[#1a2233]">
-          <span className="text-[#94a3b8] font-medium">{new Date(data.time).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-          <span className="text-[10px] text-[#64748b]">1D BAR</span>
+      <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700 shadow-2xl rounded p-3 text-xs font-mono z-50 min-w-[220px]">
+        <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-800">
+          <span className="text-slate-400 font-medium">{new Date(data.time).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          <span className="text-[10px] text-slate-500">1D BAR</span>
         </div>
 
         <div className="space-y-1.5 mb-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-[#94a3b8] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+            <span className="text-slate-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
               CLOSE
             </span>
             <span className="font-bold text-white font-mono-numbers">${data.close.toLocaleString()}</span>
@@ -45,13 +45,13 @@ const CustomTooltip = ({ active, payload, label, highlights, founderOrders, foun
 
           {emaValue && (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[#94a3b8] flex items-center gap-1.5">
+              <span className="text-slate-400 flex items-center gap-1.5">
                 <span className="w-2 h-0.5 bg-white"></span>
                 EMA15
               </span>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-[#e2e8f0] font-mono-numbers">${Math.round(emaValue).toLocaleString()}</span>
-                <span className={`text-[10px] ${emaDiff >= 0 ? 'text-[#00ff88]' : 'text-[#ff3b69]'}`}>
+                <span className="font-bold text-slate-200 font-mono-numbers">${Math.round(emaValue).toLocaleString()}</span>
+                <span className={`text-[10px] ${emaDiff >= 0 ? 'text-emerald-500' : 'text-amber-500'}`}>
                   ({emaDiff >= 0 ? '+' : ''}{emaDiff.toFixed(1)}%)
                 </span>
               </div>
@@ -59,21 +59,21 @@ const CustomTooltip = ({ active, payload, label, highlights, founderOrders, foun
           )}
 
           <div className="flex items-center justify-between gap-4">
-            <span className="text-[#94a3b8] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#38bdf8]/60"></span>
+            <span className="text-slate-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-slate-500"></span>
               VOL
             </span>
-            <span className="font-medium text-[#94a3b8] font-mono-numbers">{volume ? `$${(volume/1000000).toFixed(1)}M` : '-'}</span>
+            <span className="font-medium text-slate-400 font-mono-numbers">{volume ? `$${(volume/1000000).toFixed(1)}M` : '-'}</span>
           </div>
         </div>
 
         {activePeriod && (
-          <div className="pt-2 border-t border-[#1a2233] text-[11px]">
+          <div className="pt-2 border-t border-slate-800 text-[11px]">
              <div className="flex items-center justify-between mb-0.5">
                 <span className="font-bold text-white font-mono">{activePeriod.label}</span>
-                <span className="text-[9px] bg-[#00ff88]/10 text-[#00ff88] px-1 rounded font-mono">TRACKED</span>
+                <span className="text-[9px] bg-emerald-500/10 text-emerald-500 px-1 rounded font-mono">TRACKED</span>
              </div>
-             <p className="text-[#94a3b8] text-[10px] leading-tight">{activePeriod.description}</p>
+             <p className="text-slate-400 text-[10px] leading-tight">{activePeriod.description}</p>
           </div>
         )}
       </div>
@@ -121,7 +121,7 @@ export const ModernChart: React.FC<CandleChartProps> = ({
          x1: start,
          x2: mid,
          cycleLabel: `C${cycleNum}`,
-         color: '#00ff88',
+         color: '#10b981',
          bgOpacity: 0.04,
          strokeOpacity: 0.25,
          showLabel: true,
@@ -131,7 +131,7 @@ export const ModernChart: React.FC<CandleChartProps> = ({
          x1: mid,
          x2: end,
          cycleLabel: '',
-         color: '#ff3b69',
+         color: '#d97706',
          bgOpacity: 0.04,
          strokeOpacity: 0.25,
          showLabel: false,
@@ -173,7 +173,7 @@ export const ModernChart: React.FC<CandleChartProps> = ({
             </linearGradient>
           </defs>
           
-          <CartesianGrid strokeDasharray="2 2" stroke="#162032" horizontal={true} vertical={false} />
+          <CartesianGrid strokeDasharray="2 2" stroke="#1e293b" horizontal={true} vertical={false} />
           
           <XAxis
             dataKey="time"
@@ -250,14 +250,14 @@ export const ModernChart: React.FC<CandleChartProps> = ({
             <ReferenceLine
               yAxisId="price"
               y={founderPosition.entryPrice}
-              stroke="#00ff88"
+              stroke="#10b981"
               strokeDasharray="3 3"
               strokeOpacity={0.7}
               strokeWidth={1.2}
               label={{
                 value: `@Paulwei Entry $${Math.round(founderPosition.entryPrice).toLocaleString()}`,
                 position: 'insideBottomRight',
-                fill: '#00ff88',
+                fill: '#10b981',
                 fontSize: 10,
                 offset: 4
               }}
@@ -270,14 +270,14 @@ export const ModernChart: React.FC<CandleChartProps> = ({
               yAxisId="price"
               key={lvl.px}
               y={lvl.px}
-              stroke={lvl.side === 'B' ? '#38bdf8' : '#f59e0b'}
+              stroke={lvl.side === 'B' ? '#059669' : '#d97706'}
               strokeDasharray="2 4"
               strokeOpacity={0.6}
               strokeWidth={1}
               label={{
                 value: `@Paulwei ${lvl.side === 'B' ? 'BID' : 'TP'}: ${lvl.label}`,
                 position: 'insideRight',
-                fill: lvl.side === 'B' ? '#38bdf8' : '#f59e0b',
+                fill: lvl.side === 'B' ? '#059669' : '#d97706',
                 fontSize: 9,
                 offset: 4
               }}

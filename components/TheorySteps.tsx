@@ -29,7 +29,7 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
       phase: isEn ? 'OBSERVATION & GATE' : '第一阶段：观察蓄势与启动闸门',
       window: 'DAY 0 — 30',
       tag: isEn ? 'DUAL-MOMENTUM GATE' : '双动能启动闸门',
-      tagColor: 'bg-amber-50 text-amber-800 border-amber-200',
+      tagColor: 'bg-slate-100 text-slate-800 border-slate-200',
       thesis: isEn
         ? 'Price systematically breaks above daily EMA15 and punches through Donchian 20D resistance with expanding volume.'
         : '价格放量突破并有效站稳日线 EMA15 轨道上方，且向上穿透唐奇安 20 日高点，确认非震荡假启动。',
@@ -61,7 +61,7 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
       phase: isEn ? 'EXHAUSTION WARNING' : '第三阶段：高位预警与狂热逃顶',
       window: 'DAY 70 — 100',
       tag: isEn ? 'SYSTEMATIC EXIT' : 'Pi-Top 监控与梯级离场',
-      tagColor: 'bg-rose-50 text-rose-800 border-rose-200',
+      tagColor: 'bg-amber-50 text-amber-800 border-amber-200',
       thesis: isEn
         ? 'Retail euphoria peaks alongside violent whipsaws. Pi-Cycle Top ratio approaches 0.98. Historical expected value degrades to zero.'
         : '散户狂热情绪见顶，盘面洗盘加剧。Pi-Cycle Top 比值逼近 0.98 临界区，历史数据显示 Day 70 之后期望收益归零。',
@@ -145,7 +145,7 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
             <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-amber-500 text-white font-mono font-bold text-xs flex items-center justify-center">
+                <span className="w-6 h-6 rounded-md bg-slate-900 text-white font-mono font-bold text-xs flex items-center justify-center">
                   01
                 </span>
                 <span className="font-mono font-bold text-sm text-slate-900">
@@ -214,8 +214,8 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
 
             <div className="p-5 space-y-4">
               {/* Warning Callout */}
-              <div className="p-3 bg-rose-50/70 border border-rose-200/80 rounded-lg text-xs text-rose-900 flex items-start gap-2.5">
-                <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-lg text-xs text-amber-900 flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="leading-relaxed">
                   <strong>WARNING 警告：</strong>
                   {isEn
@@ -265,22 +265,22 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
             <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-rose-600 text-white font-mono font-bold text-xs flex items-center justify-center">
+                <span className="w-6 h-6 rounded-md bg-amber-600 text-white font-mono font-bold text-xs flex items-center justify-center">
                   03
                 </span>
                 <span className="font-mono font-bold text-sm text-slate-900">
                   {isEn ? 'PHASE 3: DAY 70 - 100 SYSTEMATIC EXIT' : '阶段三：Day 70 ~ Day 100 终局离场与狂热逃顶（系统性撤离）'}
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full font-semibold">
+              <span className="text-[11px] font-mono text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full font-semibold">
                 {isEn ? 'De-risking Protocol' : '强制减仓规程'}
               </span>
             </div>
 
             <div className="p-5 space-y-4">
               {/* Alert Callout */}
-              <div className="p-3 bg-rose-50/70 border border-rose-200/80 rounded-lg text-xs text-rose-900 flex items-start gap-2.5">
-                <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-lg text-xs text-amber-900 flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="leading-relaxed">
                   <strong>MANDATORY DISCIPLINE 铁律纪律：</strong>
                   {isEn
@@ -314,7 +314,7 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                     <span>STEP 3</span>
                     <span className="font-bold text-slate-800">Day 100 到达</span>
                   </div>
-                  <div className="font-bold text-sm text-rose-600">无条件清仓剩余 30%</div>
+                  <div className="font-bold text-sm text-amber-700">无条件清仓剩余 30%</div>
                   <p className="text-slate-600 font-sans text-xs">周期闭环耗尽，不管价格是否创出新高，全部空仓进入 Rest 阶段。</p>
                 </div>
               </div>
@@ -348,7 +348,7 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   <tr className="hover:bg-slate-50/50">
-                    <td className="p-3.5 font-bold text-rose-600">日线收盘价低于 EMA15 - 1.0 ATR 达 48 小时</td>
+                    <td className="p-3.5 font-bold text-amber-700">日线收盘价低于 EMA15 - 1.0 ATR 达 48 小时</td>
                     <td className="p-3.5 font-medium">趋势硬失效 (True Breakdown)</td>
                     <td className="p-3.5 font-bold text-slate-900">100% 清仓市价止损，坚决禁止逆势扛单</td>
                   </tr>

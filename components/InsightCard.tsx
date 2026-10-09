@@ -29,7 +29,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({ stats, history, lang }
       <div className="w-full md:w-[35%] p-8 border-b md:border-b-0 md:border-r border-white/10 flex flex-col relative group">
         
         <div className="flex-1">
-           <div className="w-12 h-12 bg-black/30 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center text-[#7cff67] mb-6 shadow-sm group-hover:scale-105 transition-transform duration-300">
+           <div className="w-12 h-12 bg-black/30 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center text-emerald-500 mb-6 shadow-sm group-hover:scale-105 transition-transform duration-300">
               <Sparkles className="w-6 h-6" />
            </div>
            <h3 className="text-xl font-bold text-white text-shadow mb-3 tracking-tight">{t.title}</h3>
@@ -66,7 +66,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({ stats, history, lang }
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 h-full flex flex-col">
              <div className="flex items-center justify-between mb-5">
                <div className="flex items-center gap-2">
-                   <Sparkles className="w-4 h-4 text-[#7cff67]" />
+                   <Sparkles className="w-4 h-4 text-emerald-500" />
                    <span className="text-xs font-bold text-white text-shadow uppercase tracking-wider">DeepSeek V4 Flash</span>
                </div>
                <span className="text-[10px] text-white/60 font-mono bg-black/20 backdrop-blur-sm px-2 py-1 rounded-md border border-white/20">{new Date().toLocaleTimeString()}</span>

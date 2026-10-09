@@ -146,7 +146,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
               <span className="font-mono font-bold text-sm tracking-tight text-slate-900">BTC/USDT</span>
               <span className="text-[10px] text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full font-mono font-medium">SPOT 1D</span>
             </div>
-            <span className={`text-xs font-mono font-bold flex items-center gap-0.5 whitespace-nowrap shrink-0 ${isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
+            <span className={`text-xs font-mono font-bold flex items-center gap-0.5 whitespace-nowrap shrink-0 ${isPositive ? 'text-emerald-600' : 'text-slate-600'}`}>
               {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
               {stats ? `${isPositive ? '+' : ''}${stats.change24hPercent.toFixed(2)}%` : '--'}
             </span>
@@ -191,7 +191,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   {isEn ? `Reclaim +$${radar.emaReclaimDistance?.toLocaleString()}` : `收复 +$${radar.emaReclaimDistance?.toLocaleString()}`}
                 </span>
                 <span className="text-slate-300">|</span>
-                <span className="text-rose-600 font-semibold whitespace-nowrap">
+                <span className="text-amber-700 font-semibold whitespace-nowrap">
                   {isEn ? `Moat -$${radar.moatBufferRemaining?.toLocaleString()}` : `缓冲 -$${radar.moatBufferRemaining?.toLocaleString()}`}
                 </span>
               </div>
@@ -208,7 +208,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
           </div>
           <div className="mt-1.5 text-xl font-mono font-bold text-slate-900 flex items-baseline gap-1.5 whitespace-nowrap">
             <span>${radar.ema15Price.toLocaleString()}</span>
-            <span className={`text-xs font-semibold ${emaDiff >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+            <span className={`text-xs font-semibold ${emaDiff >= 0 ? 'text-emerald-600' : 'text-amber-700'}`}>
               ({emaDiff >= 0 ? '+' : ''}{emaDiff.toFixed(1)}%)
             </span>
           </div>
@@ -228,18 +228,18 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
         </BentoCard>
 
         {/* Stop Loss (ATR Dynamic Moat) */}
-        <BentoCard className="p-4 flex flex-col justify-between border-rose-200/80 bg-rose-50/20 group relative">
-          <div className="text-[11px] font-mono text-rose-700 uppercase tracking-wider font-semibold flex items-center justify-between gap-1.5">
+        <BentoCard className="p-4 flex flex-col justify-between border-slate-200 bg-white group relative">
+          <div className="text-[11px] font-mono text-slate-600 uppercase tracking-wider font-semibold flex items-center justify-between gap-1.5">
             <span className="whitespace-nowrap">{isEn ? 'ATR MOAT FLOOR' : 'ATR 动态防守线'}</span>
             <div className="relative group/tip cursor-help shrink-0">
-              <HelpCircle className="w-3.5 h-3.5 text-rose-400 hover:text-rose-600" />
+              <HelpCircle className="w-3.5 h-3.5 text-slate-400 hover:text-slate-700" />
               <div className="absolute right-0 top-5 hidden group-hover/tip:block z-50 w-64 p-2.5 bg-slate-900 text-white text-[11px] font-sans rounded-lg shadow-xl border border-slate-700 leading-relaxed pointer-events-none">
                 <span className="font-bold text-amber-300 block mb-1">💡 怎么看这个值？</span>
                 大饼最近平均每天自然波动 ${radar.atr14?.toLocaleString() || '2,100'}。均线价减去这个波动值就是防守底线。只要盘中没跌破此底线，均属庄家诱空洗盘，切忌恐慌卖飞。
               </div>
             </div>
           </div>
-          <div className="mt-1.5 text-xl font-mono font-bold text-rose-600 whitespace-nowrap">
+          <div className="mt-1.5 text-xl font-mono font-bold text-slate-900 whitespace-nowrap">
             ${(radar.atrDefenseFloor || radar.invalidationPrice).toLocaleString()}
           </div>
           <div className="text-[11px] font-mono text-slate-500 mt-1 leading-tight">
@@ -251,7 +251,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
         <BentoCard className="p-4 flex flex-col justify-between">
           <div className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-medium flex items-center justify-between gap-1.5">
             <span className="whitespace-nowrap">{isEn ? 'DERIVATIVES OI' : '全网持仓 / 费率'}</span>
-            <span className={`w-2 h-2 rounded-full shrink-0 ${microstructure?.leverageRiskLevel === 'extreme' ? 'bg-rose-500 animate-ping' : microstructure?.leverageRiskLevel === 'overheated' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+            <span className={`w-2 h-2 rounded-full shrink-0 ${microstructure?.leverageRiskLevel === 'extreme' ? 'bg-amber-500 animate-ping' : microstructure?.leverageRiskLevel === 'overheated' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
           </div>
           <div className="mt-1.5 text-xl font-mono font-bold text-slate-900 whitespace-nowrap">
             ${microstructure?.openInterestUsd ? `${microstructure.openInterestUsd}M` : '$3,296M'}
@@ -694,7 +694,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                       {/* Visual Progress Bar between ATR Defense Floor (0%) and EMA15 (100%) */}
                       <div className="space-y-1 pt-0.5">
                         <div className="flex items-center justify-between text-[10px] font-mono">
-                          <span className="text-rose-700 font-semibold">
+                          <span className="text-amber-700 font-semibold">
                             {isEn ? 'Moat Floor' : '防守底线'} ${floorPrice.toLocaleString()}
                           </span>
                           <span className="text-slate-900 font-bold">
@@ -704,9 +704,9 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                             EMA15 ${radar.ema15Price.toLocaleString()}
                           </span>
                         </div>
-                        <div className="w-full h-2 bg-amber-200/70 rounded-full overflow-hidden flex items-center p-0.5">
+                        <div className="w-full h-2 bg-amber-200/60 rounded-full overflow-hidden flex items-center p-0.5">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 transition-all duration-300"
+                            className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-300"
                             style={{ width: `${progressPct}%` }}
                           />
                         </div>
@@ -727,8 +727,8 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                               : `确认为诱空假摔 (Spring Reclaim)，还差 $${radar.emaReclaimDistance?.toLocaleString()}，周期正式延续 Day ${radar.currentCycleDay}。`}
                           </span>
                         </div>
-                        <div className="flex items-start gap-1.5 text-rose-900">
-                          <span className="shrink-0">🔴</span>
+                        <div className="flex items-start gap-1.5 text-slate-700">
+                          <span className="shrink-0">🔶</span>
                           <span>
                             <strong className="font-mono">
                               {isEn
@@ -794,13 +794,13 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   <div className="space-y-0.5 pt-1 border-t border-slate-200/50">
                     <div className="flex flex-wrap items-center justify-between gap-1 text-slate-700">
                       <span className="flex items-center gap-1.5 font-medium whitespace-nowrap">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${radar.piCycleState === 'critical' ? 'bg-rose-500 animate-pulse' : 'bg-blue-500'}`}></span>
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${radar.piCycleState === 'critical' ? 'bg-amber-500 animate-pulse' : 'bg-slate-900'}`}></span>
                         <span>Pi-Cycle 极值顶比值:</span>
                       </span>
                       <span className="font-bold text-slate-900 font-mono whitespace-nowrap">
                         {radar.piCycleRatio ? radar.piCycleRatio.toFixed(2) : '--'}
                         <span className={`ml-1 text-[11px] font-semibold ${
-                          radar.piCycleState === 'critical' ? 'text-rose-600' : 'text-emerald-600'
+                          radar.piCycleState === 'critical' ? 'text-amber-700' : 'text-emerald-600'
                         }`}>
                           ({radar.piCycleState === 'critical' ? '🚨极值逃顶' : '🟢安全健康'})
                         </span>
@@ -820,7 +820,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   {radar.checklist.map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between gap-2 px-3 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs">
                       <div className="flex items-center gap-2 min-w-0">
-                        <CheckCircle2 className={`w-4 h-4 shrink-0 ${item.passed ? 'text-emerald-600' : 'text-rose-600'}`} />
+                        <CheckCircle2 className={`w-4 h-4 shrink-0 ${item.passed ? 'text-emerald-600' : 'text-amber-600'}`} />
                         <span className="text-slate-800 font-medium leading-snug">{item.label}</span>
                       </div>
                       <span className="font-bold text-slate-900 shrink-0 whitespace-nowrap">{item.value}</span>
@@ -828,8 +828,8 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   ))}
                 </div>
 
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start gap-2 leading-relaxed font-sans">
-                  <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 flex items-start gap-2 leading-relaxed font-sans">
+                  <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <span>硬失效纪律：日线收盘若击穿 ${radar.invalidationPrice.toLocaleString()} 达 2 天，单边假设失效必须止损。</span>
                 </div>
               </div>
@@ -869,7 +869,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
                       <span className="text-slate-600">单笔最大允许风险 (Equity Risk):</span>
-                      <span className="font-bold text-rose-600 font-mono">{maxRiskPercent}% (${positionSizer.dollarRisk})</span>
+                      <span className="font-bold text-amber-700 font-mono">{maxRiskPercent}% (${positionSizer.dollarRisk})</span>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5">
                       {[1.0, 1.5, 2.0, 3.0].map(pct => (
@@ -891,7 +891,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                 <div className="bg-white border-2 border-slate-900 rounded-xl p-3.5 space-y-2.5 shadow-sm">
                   <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
                     <span className="text-slate-600">硬失效止损距离:</span>
-                    <span className="font-bold text-rose-600 font-mono">
+                    <span className="font-bold text-amber-700 font-mono">
                       -${positionSizer.stopDistance.toLocaleString()} (-{positionSizer.stopPercent}%)
                     </span>
                   </div>
@@ -918,7 +918,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-relaxed font-sans">
-                    🛡️ <strong className="text-slate-800">数学铁律：</strong>若价格跌破动态防守线 (${positionSizer.defenseStop.toLocaleString()})，账户最大亏损严格锁定为 <strong className="text-rose-600 font-mono">${positionSizer.dollarRisk}</strong>，绝对不会发生追加保证金或爆仓。
+                    🛡️ <strong className="text-slate-800">数学铁律：</strong>若价格跌破动态防守线 (${positionSizer.defenseStop.toLocaleString()})，账户最大亏损严格锁定为 <strong className="text-amber-700 font-mono">${positionSizer.dollarRisk}</strong>，绝对不会发生追加保证金或爆仓。
                   </div>
                 </div>
 
@@ -957,7 +957,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   
                   <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                      <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                       <span className="text-slate-600">上方空头爆仓带 (+4.5%):</span>
                     </div>
                     <span className="font-bold text-slate-900 font-mono">

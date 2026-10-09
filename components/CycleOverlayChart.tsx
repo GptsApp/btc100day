@@ -92,7 +92,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
                     )}
                     <span>{nameMap[entry.dataKey] || entry.name}</span>
                   </span>
-                  <span className={`font-mono font-semibold ${entry.value >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  <span className={`font-mono font-semibold ${entry.value >= 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
                     {entry.value >= 0 ? '+' : ''}{entry.value}%
                   </span>
                 </div>
@@ -172,27 +172,27 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
             </span>
           </div>
 
-          {/* Cycle 1 - Vibrant Royal Blue */}
+          {/* Cycle 1 - Muted Slate */}
           <div className="flex items-center gap-2 text-slate-700 text-xs font-medium">
-            <span className="w-3.5 h-1 bg-[#2563eb] rounded-full"></span>
+            <span className="w-3.5 h-1 bg-[#64748b] rounded-full"></span>
             <span>{isEn ? 'Cycle 1 (+82%)' : '周期 1 (+82%)'}</span>
           </div>
 
-          {/* Cycle 2 - Warm Amber Orange */}
+          {/* Cycle 2 - Deep Slate Ink */}
           <div className="flex items-center gap-2 text-slate-700 text-xs font-medium">
-            <span className="w-3.5 h-1 bg-[#f59e0b] rounded-full"></span>
+            <span className="w-3.5 h-1 bg-[#0f172a] rounded-full"></span>
             <span>{isEn ? 'Cycle 2 (+86%)' : '周期 2 (+86%)'}</span>
           </div>
 
-          {/* Cycle 3 - Rich Indigo / Purple */}
+          {/* Cycle 3 - Warm Amber Ochre */}
           <div className="flex items-center gap-2 text-slate-700 text-xs font-medium">
-            <span className="w-3.5 h-1 bg-[#8b5cf6] rounded-full"></span>
+            <span className="w-3.5 h-1 bg-[#d97706] rounded-full"></span>
             <span>{isEn ? 'Cycle 3 (+99%)' : '周期 3 (+99%)'}</span>
           </div>
 
           {/* Historical Avg - Explicit Dashed Line Representation */}
           <div className="flex items-center gap-2 text-slate-600 text-xs font-medium">
-            <span className="w-4 h-0 border-t-2 border-dashed border-slate-500 inline-block"></span>
+            <span className="w-4 h-0 border-t-2 border-dashed border-[#94a3b8] inline-block"></span>
             <span>{isEn ? 'Historical Avg (Dashed)' : '历史均值 (虚线)'}</span>
           </div>
 
@@ -285,31 +285,31 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
               isAnimationActive={false}
             />
 
-            {/* Cycle 1 Line (Blue) */}
+            {/* Cycle 1 Line (Muted Slate) */}
             <Line
               type="monotone"
               dataKey="cycle1"
-              stroke="#2563eb"
-              strokeWidth={2}
+              stroke="#64748b"
+              strokeWidth={1.6}
               dot={false}
               isAnimationActive={false}
             />
 
-            {/* Cycle 2 Line (Amber Orange) */}
+            {/* Cycle 2 Line (Deep Slate Ink) */}
             <Line
               type="monotone"
               dataKey="cycle2"
-              stroke="#f59e0b"
-              strokeWidth={2}
+              stroke="#0f172a"
+              strokeWidth={1.8}
               dot={false}
               isAnimationActive={false}
             />
 
-            {/* Cycle 3 Line (Purple) */}
+            {/* Cycle 3 Line (Warm Amber Ochre) */}
             <Line
               type="monotone"
               dataKey="cycle3"
-              stroke="#8b5cf6"
+              stroke="#d97706"
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
@@ -319,7 +319,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
             <Line
               type="monotone"
               dataKey="avgBenchmark"
-              stroke="#64748b"
+              stroke="#94a3b8"
               strokeDasharray="5 5"
               strokeWidth={1.8}
               dot={false}
@@ -343,7 +343,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-100 text-xs">
         <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
           <div className="text-slate-900 font-bold mb-1 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+            <span className="w-2 h-2 rounded-full bg-[#0f172a]"></span>
             <span>{isEn ? 'CYCLE 2: FRONT-RUNNING' : '周期 2：前快后慢'}</span>
           </div>
           <p className="text-slate-600 leading-relaxed font-sans text-[11px]">
@@ -355,7 +355,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
 
         <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
           <div className="text-slate-900 font-bold mb-1 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#8b5cf6]"></span>
+            <span className="w-2 h-2 rounded-full bg-[#d97706]"></span>
             <span>{isEn ? 'CYCLE 3: ACCELERATION' : '周期 3：前慢后快'}</span>
           </div>
           <p className="text-slate-600 leading-relaxed font-sans text-[11px]">
@@ -367,7 +367,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
 
         <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
           <div className="text-slate-900 font-bold mb-1 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#10b981]"></span>
+            <span className="w-2 h-2 rounded-full bg-[#64748b]"></span>
             <span>{isEn ? 'RISK RULE: DAY 70 CEILING' : '铁律风控：Day 70 预警'}</span>
           </div>
           <p className="text-slate-600 leading-relaxed font-sans text-[11px]">

@@ -651,7 +651,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
     ) {
       const moatLine = candleSeriesRef.current.createPriceLine({
         price: atrDefenseFloor,
-        color: '#e11d48',
+        color: '#d97706',
         lineWidth: 1,
         lineStyle: LineStyle.Dashed,
         axisLabelVisible: true,
@@ -747,7 +747,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       if (emaBid) {
         priceLinesRef.current.push(candleSeriesRef.current.createPriceLine({
           price: emaBid.price,
-          color: '#2563eb',
+          color: '#059669',
           lineWidth: 2,
           lineStyle: LineStyle.Dashed,
           axisLabelVisible: true,
@@ -759,7 +759,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       if (breakoutBid) {
         priceLinesRef.current.push(candleSeriesRef.current.createPriceLine({
           price: breakoutBid.price,
-          color: '#2563eb',
+          color: '#059669',
           lineWidth: 1,
           lineStyle: LineStyle.Dotted,
           axisLabelVisible: true,
@@ -799,9 +799,9 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
             <div className="flex items-center gap-1.5 font-mono shrink-0 whitespace-nowrap">
               <span>O:<strong className="text-slate-900 ml-0.5">${Math.round(activeDisplay.open).toLocaleString()}</strong></span>
               <span>H:<strong className="text-emerald-600 ml-0.5">${Math.round(activeDisplay.high).toLocaleString()}</strong></span>
-              <span>L:<strong className="text-rose-600 ml-0.5">${Math.round(activeDisplay.low).toLocaleString()}</strong></span>
-              <span>C:<strong className={`ml-0.5 ${isUp ? 'text-emerald-600' : 'text-rose-600'}`}>${Math.round(activeDisplay.close).toLocaleString()}</strong></span>
-              <span className={`font-semibold ${isUp ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span>L:<strong className="text-slate-700 ml-0.5">${Math.round(activeDisplay.low).toLocaleString()}</strong></span>
+              <span>C:<strong className={`ml-0.5 ${isUp ? 'text-emerald-600' : 'text-slate-700'}`}>${Math.round(activeDisplay.close).toLocaleString()}</strong></span>
+              <span className={`font-semibold ${isUp ? 'text-emerald-600' : 'text-slate-700'}`}>
                 ({isUp ? '+' : ''}{priceChangePct.toFixed(1)}%)
               </span>
             </div>
@@ -878,18 +878,18 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
                 </div>
               </div>
 
-              {/* 2nd 50 Days: Subtle Rose Red Area */}
+              {/* 2nd 50 Days: Subtle Amber Ochre Area */}
               <div
                 ref={(el) => {
                   if (!bandsMapRef.current[c.id]) bandsMapRef.current[c.id] = { p1: null, p2: null };
                   bandsMapRef.current[c.id].p2 = el;
                 }}
-                className="absolute top-0 bottom-0 border-l border-dashed border-rose-400/50 border-r border-solid bg-rose-500/[0.045]"
+                className="absolute top-0 bottom-0 border-l border-dashed border-amber-400/50 border-r border-solid bg-amber-500/[0.045]"
                 style={{ display: 'none' }}
               >
-                <div className="p-2 text-[10px] font-mono font-bold text-rose-700 flex items-center gap-1">
+                <div className="p-2 text-[10px] font-mono font-bold text-amber-800 flex items-center gap-1">
                   <span>{c.label}</span>
-                  <span className="font-normal text-[9px] text-rose-600/80">
+                  <span className="font-normal text-[9px] text-amber-700/80">
                     {isEn ? '2nd 50d' : '后50天'}
                   </span>
                 </div>
