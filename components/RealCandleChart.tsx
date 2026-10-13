@@ -703,7 +703,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
           lineWidth: 2,
           lineStyle: LineStyle.Dashed,
           axisLabelVisible: true,
-          title: `[TP Exit] $${topExit.price.toLocaleString()} (Day 100 顶部清仓)`,
+          title: isEn ? `[TP Exit] $${topExit.price.toLocaleString()} (Day 100 Final Exit)` : `[TP Exit] $${topExit.price.toLocaleString()} (Day 100 顶部清仓)`,
         }));
       }
 
@@ -715,7 +715,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
           lineWidth: 1,
           lineStyle: LineStyle.Dashed,
           axisLabelVisible: true,
-          title: `[TP Wall] $${wall100k.price.toLocaleString()} (10万关口止盈)`,
+          title: isEn ? `[TP Wall] $${wall100k.price.toLocaleString()} ($100k Psychological TP)` : `[TP Wall] $${wall100k.price.toLocaleString()} (10万关口止盈)`,
         }));
       }
 
@@ -727,7 +727,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
           lineWidth: 2,
           lineStyle: LineStyle.Dotted,
           axisLabelVisible: true,
-          title: `[Major TP] $${majorTP.price.toLocaleString()} (0.3 BTC 核心减仓)`,
+          title: isEn ? `[Major TP] $${majorTP.price.toLocaleString()} (0.3 BTC Core Trim)` : `[Major TP] $${majorTP.price.toLocaleString()} (0.3 BTC 核心减仓)`,
         }));
       }
 
@@ -739,7 +739,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
           lineWidth: 1,
           lineStyle: LineStyle.Dotted,
           axisLabelVisible: true,
-          title: `[First TP] $${firstTP.price.toLocaleString()} (首批止盈)`,
+          title: isEn ? `[First TP] $${firstTP.price.toLocaleString()} (Initial TP)` : `[First TP] $${firstTP.price.toLocaleString()} (首批止盈)`,
         }));
       }
 
@@ -751,7 +751,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
           lineWidth: 2,
           lineStyle: LineStyle.Dashed,
           axisLabelVisible: true,
-          title: `[EMA15 Bid] $${emaBid.price.toLocaleString()} (贴线接多)`,
+          title: isEn ? `[EMA15 Bid] $${emaBid.price.toLocaleString()} (EMA15 Hug Bid)` : `[EMA15 Bid] $${emaBid.price.toLocaleString()} (贴线接多)`,
         }));
       }
 
@@ -763,7 +763,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
           lineWidth: 1,
           lineStyle: LineStyle.Dotted,
           axisLabelVisible: true,
-          title: `[Support Bid] $${breakoutBid.price.toLocaleString()} (起涨点防守)`,
+          title: isEn ? `[Support Bid] $${breakoutBid.price.toLocaleString()} (Launch Support Bid)` : `[Support Bid] $${breakoutBid.price.toLocaleString()} (起涨点防守)`,
         }));
       }
 

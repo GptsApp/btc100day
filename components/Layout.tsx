@@ -121,17 +121,37 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-xs font-mono text-slate-700 transition-colors"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                <span>Trasia 实盘链上数据</span>
+                <span>{lang === 'en' ? 'Trasia Live Portfolio' : 'Trasia 实盘链上数据'}</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
               </a>
 
-              <button
-                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
-                className="flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-xs font-mono text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-xs"
-              >
-                <Languages className="w-3.5 h-3.5 text-slate-400" />
-                <span>{lang === 'en' ? 'EN' : '中'}</span>
-              </button>
+              {/* Segmented Clear Language Switcher */}
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={() => setLang('zh')}
+                  aria-label="切换至中文"
+                  className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                    lang === 'zh'
+                      ? 'bg-white text-slate-900 font-bold shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  中文
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang('en')}
+                  aria-label="Switch to English"
+                  className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                    lang === 'en'
+                      ? 'bg-white text-slate-900 font-bold shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -144,6 +164,31 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-4"></div>
+
+              {/* Mobile Language Selector */}
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 mb-4 text-xs font-mono">
+                <span className="text-slate-600 font-medium">{lang === 'en' ? 'Language / 语言' : '语言 / Language'}</span>
+                <div className="flex items-center bg-slate-200/70 p-0.5 rounded-full border border-slate-300">
+                  <button
+                    type="button"
+                    onClick={() => setLang('zh')}
+                    className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                      lang === 'zh' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600'
+                    }`}
+                  >
+                    中文
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLang('en')}
+                    className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                      lang === 'en' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+              </div>
 
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <button
@@ -178,7 +223,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                 rel="noreferrer"
                 className="flex items-center justify-center gap-2 p-3 bg-slate-100 rounded-xl border border-slate-200 text-xs font-mono text-slate-700"
               >
-                <span>查看 @Paulwei 链上实盘</span>
+                <span>{lang === 'en' ? 'View @Paulwei Live Portfolio' : '查看 @Paulwei 链上实盘'}</span>
               </a>
             </div>
           </div>
@@ -202,7 +247,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
               <span>Engineering by <a href="https://x.com/WeWill_Rocky" target="_blank" rel="noreferrer" className="text-slate-900 hover:underline font-semibold">@Rocky</a></span>
             </div>
             <div className="text-[11px] text-slate-400">
-              Quantitative methodology for empirical cycle study. Not retail financial advice.
+              {lang === 'en'
+                ? 'Quantitative methodology for empirical cycle study. Not retail financial advice.'
+                : '量化周期实证研究方法论，不构成任何零售散户投资建议。'}
             </div>
           </div>
         </footer>

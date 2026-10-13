@@ -16,6 +16,31 @@ const LazyFallback = () => (
   </div>
 );
 
+const getInitialLanguage = (): Language => {
+  if (typeof window !== 'undefined') {
+    // 1. Query parameter override (?lang=en or ?lang=zh)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get('lang');
+      if (urlLang === 'en' || urlLang === 'zh') return urlLang;
+    } catch (_) {}
+
+    // 2. LocalStorage saved preference
+    try {
+      const saved = localStorage.getItem('btc100_lang');
+      if (saved === 'en' || saved === 'zh') return saved;
+    } catch (_) {}
+
+    // 3. Browser language
+    try {
+      if (navigator.language && navigator.language.toLowerCase().startsWith('en')) {
+        return 'en';
+      }
+    } catch (_) {}
+  }
+  return 'zh';
+};
+
 const App = () => {
   const [stats, setStats] = useState<MarketStats | null>(null);
   const [candles, setCandles] = useState<CandleData[]>([]);
@@ -23,7 +48,19 @@ const App = () => {
   const [showFounderOnChart, setShowFounderOnChart] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lang, setLang] = useState<Language>('zh');
+  const [lang, setLang] = useState<Language>(getInitialLanguage);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('btc100_lang', lang);
+      } catch (_) {}
+      document.documentElement.lang = lang;
+      document.title = lang === 'en'
+        ? 'BTC100.DAY — Institutional Research & Bitcoin Cycle Dispatch'
+        : 'BTC100.DAY — 比特币 100 天周期理论与实盘追踪';
+    }
+  }, [lang]);
 
   useEffect(() => {
     const initData = async () => {

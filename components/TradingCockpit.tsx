@@ -234,8 +234,12 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
             <div className="relative group/tip cursor-help shrink-0">
               <HelpCircle className="w-3.5 h-3.5 text-slate-400 hover:text-slate-700" />
               <div className="absolute right-0 top-5 hidden group-hover/tip:block z-50 w-64 p-2.5 bg-slate-900 text-white text-[11px] font-sans rounded-lg shadow-xl border border-slate-700 leading-relaxed pointer-events-none">
-                <span className="font-bold text-amber-300 block mb-1">💡 怎么看这个值？</span>
-                大饼最近平均每天自然波动 ${radar.atr14?.toLocaleString() || '2,100'}。均线价减去这个波动值就是防守底线。只要盘中没跌破此底线，均属庄家诱空洗盘，切忌恐慌卖飞。
+                <span className="font-bold text-amber-300 block mb-1">
+                  {isEn ? '💡 How to read this value?' : '💡 怎么看这个值？'}
+                </span>
+                {isEn
+                  ? `Bitcoin recently fluctuates ~$${radar.atr14?.toLocaleString() || '2,100'} naturally per day. Moving average minus this volatility equals the defense floor. As long as price doesn't break below it, dips are market maker bear traps—avoid panic selling.`
+                  : `大饼最近平均每天自然波动 $${radar.atr14?.toLocaleString() || '2,100'}。均线价减去这个波动值就是防守底线。只要盘中没跌破此底线，均属庄家诱空洗盘，切忌恐慌卖飞。`}
               </div>
             </div>
           </div>
@@ -243,7 +247,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
             ${(radar.atrDefenseFloor || radar.invalidationPrice).toLocaleString()}
           </div>
           <div className="text-[11px] font-mono text-slate-500 mt-1 leading-tight">
-            {isEn ? '1.0 ATR Volatility Moat' : `扣减 $${radar.atr14?.toLocaleString() || '---'} 允许洗盘冗余`}
+            {isEn ? `-$${radar.atr14?.toLocaleString() || '---'} Volatility Buffer` : `扣减 $${radar.atr14?.toLocaleString() || '---'} 允许洗盘冗余`}
           </div>
         </BentoCard>
 
@@ -257,11 +261,15 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
             ${microstructure?.openInterestUsd ? `${microstructure.openInterestUsd}M` : '$3,296M'}
           </div>
           <div className="text-[11px] font-mono text-slate-600 mt-1 leading-tight flex flex-wrap items-center gap-x-1">
-            <span className="whitespace-nowrap">年化费率:</span>
+            <span className="whitespace-nowrap">{isEn ? 'Funding APR:' : '年化费率:'}</span>
             <span className="font-bold text-slate-900 whitespace-nowrap">
               {microstructure?.fundingAnnualized !== undefined ? `${microstructure.fundingAnnualized}%` : '1.37%'}
             </span>
-            <span className="text-slate-400 whitespace-nowrap">({microstructure?.leverageRiskLevel === 'extreme' ? '极度过热' : '健康主升'})</span>
+            <span className="text-slate-400 whitespace-nowrap">
+              ({microstructure?.leverageRiskLevel === 'extreme'
+                ? (isEn ? 'Overheated' : '极度过热')
+                : (isEn ? 'Healthy Uptrend' : '健康主升')})
+            </span>
           </div>
         </BentoCard>
 
@@ -372,7 +380,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                       </div>
                       <div>
                         <span className="text-slate-500 block whitespace-nowrap">{isEn ? 'LEVERAGE' : '总杠杆'}</span>
-                        <span className="text-slate-900 font-bold whitespace-nowrap">1.18x (现货级)</span>
+                        <span className="text-slate-900 font-bold whitespace-nowrap">{isEn ? '1.18x (Spot-Equiv)' : '1.18x (现货级)'}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block whitespace-nowrap">{isEn ? 'LIQ PRICE' : '强平价'}</span>
@@ -427,7 +435,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                         orderFilter === 'all' ? 'bg-slate-900 text-white font-bold' : 'text-slate-600 hover:text-slate-900 bg-slate-100'
                       }`}
                     >
-                      全部 ({founderOrders.length})
+                      {isEn ? `All (${founderOrders.length})` : `全部 (${founderOrders.length})`}
                     </button>
                     <button
                       onClick={() => setOrderFilter('sell')}
@@ -435,7 +443,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                         orderFilter === 'sell' ? 'bg-slate-900 text-white font-bold' : 'text-slate-600 hover:text-slate-900 bg-slate-100'
                       }`}
                     >
-                      止盈 ({sellOrders.length})
+                      {isEn ? `Take-Profit (${sellOrders.length})` : `止盈 (${sellOrders.length})`}
                     </button>
                     <button
                       onClick={() => setOrderFilter('buy')}
@@ -443,12 +451,16 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                         orderFilter === 'buy' ? 'bg-slate-900 text-white font-bold' : 'text-slate-600 hover:text-slate-900 bg-slate-100'
                       }`}
                     >
-                      接多 ({buyOrders.length})
+                      {isEn ? `Bids (${buyOrders.length})` : `接多 (${buyOrders.length})`}
                     </button>
                   </div>
 
                   <span className="text-[11px] text-slate-500 font-medium">
-                    {orderFilter === 'sell' ? `止盈: ${totalSellBtc} BTC` : orderFilter === 'buy' ? `接多: ${totalBuyBtc} BTC` : `总计: ${founderOrders.length}笔`}
+                    {orderFilter === 'sell'
+                      ? (isEn ? `TP: ${totalSellBtc} BTC` : `止盈: ${totalSellBtc} BTC`)
+                      : orderFilter === 'buy'
+                      ? (isEn ? `Bids: ${totalBuyBtc} BTC` : `接多: ${totalBuyBtc} BTC`)
+                      : (isEn ? `Total: ${founderOrders.length} orders` : `总计: ${founderOrders.length}笔`)}
                   </span>
                 </div>
 
@@ -458,13 +470,13 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                     const isBuy = o.side === 'B';
                     const isSelected = selectedOrderPrice === o.price;
                     
-                    let roleBadge = '加仓网格';
+                    let roleBadge = isEn ? 'Grid Accum' : '加仓网格';
                     if (o.cycleRole === 'ema15_defense') {
-                      roleBadge = 'EMA15接多';
+                      roleBadge = isEn ? 'EMA15 Bid' : 'EMA15接多';
                     } else if (o.cycleRole === 'blowoff_top_exit') {
-                      roleBadge = '100天出逃';
+                      roleBadge = isEn ? 'Day 100 Exit' : '100天出逃';
                     } else if (o.cycleRole === 'ladder_take_profit') {
-                      roleBadge = '阶梯止盈';
+                      roleBadge = isEn ? 'Ladder TP' : '阶梯止盈';
                     }
 
                     return (
@@ -476,7 +488,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                             ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                             : 'bg-slate-50/70 border-slate-200/80 hover:border-slate-300 hover:bg-slate-100/60'
                         }`}
-                        title="点击在图表上聚焦高亮该挂单"
+                        title={isEn ? "Click to highlight order on chart" : "点击在图表上聚焦高亮该挂单"}
                       >
                         <div className="flex items-center gap-2.5">
                           <span className={`w-2 h-2 rounded-full ${isBuy ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
@@ -505,8 +517,10 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
 
                 {/* Strategy Insight */}
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
-                  <span className="text-slate-900 font-bold mr-1.5 font-mono">💡 周期心法:</span>
-                  魏神已在 $93k~$104k 挂设 2.35 BTC 止盈网，下方 $83,186 挂单紧咬 EMA15，严格践行 Day 70 前分批被动兑现纪律。
+                  <span className="text-slate-900 font-bold mr-1.5 font-mono">{isEn ? '💡 CYCLE MINDSET:' : '💡 周期心法:'}</span>
+                  {isEn
+                    ? 'Founder has set a 2.35 BTC take-profit grid between $93k~$104k, with $83,186 bid hugging EMA15, strictly executing the passive profit-taking discipline before Day 70.'
+                    : '魏神已在 $93k~$104k 挂设 2.35 BTC 止盈网，下方 $83,186 挂单紧咬 EMA15，严格践行 Day 70 前分批被动兑现纪律。'}
                 </div>
                   </>
                 ) : (
@@ -582,7 +596,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                                   ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                                   : 'bg-slate-50/70 border-slate-200/80 hover:border-slate-300 hover:bg-slate-100/60'
                               }`}
-                              title="点击在K线图上高亮该成交价位"
+                              title={isEn ? "Click to highlight fill price on chart" : "点击在K线图上高亮该成交价位"}
                             >
                               <div className="flex items-center gap-2">
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${isBuy ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
@@ -633,8 +647,10 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
 
                     {/* Fills Insight */}
                     <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/80 text-xs text-slate-700 leading-relaxed font-sans">
-                      <span className="text-emerald-900 font-bold mr-1.5 font-mono">📈 实盘轨迹:</span>
-                      近3个月魏神从 $62.4k~$68.7k 底部密集建仓，沿 EMA15 一路在 $75.7k~$83.2k 逢回踩接多，完美印证百日单边波段加仓逻辑。
+                      <span className="text-emerald-900 font-bold mr-1.5 font-mono">{isEn ? '📈 REAL EXECUTION:' : '📈 实盘轨迹:'}</span>
+                      {isEn
+                        ? 'Over the last 3 months, founder built positions heavily from $62.4k-$68.7k, and scaled into pullbacks at $75.7k-$83.2k along EMA15, validating the 100-day cycle framework.'
+                        : '近3个月魏神从 $62.4k~$68.7k 底部密集建仓，沿 EMA15 一路在 $75.7k~$83.2k 逢回踩接多，完美印证百日单边波段加仓逻辑。'}
                     </div>
                   </>
                 )}
@@ -748,8 +764,8 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                 {/* 3 Pillars Highlight Bar */}
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 text-xs">
                   <div className="pb-1 border-b border-slate-200/60 flex flex-wrap items-center justify-between gap-1 text-slate-700 font-bold">
-                    <span className="whitespace-nowrap">三大实战指标监测 (含白话指引)</span>
-                    <span className="text-[10px] text-slate-400 font-normal whitespace-nowrap">点击各条目见说明</span>
+                    <span className="whitespace-nowrap">{isEn ? 'Core Quantitative Indicators & Plain Guide' : '三大实战指标监测 (含白话指引)'}</span>
+                    <span className="text-[10px] text-slate-400 font-normal whitespace-nowrap">{isEn ? 'Hover/read details below' : '点击各条目见说明'}</span>
                   </div>
 
                   {/* Pillar 1: Donchian */}
@@ -757,19 +773,27 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                     <div className="flex flex-wrap items-center justify-between gap-1 text-slate-700">
                       <span className="flex items-center gap-1.5 font-medium whitespace-nowrap">
                         <span className="w-2 h-2 rounded-full bg-slate-900 shrink-0"></span>
-                        <span>唐奇安 20D (启动/高位轨):</span>
+                        <span>{isEn ? 'Donchian 20D (Launch / High Rail):' : '唐奇安 20D (启动/高位轨):'}</span>
                       </span>
                       <span className="font-bold text-slate-900 font-mono whitespace-nowrap">
                         ${radar.donchian20High?.toLocaleString()} 
                         <span className={`ml-1 text-[11px] font-normal ${radar.currentCycleDay >= 30 ? 'text-emerald-600 font-bold' : radar.isDonchianBreakout ? 'text-emerald-600 font-bold' : 'text-amber-600'}`}>
-                          ({radar.currentCycleDay >= 30 ? '起涨点已突破确认' : radar.isDonchianBreakout ? '已放量突破' : '等待冲破'})
+                          ({radar.currentCycleDay >= 30 
+                            ? (isEn ? 'Confirmed at Day 0' : '起涨点已突破确认') 
+                            : radar.isDonchianBreakout 
+                            ? (isEn ? 'Volume Breakout' : '已放量突破') 
+                            : (isEn ? 'Awaiting Breakout' : '等待冲破')})
                         </span>
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 font-sans pl-3.5 leading-tight">
-                      📖 <strong>白话</strong>：{radar.currentCycleDay >= 30 
-                        ? `当前运行第 ${radar.currentCycleDay} 天，起涨点已彻底突破确认；上方 $${radar.donchian20High?.toLocaleString()} 为近20日局部高点阻力。`
-                        : '过去 20 天最高价。冲破它才算大单边“真正启动”，没破前别无脑重仓追。'}
+                      📖 <strong>{isEn ? 'Guide' : '白话'}</strong>：{isEn
+                        ? (radar.currentCycleDay >= 30
+                            ? `Currently Day ${radar.currentCycleDay}, launch breakout confirmed; upper $${radar.donchian20High?.toLocaleString()} is 20-day high resistance.`
+                            : '20-day highest close. Punching through it signals genuine unilateral launch—never chase blindly before breakout.')
+                        : (radar.currentCycleDay >= 30 
+                            ? `当前运行第 ${radar.currentCycleDay} 天，起涨点已彻底突破确认；上方 $${radar.donchian20High?.toLocaleString()} 为近20日局部高点阻力。`
+                            : '过去 20 天最高价。冲破它才算大单边“真正启动”，没破前别无脑重仓追。')}
                     </p>
                   </div>
 
@@ -778,7 +802,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                     <div className="flex flex-wrap items-center justify-between gap-1 text-slate-700">
                       <span className="flex items-center gap-1.5 font-medium whitespace-nowrap">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                        <span>ATR14 波动安全垫:</span>
+                        <span>{isEn ? 'ATR14 Volatility Moat Cushion:' : 'ATR14 波动安全垫:'}</span>
                       </span>
                       <span className="font-bold text-emerald-700 font-mono whitespace-nowrap">
                         ±${radar.atr14?.toLocaleString()} 
@@ -786,7 +810,9 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 font-sans pl-3.5 leading-tight">
-                      📖 <strong>白话</strong>：大饼每天正常的自然晃荡幅度。只要插针没跌破防守底线，都属庄家诱空，别轻易卖飞。
+                      📖 <strong>{isEn ? 'Guide' : '白话'}</strong>：{isEn
+                        ? 'Normal daily noise for Bitcoin. As long as wicks stay above the defense floor, dips are bear traps—do not get shaken out.'
+                        : '大饼每天正常的自然晃荡幅度。只要插针没跌破防守底线，都属庄家诱空，别轻易卖飞。'}
                     </p>
                   </div>
 
@@ -795,19 +821,23 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                     <div className="flex flex-wrap items-center justify-between gap-1 text-slate-700">
                       <span className="flex items-center gap-1.5 font-medium whitespace-nowrap">
                         <span className={`w-2 h-2 rounded-full shrink-0 ${radar.piCycleState === 'critical' ? 'bg-amber-500 animate-pulse' : 'bg-slate-900'}`}></span>
-                        <span>Pi-Cycle 极值顶比值:</span>
+                        <span>{isEn ? 'Pi-Cycle Top Ratio:' : 'Pi-Cycle 极值顶比值:'}</span>
                       </span>
                       <span className="font-bold text-slate-900 font-mono whitespace-nowrap">
                         {radar.piCycleRatio ? radar.piCycleRatio.toFixed(2) : '--'}
                         <span className={`ml-1 text-[11px] font-semibold ${
                           radar.piCycleState === 'critical' ? 'text-amber-700' : 'text-emerald-600'
                         }`}>
-                          ({radar.piCycleState === 'critical' ? '🚨极值逃顶' : '🟢安全健康'})
+                          ({radar.piCycleState === 'critical'
+                            ? (isEn ? '🚨Critical Top' : '🚨极值逃顶')
+                            : (isEn ? '🟢Safe / Healthy' : '🟢安全健康')})
                         </span>
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 font-sans pl-3.5 leading-tight">
-                      📖 <strong>白话</strong>：历史逃顶神标。0.95~1.0 才算过热见大顶（如2021年牛顶）。目前 0.45 离大顶极远，大趋势无忧。
+                      📖 <strong>{isEn ? 'Guide' : '白话'}</strong>：{isEn
+                        ? 'Historical macro top indicator. 0.95~1.0 marks overheated peak (e.g. 2021 bull top). Currently well below danger zone; macro trend is secure.'
+                        : '历史逃顶神标。0.95~1.0 才算过热见大顶（如2021年牛顶）。目前 0.45 离大顶极远，大趋势无忧。'}
                     </p>
                   </div>
                 </div>
@@ -815,7 +845,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                 <div className="space-y-2 pt-1">
                   <div className="text-xs text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between font-bold">
                     <span>{isEn ? 'CRITERIA CHECKLIST' : '量化入场判定清单'}</span>
-                    <span className="text-slate-900 whitespace-nowrap">{radar.checklist.filter(c => c.passed).length}/5 通过</span>
+                    <span className="text-slate-900 whitespace-nowrap">{radar.checklist.filter(c => c.passed).length}/5 {isEn ? 'Passed' : '通过'}</span>
                   </div>
                   {radar.checklist.map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between gap-2 px-3 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs">
@@ -830,7 +860,11 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
 
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 flex items-start gap-2 leading-relaxed font-sans">
                   <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span>硬失效纪律：日线收盘若击穿 ${radar.invalidationPrice.toLocaleString()} 达 2 天，单边假设失效必须止损。</span>
+                  <span>
+                    {isEn
+                      ? `Hard Invalidation: If daily close pierces below $${radar.invalidationPrice.toLocaleString()} for 2 days, trend assumption is invalidated—stop loss mandatory.`
+                      : `硬失效纪律：日线收盘若击穿 $${radar.invalidationPrice.toLocaleString()} 达 2 天，单边假设失效必须止损。`}
+                  </span>
                 </div>
               </div>
             )}
@@ -839,7 +873,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
             {activeTab === 'calculator' && (
               <div className="space-y-3.5">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <span className="font-bold text-slate-900 text-sm">固定比例风险头寸逆算器</span>
+                  <span className="font-bold text-slate-900 text-sm">{isEn ? 'Fixed Fractional Position Sizer' : '固定比例风险头寸逆算器'}</span>
                   <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600">Fixed Fractional</span>
                 </div>
 
@@ -847,7 +881,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   {/* Account Size */}
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
-                      <span className="text-slate-600">账户总本金 (USD):</span>
+                      <span className="text-slate-600">{isEn ? 'Account Equity (USD):' : '账户总本金 (USD):'}</span>
                       <span className="font-bold text-slate-900 font-mono">${accountCapital.toLocaleString()}</span>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5">
@@ -868,7 +902,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   {/* Max Risk Exposure */}
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
-                      <span className="text-slate-600">单笔最大允许风险 (Equity Risk):</span>
+                      <span className="text-slate-600">{isEn ? 'Max Risk per Trade (Equity Risk):' : '单笔最大允许风险 (Equity Risk):'}</span>
                       <span className="font-bold text-amber-700 font-mono">{maxRiskPercent}% (${positionSizer.dollarRisk})</span>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5">
@@ -890,7 +924,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                 {/* Sizing Calculation Result Pod */}
                 <div className="bg-white border-2 border-slate-900 rounded-xl p-3.5 space-y-2.5 shadow-sm">
                   <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
-                    <span className="text-slate-600">硬失效止损距离:</span>
+                    <span className="text-slate-600">{isEn ? 'Hard Stop Distance:' : '硬失效止损距离:'}</span>
                     <span className="font-bold text-amber-700 font-mono">
                       -${positionSizer.stopDistance.toLocaleString()} (-{positionSizer.stopPercent}%)
                     </span>
@@ -898,19 +932,19 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">建议开仓手数:</span>
+                      <span className="text-xs text-slate-500">{isEn ? 'Recommended Position Size:' : '建议开仓手数:'}</span>
                       <span className="text-base font-bold text-slate-900 font-mono">
                         {positionSizer.positionSizeBtc} BTC
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500">头寸名义价值:</span>
+                      <span className="text-slate-500">{isEn ? 'Notional Position Value:' : '头寸名义价值:'}</span>
                       <span className="font-bold text-slate-800 font-mono">
                         ${positionSizer.positionValueUsd.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500">推导实际杠杆:</span>
+                      <span className="text-slate-500">{isEn ? 'Effective Leverage:' : '推导实际杠杆:'}</span>
                       <span className="font-bold text-slate-800 font-mono">
                         {positionSizer.leverage}x
                       </span>
@@ -918,7 +952,14 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-relaxed font-sans">
-                    🛡️ <strong className="text-slate-800">数学铁律：</strong>若价格跌破动态防守线 (${positionSizer.defenseStop.toLocaleString()})，账户最大亏损严格锁定为 <strong className="text-amber-700 font-mono">${positionSizer.dollarRisk}</strong>，绝对不会发生追加保证金或爆仓。
+                    🛡️ <strong className="text-slate-800">{isEn ? 'Mathematical Rule:' : '数学铁律：'}</strong>
+                    {isEn
+                      ? `If price breaks dynamic defense floor ($${positionSizer.defenseStop.toLocaleString()}), portfolio max loss is strictly locked at `
+                      : `若价格跌破动态防守线 ($${positionSizer.defenseStop.toLocaleString()})，账户最大亏损严格锁定为 `}
+                    <strong className="text-amber-700 font-mono">${positionSizer.dollarRisk}</strong>
+                    {isEn
+                      ? ', completely eliminating margin call or liquidation risk.'
+                      : '，绝对不会发生追加保证金或爆仓。'}
                   </div>
                 </div>
 
@@ -929,13 +970,13 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
             {activeTab === 'microstructure' && (
               <div className="space-y-3.5">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <span className="font-bold text-slate-900 text-sm">衍生品微观结构与流动性磁铁</span>
+                  <span className="font-bold text-slate-900 text-sm">{isEn ? 'Derivatives Microstructure & Liquidity Magnets' : '衍生品微观结构与流动性磁铁'}</span>
                   <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600">Hyperliquid API</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <span className="text-[11px] text-slate-500 block">全网未平仓合约 (OI)</span>
+                    <span className="text-[11px] text-slate-500 block">{isEn ? 'Total Open Interest (OI)' : '全网未平仓合约 (OI)'}</span>
                     <span className="text-sm font-bold text-slate-900 font-mono mt-0.5 block">
                       ${microstructure?.openInterestUsd ? `${microstructure.openInterestUsd}M` : '$3,296M'}
                     </span>
@@ -943,7 +984,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   </div>
 
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <span className="text-[11px] text-slate-500 block">年化资金费率 (Funding)</span>
+                    <span className="text-[11px] text-slate-500 block">{isEn ? 'Funding Rate (Annualized)' : '年化资金费率 (Funding)'}</span>
                     <span className="text-sm font-bold text-emerald-600 font-mono mt-0.5 block">
                       +{microstructure?.fundingAnnualized !== undefined ? `${microstructure.fundingAnnualized}%` : '1.37%'}
                     </span>
@@ -953,12 +994,14 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
 
                 {/* Liquidity Magnet Clusters */}
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
-                  <span className="font-bold text-slate-800 text-[11px] block">🧲 杠杆清算磁铁集群 (Liquidation Pools)</span>
+                  <span className="font-bold text-slate-800 text-[11px] block">
+                    {isEn ? '🧲 Liquidation Magnet Clusters (Liquidation Pools)' : '🧲 杠杆清算磁铁集群 (Liquidation Pools)'}
+                  </span>
                   
                   <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                      <span className="text-slate-600">上方空头爆仓带 (+4.5%):</span>
+                      <span className="text-slate-600">{isEn ? 'Upper Short Squeeze Zone (+4.5%):' : '上方空头爆仓带 (+4.5%):'}</span>
                     </div>
                     <span className="font-bold text-slate-900 font-mono">
                       ${(microstructure?.liquidationMagnetAbove || Math.round(currentPrice * 1.045)).toLocaleString()}
@@ -968,7 +1011,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span className="text-slate-600">下方多头清算扫荡 (-4.5%):</span>
+                      <span className="text-slate-600">{isEn ? 'Lower Long Flush Zone (-4.5%):' : '下方多头清算扫荡 (-4.5%):'}</span>
                     </div>
                     <span className="font-bold text-slate-900 font-mono">
                       ${(microstructure?.liquidationMagnetBelow || Math.round(currentPrice * 0.955)).toLocaleString()}
@@ -977,7 +1020,10 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                 </div>
 
                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 leading-relaxed font-sans">
-                  <strong>微观分析结论：</strong>当前年化资金费率仅 1.37%，远低于牛市见顶时的 80%~100% 极值；持仓量稳步扩张且无异常背离，属于最健康的<strong>现货与低杠杆有机推升单边形态</strong>。
+                  <strong>{isEn ? 'Microstructure Conclusion: ' : '微观分析结论：'}</strong>
+                  {isEn
+                    ? 'Current annualized funding rate is only 1.37%, far below the 80%~100% euphoric peak levels. Open interest expands steadily without abnormal divergence, representing the healthiest organic spot and low-leverage unilateral trend.'
+                    : '当前年化资金费率仅 1.37%，远低于牛市见顶时的 80%~100% 极值；持仓量稳步扩张且无异常背离，属于最健康的现货与低杠杆有机推升单边形态。'}
                 </div>
               </div>
             )}

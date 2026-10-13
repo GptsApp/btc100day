@@ -174,22 +174,22 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                 <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
                   <div className="font-bold text-slate-900 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
-                    <span>1. 监控 日线收盘位置 (UTC 8:00 闭合判定)</span>
+                    <span>{isEn ? '1. Monitor Daily Close (UTC 00:00 Assessment)' : '1. 监控 日线收盘位置 (UTC 8:00 闭合判定)'}</span>
                   </div>
                   <div className="space-y-1 text-slate-600 pl-3 border-l border-slate-200">
-                    <p>• 核验 1.1: 今日收盘价 ≥ 日线 EMA15 轨道价</p>
-                    <p>• 核验 1.2: 今日最高价 &gt; 过去 20 日最高价 (Donchian 20D)</p>
+                    <p>{isEn ? '• Check 1.1: Daily Close >= Daily EMA15 rail' : '• 核验 1.1: 今日收盘价 ≥ 日线 EMA15 轨道价'}</p>
+                    <p>{isEn ? '• Check 1.2: Daily High > Past 20-Day High (Donchian 20D)' : '• 核验 1.2: 今日最高价 > 过去 20 日最高价 (Donchian 20D)'}</p>
                   </div>
                 </div>
 
                 <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
                   <div className="font-bold text-slate-900 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
-                    <span>2. 执行 状态分支与开仓指令</span>
+                    <span>{isEn ? '2. Execute State Branch & Order Directives' : '2. 执行 状态分支与开仓指令'}</span>
                   </div>
                   <div className="space-y-1 text-slate-600 pl-3 border-l border-slate-200">
-                    <p className="text-emerald-700 font-semibold">• 双核验 PASS: Day 0 确立，首仓开多 30% ~ 50%，计时器设为 Day 1</p>
-                    <p className="text-slate-500">• 任一项 FAIL: 判定为震荡杂波，保持空仓，严禁追单</p>
+                    <p className="text-emerald-700 font-semibold">{isEn ? '• Dual PASS: Day 0 Confirmed, initial long 30%~50%, timer set to Day 1' : '• 双核验 PASS: Day 0 确立，首仓开多 30% ~ 50%，计时器设为 Day 1'}</p>
+                    <p className="text-slate-500">{isEn ? '• Any FAIL: Classified as choppy noise, stay in cash, do not chase' : '• 任一项 FAIL: 判定为震荡杂波，保持空仓，严禁追单'}</p>
                   </div>
                 </div>
               </div>
@@ -217,7 +217,7 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
               <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-lg text-xs text-amber-900 flex items-start gap-2.5">
                 <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="leading-relaxed">
-                  <strong>WARNING 警告：</strong>
+                  <strong>{isEn ? 'WARNING:' : 'WARNING 警告：'}</strong>
                   {isEn
                     ? 'Market makers engineer 1-2 violent bear trap sweeps between Day 30 and 50. Strict EMA15 closes cause a 33.6% premature stop-out rate! The EMA15 - 1.0 ATR volatility moat is the ironclad defense line.'
                     : '主力在 Day 30~50 必然发动 1~2 次击穿均线的洗盘扫止损（Bear Trap）。死卡 EMA15 收盘止损有 33.6% 概率直接卖飞在大暴涨前夜，必须以 EMA15 - 1.0 ATR 动态护城河为防守基准。'}
@@ -229,32 +229,32 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                 <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
                   <div className="font-bold text-slate-900 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
-                    <span>3. 设置 动态自适应防守线</span>
+                    <span>{isEn ? '3. Set Adaptive Dynamic Defense Floor' : '3. 设置 动态自适应防守线'}</span>
                   </div>
                   <div className="space-y-1 text-slate-600 pl-3 border-l border-slate-200 font-sans text-xs">
-                    <p className="font-mono text-[11px] font-bold text-slate-800">防守底线 = EMA15 - 1.0 × ATR14</p>
-                    <p>每日开盘自动锁定该价位，留出 2%~3% 市场固有日内波动冗余。</p>
+                    <p className="font-mono text-[11px] font-bold text-slate-800">{isEn ? 'Defense Floor = EMA15 - 1.0 × ATR14' : '防守底线 = EMA15 - 1.0 × ATR14'}</p>
+                    <p>{isEn ? 'Locked daily at session open, leaving 2%~3% intrinsic market volatility buffer.' : '每日开盘自动锁定该价位，留出 2%~3% 市场固有日内波动冗余。'}</p>
                   </div>
                 </div>
 
                 <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
                   <div className="font-bold text-slate-900 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
-                    <span>4. 处置 盘中击穿与诱空洗盘</span>
+                    <span>{isEn ? '4. Handle Intraday Pierces & Bear Traps' : '4. 处置 盘中击穿与诱空洗盘'}</span>
                   </div>
                   <div className="space-y-1 text-slate-600 pl-3 border-l border-slate-200 font-sans text-xs">
-                    <p><strong>刺破均线但高于底线</strong>：判定为正常洗盘测试，一股不卖。</p>
-                    <p className="text-emerald-700"><strong>次日大阳反包收复</strong>：确认为空头陷阱，立即顺势加仓至 70%~90%。</p>
+                    <p><strong>{isEn ? 'Pierces line but above floor' : '刺破均线但高于底线'}</strong>：{isEn ? 'Normal shakeout test, hold 100% without selling.' : '判定为正常洗盘测试，一股不卖。'}</p>
+                    <p className="text-emerald-700"><strong>{isEn ? 'Next-day bullish engulfing' : '次日大阳反包收复'}</strong>：{isEn ? 'Confirmed bear trap, scale in immediately to 70%~90%.' : '确认为空头陷阱，立即顺势加仓至 70%~90%。'}</p>
                   </div>
                 </div>
 
                 <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
                   <div className="font-bold text-slate-900 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
-                    <span>5. 跨越 Day 50 变盘中枢</span>
+                    <span>{isEn ? '5. Navigate Day 50 Pivot' : '5. 跨越 Day 50 变盘中枢'}</span>
                   </div>
                   <div className="space-y-1 text-slate-600 pl-3 border-l border-slate-200 font-sans text-xs">
-                    <p>50 天为获利盘大换手中枢。若 30 天涨幅已超 +70%（前快后慢型），严禁追高，全面转入持仓防守。</p>
+                    <p>{isEn ? 'Day 50 is the profit turnover midpoint. If 30-day gain already exceeds +70% (Front-Running), never chase—shift to full defense.' : '50 天为获利盘大换手中枢。若 30 天涨幅已超 +70%（前快后慢型），严禁追高，全面转入持仓防守。'}</p>
                   </div>
                 </div>
               </div>
@@ -282,7 +282,7 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
               <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-lg text-xs text-amber-900 flex items-start gap-2.5">
                 <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="leading-relaxed">
-                  <strong>MANDATORY DISCIPLINE 铁律纪律：</strong>
+                  <strong>{isEn ? 'MANDATORY DISCIPLINE:' : 'MANDATORY DISCIPLINE 铁律纪律：'}</strong>
                   {isEn
                     ? 'Past Day 70, historical upward momentum benchmark flattens to zero. Any new position carries negative mathematical expectation. Passive laddered take-profits must be executed regardless of bullish sentiment!'
                     : '进入 Day 70 之后，历史均值向上动能完全走平归零。任何新增开多期望收益率均为负数，必须无视盘面煽动，机械执行梯级离场！'}
@@ -296,8 +296,8 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                     <span>STEP 1</span>
                     <span className="font-bold text-slate-800">Day 75 ~ 80</span>
                   </div>
-                  <div className="font-bold text-sm text-slate-900">市价平仓 30% 仓位</div>
-                  <p className="text-slate-600 font-sans text-xs">抽回全部初始本金，锁定第一批利润，转为纯浮盈博弈。</p>
+                  <div className="font-bold text-sm text-slate-900">{isEn ? 'Market Close 30% Position' : '市价平仓 30% 仓位'}</div>
+                  <p className="text-slate-600 font-sans text-xs">{isEn ? 'Withdraw all initial capital, lock in first tranche of profit, continue with pure unrealized gains.' : '抽回全部初始本金，锁定第一批利润，转为纯浮盈博弈。'}</p>
                 </div>
 
                 <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50 space-y-1.5">
@@ -305,17 +305,17 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                     <span>STEP 2</span>
                     <span className="font-bold text-slate-800">Day 85 ~ 90</span>
                   </div>
-                  <div className="font-bold text-sm text-slate-900">市价平仓 40% 仓位</div>
-                  <p className="text-slate-600 font-sans text-xs">若 Pi-Top 比值 ≥ 0.95 或合约费率高企，坚决落袋，仅留极轻底仓。</p>
+                  <div className="font-bold text-sm text-slate-900">{isEn ? 'Market Close 40% Position' : '市价平仓 40% 仓位'}</div>
+                  <p className="text-slate-600 font-sans text-xs">{isEn ? 'If Pi-Top ratio >= 0.95 or funding rates spike, aggressively lock in gains, leaving only micro remainder.' : '若 Pi-Top 比值 ≥ 0.95 或合约费率高企，坚决落袋，仅留极轻底仓。'}</p>
                 </div>
 
                 <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50 space-y-1.5">
                   <div className="flex items-center justify-between text-slate-500 text-[11px]">
                     <span>STEP 3</span>
-                    <span className="font-bold text-slate-800">Day 100 到达</span>
+                    <span className="font-bold text-slate-800">{isEn ? 'Day 100 Reached' : 'Day 100 到达'}</span>
                   </div>
-                  <div className="font-bold text-sm text-amber-700">无条件清仓剩余 30%</div>
-                  <p className="text-slate-600 font-sans text-xs">周期闭环耗尽，不管价格是否创出新高，全部空仓进入 Rest 阶段。</p>
+                  <div className="font-bold text-sm text-amber-700">{isEn ? 'Unconditionally Exit Remaining 30%' : '无条件清仓剩余 30%'}</div>
+                  <p className="text-slate-600 font-sans text-xs">{isEn ? 'Cycle liquidity loop exhausted; regardless of new ATHs, close 100% and enter Rest phase.' : '周期闭环耗尽，不管价格是否创出新高，全部空仓进入 Rest 阶段。'}</p>
                 </div>
               </div>
             </div>
@@ -341,26 +341,26 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
               <table className="w-full text-xs font-mono text-left">
                 <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-[11px]">
                   <tr>
-                    <th className="p-3.5 font-semibold">触发条件 (Trigger Condition)</th>
-                    <th className="p-3.5 font-semibold">判定定性 (Classification)</th>
-                    <th className="p-3.5 font-semibold">即时处置动作 (Mandatory Action)</th>
+                    <th className="p-3.5 font-semibold">{isEn ? 'Trigger Condition' : '触发条件 (Trigger Condition)'}</th>
+                    <th className="p-3.5 font-semibold">{isEn ? 'Classification' : '判定定性 (Classification)'}</th>
+                    <th className="p-3.5 font-semibold">{isEn ? 'Mandatory Action' : '即时处置动作 (Mandatory Action)'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   <tr className="hover:bg-slate-50/50">
-                    <td className="p-3.5 font-bold text-amber-700">日线收盘价低于 EMA15 - 1.0 ATR 达 48 小时</td>
-                    <td className="p-3.5 font-medium">趋势硬失效 (True Breakdown)</td>
-                    <td className="p-3.5 font-bold text-slate-900">100% 清仓市价止损，坚决禁止逆势扛单</td>
+                    <td className="p-3.5 font-bold text-amber-700">{isEn ? 'Daily close below EMA15 - 1.0 ATR for 48 hours' : '日线收盘价低于 EMA15 - 1.0 ATR 达 48 小时'}</td>
+                    <td className="p-3.5 font-medium">{isEn ? 'True Breakdown' : '趋势硬失效 (True Breakdown)'}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{isEn ? '100% market stop loss; never hold against trend' : '100% 清仓市价止损，坚决禁止逆势扛单'}</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50">
-                    <td className="p-3.5 font-bold text-amber-700">单日无预警暴跌 &gt; 5.5% 且成交量放大 &gt; 2.5x</td>
-                    <td className="p-3.5 font-medium">异常放量踩踏 (Catastrophic Dip)</td>
-                    <td className="p-3.5 font-bold text-slate-900">立即平掉所有浮盈杠杆仓位，转为纯现货观察</td>
+                    <td className="p-3.5 font-bold text-amber-700">{isEn ? 'Flash crash > 5.5% with volume expansion > 2.5x' : '单日无预警暴跌 > 5.5% 且成交量放大 > 2.5x'}</td>
+                    <td className="p-3.5 font-medium">{isEn ? 'Catastrophic Dip' : '异常放量踩踏 (Catastrophic Dip)'}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{isEn ? 'Immediately close all leveraged positions; pure spot observation' : '立即平掉所有浮盈杠杆仓位，转为纯现货观察'}</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50">
-                    <td className="p-3.5 font-bold text-slate-800">Day 30 累计涨幅 &lt; 5% 且均线走平粘合</td>
-                    <td className="p-3.5 font-medium">动能衰竭 (Dead Wave)</td>
-                    <td className="p-3.5 font-bold text-slate-900">主动平仓保本离场，重置 100 天计时器</td>
+                    <td className="p-3.5 font-bold text-slate-800">{isEn ? 'Day 30 cumulative gain < 5% with flat EMA15' : 'Day 30 累计涨幅 < 5% 且均线走平粘合'}</td>
+                    <td className="p-3.5 font-medium">{isEn ? 'Dead Wave' : '动能衰竭 (Dead Wave)'}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{isEn ? 'Close at breakeven; reset 100-day timer' : '主动平仓保本离场，重置 100 天计时器'}</td>
                   </tr>
                 </tbody>
               </table>

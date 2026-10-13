@@ -206,7 +206,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
         {/* Shading Indicator Hint */}
         <div className="hidden sm:flex items-center gap-2 text-[11px] text-slate-500 font-mono">
           <span className="inline-block w-3 h-3 rounded bg-emerald-50 border border-emerald-200/80"></span>
-          <span>Day 30-70: 黄金确认窗口</span>
+          <span>{isEn ? 'Day 30-70: Golden Confirmation Window' : 'Day 30-70: 黄金确认窗口'}</span>
         </div>
       </div>
 
