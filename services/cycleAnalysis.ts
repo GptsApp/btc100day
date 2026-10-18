@@ -336,13 +336,15 @@ export const calculateStreakDetails = (
 
     // Check if cluster was reclaimed in forward timeline
     const isReclaimed = i < candles.length - 1 && candles[i + 1].close >= (emaData[i + 1]?.ema || 0);
-    const withinMoatOrShallow = maxDepth <= 3.0 || maxAtrRatio <= 1.05;
+    const withinMoatOrShallow = maxDepth <= 3.5 || maxAtrRatio <= 1.05;
 
-    // Valid Reclaimed Shakeout / Bear Trap Spring
+    // Past reclaimed dips are tolerated up to 5 days (e.g. Sept 10-18 spring clusters),
+    // cleanly preserving the Aug 17 (Day 0) launch boundary.
+    // Active ongoing tail dip within ATR moat is dynamically tolerated up to 10 trading days.
     if (isReclaimed && clusterLen <= 5 && withinMoatOrShallow) {
       streak += clusterLen;
       i = clusterIdx;
-    } else if (i === candles.length - 1 && clusterLen <= 5 && withinMoatOrShallow) {
+    } else if (i === candles.length - 1 && clusterLen <= 10 && withinMoatOrShallow) {
       // Active tail dip within ATR moat / shallow threshold:
       // Only preserve if there was an established bull streak prior to this tail dip!
       if (clusterIdx >= 0 && candles[clusterIdx].close >= (emaData[clusterIdx]?.ema || 0)) {
@@ -617,6 +619,8 @@ export const calculateTacticalRadar = (
   let state: TacticalState = 'healthy_bull';
   let stateLabel = isEn ? 'Healthy Bull (Above EMA15)' : '单边健康上行 (牢牢踩在EMA15)';
   let stance: TacticalRadarData['stance'] = 'long_hold';
+  let isBroken = false;
+  let breakdownDay: number | undefined = undefined;
 
   if (emaDistance >= 0) {
     if (yesterdayDip) {
@@ -644,10 +648,18 @@ export const calculateTacticalRadar = (
       state = 'shakeout_test';
       stateLabel = isEn ? 'ATR Moat Test (Shakeout Zone)' : 'ATR 护城河测试 (洗盘缓冲区)';
       stance = 'cautious_watch';
+    } else if (currentPrice >= atrDefenseFloor) {
+      state = 'true_breakdown';
+      stateLabel = isEn ? 'Trend Exhaustion (Over 10d Moat Chop)' : '趋势动能衰竭 (洗盘超限未反包)';
+      stance = 'defensive_exit';
+      isBroken = true;
+      breakdownDay = streakDetails.streak > 0 ? streakDetails.streak : 61;
     } else {
       state = 'true_breakdown';
       stateLabel = isEn ? 'Invalidation Alert (True Breakdown)' : '防守破位预警 (击穿 ATR 护城河)';
       stance = 'defensive_exit';
+      isBroken = true;
+      breakdownDay = streakDetails.streak > 0 ? streakDetails.streak : 61;
     }
   }
 
@@ -787,6 +799,8 @@ export const calculateTacticalRadar = (
     atrDefenseFloor,
     piCycleRatio: piCycle.ratio ?? undefined,
     piCycleState: piCycle.state,
+    isBroken,
+    breakdownDay,
     checklist,
     tacticalAdvice: {
       headline,
@@ -803,7 +817,10 @@ export const calculateTacticalRadar = (
 /**
  * Generate Normalized Day 0 - Day 100 Comparative Trajectory Data
  */
-export const buildNormalizedCycleData = (candles: CandleData[]): NormalizedCyclePoint[] => {
+export const buildNormalizedCycleData = (
+  candles: CandleData[],
+  options?: { isBroken?: boolean; breakdownDay?: number }
+): NormalizedCyclePoint[] => {
   if (!candles || candles.length === 0) return [];
 
   const points: NormalizedCyclePoint[] = [];
@@ -833,30 +850,71 @@ export const buildNormalizedCycleData = (candles: CandleData[]): NormalizedCycle
   const c2Gains = extractCycleGain('2024-01-22', 100);
   const c3Gains = extractCycleGain('2024-09-07', 100);
 
-  // Active Cycle (Cycle 4): Dynamically determine start point from verified streak
-  const emaData = calculateEMA(candles, EMA_PERIOD);
-  const streak = calculateConsecutiveAbove(candles, emaData);
-  const currentGains: (number | undefined)[] = [];
+  // Active Cycle (Cycle 4): Anchored to launch date 2026-08-17 (Day 0)
+  const c4StartMs = new Date('2026-08-17').getTime();
+  let c4StartIdx = candles.findIndex(c => Math.abs(c.time - c4StartMs) < 36 * 3600 * 1000);
+  if (c4StartIdx === -1) {
+    const emaData = calculateEMA(candles, EMA_PERIOD);
+    const streak = calculateConsecutiveAbove(candles, emaData);
+    if (streak > 0) c4StartIdx = candles.length - streak;
+  }
 
-  if (streak > 0 && streak <= candles.length) {
-    const startIdx = candles.length - streak;
-    const basePrice = candles[startIdx].close;
-    for (let d = 0; d <= 100; d++) {
-      const idx = startIdx + d;
+  const lastPrice = candles[candles.length - 1]?.close || 0;
+  const radar = calculateTacticalRadar(candles, lastPrice);
+
+  const isBroken = options?.isBroken !== undefined ? options.isBroken : (radar.isBroken || radar.state === 'true_breakdown');
+  const elapsedDays = c4StartIdx !== -1 ? Math.min(100, candles.length - 1 - c4StartIdx) : 0;
+  const breakdownDay = options?.breakdownDay ?? radar.breakdownDay ?? (isBroken ? Math.max(1, elapsedDays - (radar.activeDipDays || 2)) : undefined);
+
+  // Extract actual gains for Cycle 4
+  const c4ActualGains: (number | undefined)[] = [];
+  if (c4StartIdx !== -1) {
+    const basePrice = candles[c4StartIdx].close;
+    for (let d = 0; d <= elapsedDays; d++) {
+      const idx = c4StartIdx + d;
       if (idx < candles.length) {
         const gain = ((candles[idx].close - basePrice) / basePrice) * 100;
-        currentGains.push(Number(gain.toFixed(1)));
-      } else {
-        currentGains.push(undefined);
+        c4ActualGains.push(Number(gain.toFixed(1)));
       }
     }
   }
+
+  const lastActualGain = c4ActualGains.length > 0 ? c4ActualGains[c4ActualGains.length - 1] : 0;
 
   for (let day = 0; day <= 100; day++) {
     const c1 = c1Gains[day];
     const c2 = c2Gains[day];
     const c3 = c3Gains[day];
-    const current = currentGains[day];
+
+    let current: number | undefined = undefined;
+    let currentBroken: number | undefined = undefined;
+    let isBreakdownPoint = false;
+    let breakdownLabel: string | undefined = undefined;
+
+    if (c4ActualGains.length > 0) {
+      if (!isBroken) {
+        // Active mode: keep valid segment up to elapsedDays
+        if (day <= elapsedDays) {
+          current = c4ActualGains[day];
+        }
+      } else {
+        // Invalidation mode: keep valid segment in green, rest in red to Day 100
+        const bDay = breakdownDay !== undefined ? Math.min(breakdownDay, elapsedDays) : elapsedDays;
+        if (day < bDay) {
+          current = c4ActualGains[day];
+        } else if (day === bDay) {
+          current = c4ActualGains[day] ?? lastActualGain;
+          currentBroken = c4ActualGains[day] ?? lastActualGain;
+          isBreakdownPoint = true;
+          breakdownLabel = `已跌破 (Day ${bDay})`;
+        } else if (day <= elapsedDays) {
+          currentBroken = c4ActualGains[day];
+        } else {
+          // Project remaining 100 days as a red line
+          currentBroken = lastActualGain;
+        }
+      }
+    }
 
     const validPast = [c1, c2, c3].filter((x): x is number => typeof x === 'number');
     const avgBenchmark = validPast.length > 0 ? Number((validPast.reduce((a, b) => a + b, 0) / validPast.length).toFixed(1)) : undefined;
@@ -889,6 +947,9 @@ export const buildNormalizedCycleData = (candles: CandleData[]): NormalizedCycle
       cycle2: c2,
       cycle3: c3,
       current,
+      currentBroken,
+      isBreakdownPoint,
+      breakdownLabel,
       avgBenchmark,
       coneP90,
       coneP50,

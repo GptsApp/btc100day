@@ -73,6 +73,8 @@ export interface TacticalRadarData {
   atrDefenseFloor?: number; // EMA15 - 1.0 * ATR14 dynamic shakeout moat
   piCycleRatio?: number;    // SMA111 / (2 * SMA350)
   piCycleState?: 'safe' | 'warning' | 'critical';
+  isBroken?: boolean;
+  breakdownDay?: number;
   checklist: {
     label: string;
     value: string;
@@ -95,6 +97,9 @@ export interface NormalizedCyclePoint {
   cycle2?: number;
   cycle3?: number;
   current?: number;
+  currentBroken?: number; // Red line segment after breakdown extending to day 100
+  isBreakdownPoint?: boolean; // Marker where the cycle was invalidated
+  breakdownLabel?: string;
   avgBenchmark?: number;
   // Wall Street Monte Carlo Cone
   coneP90?: number; // 90th percentile (parabolic surge)

@@ -7,6 +7,7 @@ import {
   calculateEMA,
   calculateStreakDetails,
   calculateTacticalRadar,
+  buildNormalizedCycleData,
 } from '../services/cycleAnalysis.ts';
 
 const makeFixture = (): CandleData[] => {
@@ -178,13 +179,13 @@ test('Uncertain Phase: preserves cycle streak during 3-day EMA15 dip & rebound w
   assert.ok((radar.emaReclaimDistance ?? 0) > 0, 'Should report positive dollar distance to reclaim EMA15');
   assert.ok((radar.moatBufferRemaining ?? 0) > 0, 'Should report positive dollar buffer above ATR defense floor');
 
-  // Case B: If the dip exceeds 5 days (e.g. 6 consecutive days below EMA15), streak resets to 0
-  const sixDayDipCandles = [...moatDipCandles];
-  for (let extra = 0; extra < 3; extra++) {
+  // Case B: If the dip exceeds the dynamic 10-day tolerance (e.g. 11 consecutive days below EMA15), streak resets to 0
+  const elevenDayDipCandles = [...moatDipCandles];
+  for (let extra = 0; extra < 8; extra++) {
     const idx = 45 + extra;
-    const latestEma = calculateEMA(sixDayDipCandles, 15)[sixDayDipCandles.length - 1].ema;
+    const latestEma = calculateEMA(elevenDayDipCandles, 15)[elevenDayDipCandles.length - 1].ema;
     const dipClose = Math.round(latestEma * 0.985);
-    sixDayDipCandles.push({
+    elevenDayDipCandles.push({
       time: (idx + 1) * 86400000,
       open: dipClose + 100,
       high: dipClose + 200,
@@ -193,8 +194,8 @@ test('Uncertain Phase: preserves cycle streak during 3-day EMA15 dip & rebound w
       volume: 130,
     });
   }
-  const expiredMetrics = calculateCycleMetrics(sixDayDipCandles, sixDayDipCandles[sixDayDipCandles.length - 1].close);
-  assert.equal(expiredMetrics.consecutiveAbove, 0, 'Dip exceeding 5 days must reset consecutiveAbove to 0');
+  const expiredMetrics = calculateCycleMetrics(elevenDayDipCandles, elevenDayDipCandles[elevenDayDipCandles.length - 1].close);
+  assert.equal(expiredMetrics.consecutiveAbove, 0, 'Dip exceeding 10 days must reset consecutiveAbove to 0');
 
   // Case C: Deep breakdown below ATR moat (> 3% and below EMA15 - 1.05 ATR) resets streak to 0 and state becomes true_breakdown
   const deepCrashCandles = [...baseCandles];
@@ -228,6 +229,41 @@ test('Uncertain Phase: preserves cycle streak during 3-day EMA15 dip & rebound w
   const bearStreak = calculateStreakDetails(bearCandles, bearEma);
   assert.equal(bearStreak.streak, 0, 'Pure downtrend must have 0 streak');
   assert.equal(bearStreak.isUncertain, false);
+});
+
+test('Dynamic Moat & Curve 4 Red Line: 7-day shallow dip preserves streak, and breakdown draws red line to Day 100', () => {
+  // Build a test series simulating Cycle 4 launched on 2026-08-17
+  const startMs = new Date('2026-08-17').getTime();
+  const candles: CandleData[] = Array.from({ length: 70 }, (_, i) => {
+    const t = startMs + i * 86400000;
+    const base = 60000 + i * 350;
+    return {
+      time: t,
+      open: base,
+      high: base + 500,
+      low: base - 500,
+      close: base,
+      volume: 100,
+    };
+  });
+
+  // Verify buildNormalizedCycleData retains Curve 4 even under breakdown
+  const brokenData = buildNormalizedCycleData(candles, { isBroken: true, breakdownDay: 61 });
+  assert.equal(brokenData.length, 101, 'Should output 101 points (Day 0 to 100)');
+
+  // Prior to breakdown: current (green) is defined
+  assert.ok(typeof brokenData[0].current === 'number', 'Day 0 must have current gain');
+  assert.ok(typeof brokenData[60].current === 'number', 'Day 60 must have current gain');
+
+  // Breakdown point Day 61: flagged with isBreakdownPoint and connects both lines
+  assert.equal(brokenData[61].isBreakdownPoint, true, 'Day 61 must be flagged as breakdown point');
+  assert.ok(typeof brokenData[61].current === 'number', 'Day 61 should connect with current');
+  assert.ok(typeof brokenData[61].currentBroken === 'number', 'Day 61 should connect with currentBroken');
+
+  // After breakdown day up to Day 100: currentBroken (red) extends to Day 100
+  assert.ok(typeof brokenData[62].currentBroken === 'number', 'Day 62 must have currentBroken');
+  assert.ok(typeof brokenData[70].currentBroken === 'number', 'Day 70 must project currentBroken');
+  assert.ok(typeof brokenData[100].currentBroken === 'number', 'Day 100 must have currentBroken all the way to 100');
 });
 
 

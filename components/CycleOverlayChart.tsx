@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -9,7 +9,8 @@ import {
   ResponsiveContainer,
   CartesianGrid,
   ReferenceLine,
-  ReferenceArea
+  ReferenceArea,
+  ReferenceDot
 } from 'recharts';
 import { CandleData, Language, NormalizedCyclePoint } from '../types';
 import { buildNormalizedCycleData, calculateTacticalRadar } from '../services/cycleAnalysis';
@@ -23,23 +24,37 @@ interface CycleOverlayProps {
 
 export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }) => {
   const isEn = lang === 'en';
-
-  const overlayData: NormalizedCyclePoint[] = useMemo(() => {
-    return buildNormalizedCycleData(candles);
-  }, [candles]);
+  const [simulateBroken, setSimulateBroken] = useState<boolean>(false);
 
   const radar = useMemo(() => {
     const latestClose = candles[candles.length - 1]?.close || 0;
     return calculateTacticalRadar(candles, latestClose, lang);
   }, [candles, lang]);
 
-  const currentPoint = useMemo(() => {
+  const isBroken = simulateBroken || Boolean(radar.isBroken || radar.state === 'true_breakdown');
+
+  const overlayData: NormalizedCyclePoint[] = useMemo(() => {
+    return buildNormalizedCycleData(candles, { isBroken, breakdownDay: 61 });
+  }, [candles, isBroken]);
+
+  const latestPoint = useMemo(() => {
     for (let i = overlayData.length - 1; i >= 0; i--) {
-      if (typeof overlayData[i]?.current === 'number') {
-        return overlayData[i];
+      const p = overlayData[i];
+      if (typeof p?.current === 'number' || typeof p?.currentBroken === 'number') {
+        return p;
       }
     }
     return null;
+  }, [overlayData]);
+
+  const latestGain = latestPoint
+    ? typeof latestPoint.current === 'number'
+      ? latestPoint.current
+      : latestPoint.currentBroken
+    : 0;
+
+  const breakdownPoint = useMemo(() => {
+    return overlayData.find(p => p.isBreakdownPoint);
   }, [overlayData]);
 
   const customTooltip = ({ active, payload, label }: any) => {
@@ -59,6 +74,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
             {payload.map((entry: any, i: number) => {
               const nameMap: Record<string, string> = {
                 current: isEn ? 'Cycle 4 (Active)' : '周期 4 (当前运行)',
+                currentBroken: isEn ? 'Cycle 4 (Invalidated / Red)' : '周期 4 (已跌破区间)',
                 cycle1: isEn ? 'Cycle 1 (2023)' : '周期 1 (2023)',
                 cycle2: isEn ? 'Cycle 2 (2024 Sp)' : '周期 2 (2024春)',
                 cycle3: isEn ? 'Cycle 3 (2024 Au)' : '周期 3 (2024秋冬)',
@@ -67,6 +83,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
                 coneP10: isEn ? 'Monte Carlo 10th% (Low)' : '蒙特卡洛 10分位下限',
               };
               const isCurr = entry.dataKey === 'current';
+              const isBrokenKey = entry.dataKey === 'currentBroken';
               const isAvg = entry.dataKey === 'avgBenchmark';
               const isCone = entry.dataKey === 'coneP90' || entry.dataKey === 'coneP10';
 
@@ -76,7 +93,11 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
                 <div
                   key={i}
                   className={`flex items-center justify-between px-2 py-1 rounded-md ${
-                    isCurr ? 'font-bold text-slate-900 bg-emerald-50 border border-emerald-200/60' : 'text-slate-700'
+                    isCurr
+                      ? 'font-bold text-slate-900 bg-emerald-50 border border-emerald-200/60'
+                      : isBrokenKey
+                      ? 'font-bold text-rose-900 bg-rose-50 border border-rose-200/60'
+                      : 'text-slate-700'
                   }`}
                 >
                   <span className="flex items-center gap-2 font-mono text-[11px]">
@@ -84,6 +105,8 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
                       <span className="w-3 border-t-2 border-dashed border-slate-500"></span>
                     ) : isCone ? (
                       <span className="w-2.5 h-1 bg-slate-300 rounded-sm"></span>
+                    ) : isBrokenKey ? (
+                      <span className="w-3.5 h-0 border-t-2 border-dashed border-[#ef4444] inline-block"></span>
                     ) : (
                       <span
                         className="w-2.5 h-2.5 rounded-full"
@@ -92,7 +115,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
                     )}
                     <span>{nameMap[entry.dataKey] || entry.name}</span>
                   </span>
-                  <span className={`font-mono font-semibold ${entry.value >= 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
+                  <span className={`font-mono font-semibold ${isBrokenKey ? 'text-rose-600' : entry.value >= 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
                     {entry.value >= 0 ? '+' : ''}{entry.value}%
                   </span>
                 </div>
@@ -131,33 +154,83 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
           </div>
         </div>
 
-        {/* Current Cycle Status Pill */}
-        {currentPoint && (
-          <div
-            className={`flex flex-wrap items-center gap-2 border rounded-2xl md:rounded-full px-3.5 py-1.5 shrink-0 font-mono text-xs ${
-              radar.isUncertainPhase
-                ? 'bg-amber-50 border-amber-300 text-amber-900'
-                : 'bg-slate-50 border-slate-200'
+        {/* Current Cycle Status Pill & Interactive Scenario Toggle */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Interactive Toggle for Dynamic Mode vs Broken Red Line Scenario */}
+          <button
+            onClick={() => setSimulateBroken(!simulateBroken)}
+            className={`px-3 py-1.5 rounded-full font-mono text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
+              isBroken
+                ? 'bg-rose-50 border-rose-300 text-rose-800 hover:bg-rose-100 shadow-xs'
+                : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
-            title={radar.isUncertainPhase ? (isEn ? 'Moat rebound watch in progress' : '护城河反抽观察中') : undefined}
+            title={isEn ? 'Toggle breakdown red line scenario' : '点击切换：动态护城河观察 vs 跌破红线标注情景'}
           >
-            <span className={`w-2 h-2 rounded-full animate-pulse shrink-0 ${radar.isUncertainPhase ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
-            <span className={`whitespace-nowrap ${radar.isUncertainPhase ? 'text-amber-800 font-semibold' : 'text-slate-500'}`}>
-              {radar.isUncertainPhase
-                ? (isEn ? 'Cycle 4 (Pending):' : '周期 4 (待定):')
-                : (isEn ? 'Cycle 4:' : '周期 4:')}
+            <span className={`w-2 h-2 rounded-full ${isBroken ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`}></span>
+            <span>
+              {isBroken
+                ? (isEn ? 'Scenario: Broken (Red Line)' : '情景：跌破红线标注')
+                : (isEn ? 'Scenario: Dynamic Moat' : '情景：动态护城河')}
             </span>
-            <span className="font-bold text-slate-900 whitespace-nowrap">Day {currentPoint.day}</span>
-            <span className="font-bold text-emerald-600 whitespace-nowrap">
-              ({currentPoint.current !== undefined && currentPoint.current >= 0 ? `+${currentPoint.current}%` : `${currentPoint.current}%`})
-            </span>
-            {radar.isUncertainPhase && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 font-sans font-semibold whitespace-nowrap">
-                {isEn ? 'Moat Watch' : '护城河反抽观察中'}
+          </button>
+
+          {latestPoint && (
+            <div
+              className={`flex flex-wrap items-center gap-2 border rounded-2xl md:rounded-full px-3.5 py-1.5 shrink-0 font-mono text-xs ${
+                isBroken
+                  ? 'bg-rose-50 border-rose-300 text-rose-900'
+                  : radar.isUncertainPhase
+                  ? 'bg-amber-50 border-amber-300 text-amber-900'
+                  : 'bg-slate-50 border-slate-200'
+              }`}
+              title={
+                isBroken
+                  ? (isEn ? 'Cycle invalidated: remaining 100 days marked in red line' : '周期已跌破，剩余 100 天走势使用红线标注')
+                  : radar.isUncertainPhase
+                  ? (isEn ? 'Moat rebound watch in progress' : '护城河反抽观察中')
+                  : undefined
+              }
+            >
+              <span
+                className={`w-2 h-2 rounded-full animate-pulse shrink-0 ${
+                  isBroken ? 'bg-rose-500' : radar.isUncertainPhase ? 'bg-amber-500' : 'bg-emerald-500'
+                }`}
+              ></span>
+              <span
+                className={`whitespace-nowrap ${
+                  isBroken
+                    ? 'text-rose-800 font-semibold'
+                    : radar.isUncertainPhase
+                    ? 'text-amber-800 font-semibold'
+                    : 'text-slate-500'
+                }`}
+              >
+                {isBroken
+                  ? (isEn ? 'Cycle 4 (Broken):' : '周期 4 (已跌破):')
+                  : radar.isUncertainPhase
+                  ? (isEn ? 'Cycle 4 (Pending):' : '周期 4 (待定):')
+                  : (isEn ? 'Cycle 4:' : '周期 4:')}
               </span>
-            )}
-          </div>
-        )}
+              <span className="font-bold text-slate-900 whitespace-nowrap">Day {latestPoint.day}</span>
+              <span
+                className={`font-bold whitespace-nowrap ${
+                  isBroken ? 'text-rose-600' : 'text-emerald-600'
+                }`}
+              >
+                ({latestGain !== undefined && latestGain >= 0 ? `+${latestGain}%` : `${latestGain}%`})
+              </span>
+              {isBroken ? (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-rose-100 border border-rose-300 text-rose-800 font-sans font-semibold whitespace-nowrap">
+                  {isEn ? 'Invalidated' : '已跌破'}
+                </span>
+              ) : radar.isUncertainPhase ? (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 font-sans font-semibold whitespace-nowrap">
+                  {isEn ? 'Moat Watch' : '护城河反抽观察中'}
+                </span>
+              ) : null}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 2. Distinct Colored Legend Bar with Clear Dashed Line for Benchmark */}
@@ -171,6 +244,16 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
               {isEn ? 'Cycle 4 (Active)' : '周期 4 (当前运行)'}
             </span>
           </div>
+
+          {/* Cycle 4 Broken Line Representation */}
+          {isBroken && (
+            <div className="flex items-center gap-2 bg-rose-50 border border-rose-200/80 px-3 py-1 rounded-full">
+              <span className="w-3.5 h-0 border-t-2 border-dashed border-[#ef4444] inline-block"></span>
+              <span className="font-bold text-rose-700 text-xs">
+                {isEn ? 'Cycle 4 (Broken · Red Line)' : '周期 4 (已跌破 · 红线)'}
+              </span>
+            </div>
+          )}
 
           {/* Cycle 1 - Muted Slate */}
           <div className="flex items-center gap-2 text-slate-700 text-xs font-medium">
@@ -335,6 +418,38 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
               dot={{ r: 4, fill: '#10b981', stroke: '#ffffff', strokeWidth: 2 }}
               isAnimationActive={false}
             />
+
+            {/* Cycle 4 Broken Segment (Red Dashed Line Extended to Day 100) */}
+            <Line
+              type="monotone"
+              dataKey="currentBroken"
+              stroke="#ef4444"
+              strokeWidth={3}
+              strokeDasharray="4 4"
+              dot={false}
+              isAnimationActive={false}
+            />
+
+            {/* Breakdown Point Marker & Explicit Text Annotation */}
+            {breakdownPoint && typeof breakdownPoint.currentBroken === 'number' && (
+              <ReferenceDot
+                x={breakdownPoint.day}
+                y={breakdownPoint.currentBroken}
+                r={6}
+                fill="#ef4444"
+                stroke="#ffffff"
+                strokeWidth={2}
+                label={{
+                  value: isEn ? `BROKEN (D${breakdownPoint.day})` : `⚠️ 已跌破 (第${breakdownPoint.day}天)`,
+                  position: 'top',
+                  fill: '#dc2626',
+                  fontSize: 11,
+                  fontFamily: 'JetBrains Mono',
+                  fontWeight: 700,
+                  offset: 12,
+                }}
+              />
+            )}
           </AreaChart>
         </ResponsiveContainer>
       </div>
