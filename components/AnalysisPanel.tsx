@@ -57,7 +57,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ candles, currentPr
           <span className={`${stats.isUncertainPhase ? 'text-amber-500' : 'text-emerald-500'} flex items-center gap-1 whitespace-nowrap`}>
             <span className={`w-1.5 h-1.5 rounded-full animate-pulse shrink-0 ${stats.isUncertainPhase ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
             {stats.isUncertainPhase
-              ? (isEn ? `Moat Day ${stats.activeDipDays}/5` : `护城河第 ${stats.activeDipDays}/5 天`)
+              ? (isEn ? `Moat Day ${stats.activeDipDays}/10` : `护城河第 ${stats.activeDipDays}/10 天`)
               : (isEn ? '3-Filter Safe' : '三维过滤保护')}
           </span>
           <span className="text-slate-500 whitespace-nowrap">{stats.consecutiveAbove >= 30 ? (isEn ? 'Confirmed' : '确认期') : (isEn ? 'Accumulating' : '蓄力期')}</span>

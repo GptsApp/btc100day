@@ -697,14 +697,14 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                           <span>{isEn ? 'UNCERTAIN PHASE RESOLUTION' : '不确定阶段双向判定卡'}</span>
                         </span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 font-bold">
-                          {isEn ? `Day ${radar.activeDipDays}/5 in Moat` : `灰区第 ${radar.activeDipDays}/5 天`}
+                          {isEn ? `Day ${radar.activeDipDays}/10 in Moat` : `灰区第 ${radar.activeDipDays}/10 天`}
                         </span>
                       </div>
 
                       <p className="text-[11px] text-amber-900 font-sans leading-relaxed">
                         {isEn
-                          ? `Why still Day ${radar.currentCycleDay} instead of 0? Price is in the ATR moat buffer (Day ${radar.activeDipDays}/5, max dip -${radar.activeDipMaxDepth}%)${radar.isIntradayReclaim ? ' and rebounding intraday' : ''}. Cycle streak is provisionally preserved.`
-                          : `为何仍显示 Day ${radar.currentCycleDay} 而未归零？当前处于 EMA15 与 ATR 防守线之间的灰区第 ${radar.activeDipDays}/5 天（最大偏离 -${radar.activeDipMaxDepth}%）${radar.isIntradayReclaim ? '，且日内已出现反抽' : ''}，护城河机制暂保周期不断裂。`}
+                          ? `Why still Day ${radar.currentCycleDay} instead of 0? Price is in the ATR moat buffer (Day ${radar.activeDipDays}/10, max dip -${radar.activeDipMaxDepth}%)${radar.isIntradayReclaim ? ' and rebounding intraday' : ''}. Cycle streak is provisionally preserved.`
+                          : `为何仍显示 Day ${radar.currentCycleDay} 而未归零？当前处于 EMA15 与 ATR 防守线之间的灰区第 ${radar.activeDipDays}/10 天（最大偏离 -${radar.activeDipMaxDepth}%）${radar.isIntradayReclaim ? '，且日内已出现反抽' : ''}，护城河机制暂保周期不断裂。`}
                       </p>
 
                       {/* Visual Progress Bar between ATR Defense Floor (0%) and EMA15 (100%) */}
@@ -748,12 +748,12 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                           <span>
                             <strong className="font-mono">
                               {isEn
-                                ? `Breakdown Reset (< $${radar.invalidationPrice.toLocaleString()} or >5d): `
-                                : `破位归零 (< $${radar.invalidationPrice.toLocaleString()} 或洗盘超5天)：`}
+                                ? `Breakdown Invalidation (< $${radar.invalidationPrice.toLocaleString()} or >10d): `
+                                : `破位失效 (< $${radar.invalidationPrice.toLocaleString()} 或洗盘超10天)：`}
                             </strong>
                             {isEn
-                              ? 'ATR moat pierced, 100-day cycle officially resets to Day 0.'
-                              : '护城河击穿，本轮百日周期正式重置为 Day 0。'}
+                              ? 'ATR moat pierced or wash exceeds 10d, Cycle 4 switches to red line and marks as invalidated.'
+                              : '护城河击穿或洗盘超10天，周期判定失效，曲线4剩余天数切为红线标注。'}
                           </span>
                         </div>
                       </div>

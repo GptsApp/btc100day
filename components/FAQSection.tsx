@@ -110,6 +110,10 @@ const contentData = {
       {
         q: "How do the 3 Pillars (Donchian 20D, ATR 14 Moat, Pi-Top) augment the 100-Day Theory?",
         a: "Based on 3,300+ daily bars backtest: 1) Donchian 20D Breakout filters 28.3% false starts, lifting win-rate to 58.6% and tripling 30d avg gain (+4.0% → +10.6%). 2) ATR 14 Moat (EMA15 - 1.0 ATR) prevents 33.6% shakeout premature exits, extending holding to 40.5 days and boosting profit factor to 5.08 (+17.0% avg gain). 3) Pi Cycle Top ratio (111SMA / 2*350SMA >= 0.98) provides a systemic euphoria tripwire past Day 70 to enforce systematic profit-taking before major crashes."
+      },
+      {
+        q: "How does the chart display invalidated cycles? What is the rationale for the 10-day ATR moat tolerance?",
+        a: "1) Empirical backtests across Cycles 1-3 show consolidations frequently grind near EMA15 for 9-11 trading days. The ATR moat buffer is dynamically calibrated to 10 days—as long as price holds above EMA15 - 1.0 ATR, a bullish reclaim confirms a Spring Reclaim and seamlessly connects the cycle. 2) If the ATR moat is pierced for 48 hours or the wash exceeds 10 days, the cycle is invalidated: pre-breakdown history is permanently preserved in emerald green, while the remainder of the 100-day path renders as a prominent red dashed line to Day 100, annotated with '⚠️ INVALIDATED (Day X)'. The top bar allows instantaneous toggling between Dynamic Moat and Breakdown Red Line scenarios."
       }
     ]
   },
@@ -139,6 +143,10 @@ const contentData = {
       {
         q: "三大实战指标（唐奇安 20D、ATR 动态护城河、Pi-Top）如何给理论护航？",
         a: "基于 3300 根全量日线回测证实：1) 唐奇安 20D 通道突破过滤掉了 28.3% 的假启动震荡，使 30 天平均收益从 +4.0% 暴增至 +10.6%，胜率升至 58.6%；2) ATR 14 动态护城河（EMA15 - 1.0 ATR）避免了 33.6% 盘中洗盘被甩下车，将平均持仓期从 14.9 天延长至 40.5 天，盈亏比高达 5.08，单笔平均收益从 +5.8% 跃升至 +17.0%；3) Pi-Cycle 极值比（>=0.98）在 Day 70 之后提供硬核逃顶预警，防范单边终局 -40%+ 的断崖踩踏。"
+      },
+      {
+        q: "若周期不幸跌破，系统如何展示走势？动态护城河 10 天容错的逻辑是什么？",
+        a: "1) 历史三大周期回测证实，中途良性洗盘震荡普遍持续 9~11 个交易日，因此系统将 ATR 护城河内的容错窗口放宽至 10 天，只要不击穿 EMA15 - 1.0 ATR 防守线，大阳反包即确认 Spring Reclaim 并无缝接续周期；2) 若收盘有效跌破护城河达 48 小时或洗盘超 10 天，系统触发硬失效：已走过的历史走势永久保留为绿色实线，破位后的剩余天数全线切换为红色虚线贯穿至 Day 100，并在破位点显著标注'⚠️ 已跌破 (第XX天)'，看板顶栏支持一键切换'动态护城河'与'跌破红线情景'。"
       }
     ]
   }

@@ -731,8 +731,8 @@ export const calculateTacticalRadar = (
       passed: metrics.consecutiveAbove >= 5,
       hint: isUncertainPhase
         ? (isEn
-            ? `Dip day ${activeDipDays}/5 (max -${activeDipMaxDepth}%), held ATR moat`
-            : `护城河洗盘第 ${activeDipDays}/5 天 (最大偏离 -${activeDipMaxDepth}%)，未破位暂保周期`)
+            ? `Dip day ${activeDipDays}/10 (max -${activeDipMaxDepth}%), held ATR moat`
+            : `护城河洗盘第 ${activeDipDays}/10 天 (最大偏离 -${activeDipMaxDepth}%)，未破位暂保周期`)
         : (isEn ? 'Target: >= 5 days for trend confirmation' : '门槛：≥5天确认右侧单边')
     },
     {
@@ -768,8 +768,8 @@ export const calculateTacticalRadar = (
     positionAdvice = '80% ~ 100%';
   } else if (state === 'moat_reclaim_watch') {
     headline = isEn
-      ? `Moat Rebound Day ${activeDipDays}/5: +$${emaReclaimDistance.toLocaleString()} to Confirm Spring Reclaim`
-      : `护城河反抽第 ${activeDipDays}/5 天：还差 $${emaReclaimDistance.toLocaleString()} 收复 EMA15 确认假摔`;
+      ? `Moat Rebound Day ${activeDipDays}/10: +$${emaReclaimDistance.toLocaleString()} to Confirm Spring Reclaim`
+      : `护城河反抽第 ${activeDipDays}/10 天：还差 $${emaReclaimDistance.toLocaleString()} 收复 EMA15 确认假摔`;
     positionAdvice = '60% ~ 75%';
   } else if (state === 'shakeout_test') {
     headline = isEn ? 'Testing ATR Moat: Do Not Panic, Protected by Volatility Band' : '测试 ATR 护城河：切勿恐慌交出筹码，波动带提供弹性保护';

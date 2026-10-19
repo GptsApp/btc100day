@@ -243,8 +243,8 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                     <span>{isEn ? '4. Handle Intraday Pierces & Bear Traps' : '4. 处置 盘中击穿与诱空洗盘'}</span>
                   </div>
                   <div className="space-y-1 text-slate-600 pl-3 border-l border-slate-200 font-sans text-xs">
-                    <p><strong>{isEn ? 'Pierces line but above floor' : '刺破均线但高于底线'}</strong>：{isEn ? 'Normal shakeout test, hold 100% without selling.' : '判定为正常洗盘测试，一股不卖。'}</p>
-                    <p className="text-emerald-700"><strong>{isEn ? 'Next-day bullish engulfing' : '次日大阳反包收复'}</strong>：{isEn ? 'Confirmed bear trap, scale in immediately to 70%~90%.' : '确认为空头陷阱，立即顺势加仓至 70%~90%。'}</p>
+                    <p><strong>{isEn ? 'Pierces line but above floor (<=10d)' : '刺破均线但高于底线 (≤10天)'}</strong>：{isEn ? 'Normal shakeout test in ATR moat, hold without panic selling.' : '判定为正常护城河洗盘测试，持仓一股不卖。'}</p>
+                    <p className="text-emerald-700"><strong>{isEn ? 'Bullish engulfing reclaim' : '大阳反包收复'}</strong>：{isEn ? 'Confirmed Spring Reclaim, scale in to 70%~90%, cycle connects seamlessly.' : '确认为诱空假摔 (Spring Reclaim)，顺势加仓至 70%~90%，周期无缝延续。'}</p>
                   </div>
                 </div>
 
@@ -350,7 +350,12 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                   <tr className="hover:bg-slate-50/50">
                     <td className="p-3.5 font-bold text-amber-700">{isEn ? 'Daily close below EMA15 - 1.0 ATR for 48 hours' : '日线收盘价低于 EMA15 - 1.0 ATR 达 48 小时'}</td>
                     <td className="p-3.5 font-medium">{isEn ? 'True Breakdown' : '趋势硬失效 (True Breakdown)'}</td>
-                    <td className="p-3.5 font-bold text-slate-900">{isEn ? '100% market stop loss; never hold against trend' : '100% 清仓市价止损，坚决禁止逆势扛单'}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{isEn ? '100% stop loss; curve switches to red line' : '100% 清仓市价止损，曲线4切换为红线标注'}</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/50">
+                    <td className="p-3.5 font-bold text-amber-700">{isEn ? 'Chop below EMA15 exceeding 10 trading days' : '连续收在 EMA15 下方超过 10 个交易日'}</td>
+                    <td className="p-3.5 font-medium">{isEn ? 'Washout Exhaustion' : '洗盘超限动能耗尽 (Exhaustion)'}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{isEn ? 'De-risk and exit; remaining curve marked red' : '离场观望避险，剩余百日曲线切为红线标注'}</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50">
                     <td className="p-3.5 font-bold text-amber-700">{isEn ? 'Flash crash > 5.5% with volume expansion > 2.5x' : '单日无预警暴跌 > 5.5% 且成交量放大 > 2.5x'}</td>
