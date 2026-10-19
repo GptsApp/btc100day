@@ -5,6 +5,7 @@ import {
   analyzeCycleStage,
   calculateCycleMetrics,
   calculateEMA,
+  calculateATR,
   calculateStreakDetails,
   calculateTacticalRadar,
   buildNormalizedCycleData,
@@ -264,6 +265,59 @@ test('Dynamic Moat & Curve 4 Red Line: 7-day shallow dip preserves streak, and b
   assert.ok(typeof brokenData[62].currentBroken === 'number', 'Day 62 must have currentBroken');
   assert.ok(typeof brokenData[70].currentBroken === 'number', 'Day 70 must project currentBroken');
   assert.ok(typeof brokenData[100].currentBroken === 'number', 'Day 100 must have currentBroken all the way to 100');
+});
+
+test('Spring Reclaim: when a 7-day dip in ATR moat reclaims EMA15, streak bridges full cycle instead of resetting to 1', () => {
+  // Build a test series simulating Cycle 4 launched on 2026-08-17
+  const startMs = new Date('2026-08-17').getTime();
+  const candles: CandleData[] = Array.from({ length: 57 }, (_, i) => {
+    const t = startMs + i * 86400000;
+    const base = 60000 + i * 350;
+    return {
+      time: t,
+      open: base,
+      high: base + 500,
+      low: base - 500,
+      close: base,
+      volume: 100,
+    };
+  });
+
+  // Add a 7-day shallow dip within ATR moat (days 57 to 63)
+  const preEma = calculateEMA(candles, 15)[56].ema;
+  for (let d = 0; d < 7; d++) {
+    const t = startMs + (57 + d) * 86400000;
+    const dipClose = Math.round(preEma * 0.985); // 1.5% below EMA15, held inside ATR moat
+    candles.push({
+      time: t,
+      open: dipClose,
+      high: dipClose + 200,
+      low: dipClose - 200,
+      close: dipClose,
+      volume: 100,
+    });
+  }
+
+  // Day 64: Strong bullish reclaim candle above EMA15
+  const emaBeforeReclaim = calculateEMA(candles, 15)[candles.length - 1].ema;
+  const reclaimClose = Math.round(emaBeforeReclaim * 1.01);
+  candles.push({
+    time: startMs + 64 * 86400000,
+    open: reclaimClose - 300,
+    high: reclaimClose + 300,
+    low: reclaimClose - 300,
+    close: reclaimClose,
+    volume: 200,
+  });
+
+  const ema = calculateEMA(candles, 15);
+  const atr = calculateATR(candles, 14);
+  const streakDetails = calculateStreakDetails(candles, ema, atr);
+  const radar = calculateTacticalRadar(candles, reclaimClose, 'zh');
+
+  assert.ok(streakDetails.streak >= 60, `Streak must preserve full cycle across 7-day dip, got ${streakDetails.streak}`);
+  assert.equal(radar.currentCycleDay, streakDetails.streak);
+  assert.equal(radar.state, 'spring_reclaim', 'Must identify state as spring_reclaim');
 });
 
 

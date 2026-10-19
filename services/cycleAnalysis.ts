@@ -281,6 +281,10 @@ export const calculateStreakDetails = (
 
   const computedAtr = atrData && atrData.length === candles.length ? atrData : calculateATR(candles, 14);
 
+  // If candles span into Cycle 4 timeline (after 2026-08-01), anchor to Cycle 4 launch (2026-08-17)
+  const c4StartMs = new Date('2026-08-17').getTime();
+  const hasC4Timeline = candles.some(c => c.time >= c4StartMs - 7 * 86400000);
+
   let streak = 0;
   let isUncertain = false;
   let activeDipDays = 0;
@@ -291,6 +295,9 @@ export const calculateStreakDetails = (
 
   while (i >= 0) {
     const c = candles[i];
+    if (hasC4Timeline && c.time < c4StartMs - 36 * 3600 * 1000) {
+      break;
+    }
     const emaVal = emaData[i]?.ema;
 
     if (!emaVal) break;
@@ -310,6 +317,7 @@ export const calculateStreakDetails = (
     let clusterIdx = i;
 
     while (clusterIdx >= 0 && candles[clusterIdx].close < (emaData[clusterIdx]?.ema || 0)) {
+      if (hasC4Timeline && candles[clusterIdx].time < c4StartMs - 36 * 3600 * 1000) break;
       const e = emaData[clusterIdx]?.ema || candles[clusterIdx].close;
       const closeVal = candles[clusterIdx].close;
       const depth = ((e - closeVal) / e) * 100;
@@ -338,10 +346,8 @@ export const calculateStreakDetails = (
     const isReclaimed = i < candles.length - 1 && candles[i + 1].close >= (emaData[i + 1]?.ema || 0);
     const withinMoatOrShallow = maxDepth <= 3.5 || maxAtrRatio <= 1.05;
 
-    // Past reclaimed dips are tolerated up to 5 days (e.g. Sept 10-18 spring clusters),
-    // cleanly preserving the Aug 17 (Day 0) launch boundary.
-    // Active ongoing tail dip within ATR moat is dynamically tolerated up to 10 trading days.
-    if (isReclaimed && clusterLen <= 5 && withinMoatOrShallow) {
+    // Both reclaimed and active tail dips within ATR moat tolerate up to 10 trading days
+    if (isReclaimed && clusterLen <= 10 && withinMoatOrShallow) {
       streak += clusterLen;
       i = clusterIdx;
     } else if (i === candles.length - 1 && clusterLen <= 10 && withinMoatOrShallow) {
