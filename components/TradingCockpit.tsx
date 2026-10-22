@@ -136,10 +136,10 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
     <div id="chart" className="space-y-4">
       
       {/* 1. Global Master Console Bento (Gallery-White Pure Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.05fr_1.05fr_1fr_1fr] gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.05fr_1.05fr_1fr_1fr]">
         
         {/* Ticker & Price */}
-        <BentoCard className="sm:col-span-2 lg:col-span-1 p-4 flex flex-col justify-between" glow>
+        <BentoCard className="col-span-2 lg:col-span-1 p-3 sm:p-2.5 sm:p-4 flex flex-col justify-between" glow>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 whitespace-nowrap">
               <span className="w-2.5 h-2.5 rounded-full bg-slate-900 shrink-0"></span>
@@ -152,8 +152,8 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
             </span>
           </div>
 
-          <div className="mt-2.5 flex items-baseline justify-between gap-2 flex-wrap">
-            <span className="text-2xl xl:text-3xl font-mono font-bold text-slate-900 tracking-tight whitespace-nowrap">
+          <div className="mt-1.5 sm:mt-2.5 flex items-baseline justify-between gap-2 flex-wrap">
+            <span className="text-[26px] sm:text-2xl xl:text-3xl font-mono font-bold text-slate-900 tracking-tight whitespace-nowrap">
               {stats ? `$${stats.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '-------'}
             </span>
             <span className="text-xs font-mono text-slate-500 whitespace-nowrap">
@@ -163,9 +163,9 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
         </BentoCard>
 
         {/* Cycle 5 Progress */}
-        <BentoCard className={`p-4 flex flex-col justify-between ${radar.isUncertainPhase ? 'border-amber-300/90 bg-amber-50/25' : ''}`}>
+        <BentoCard className={`p-2.5 sm:p-4 flex flex-col justify-between ${radar.isUncertainPhase ? 'border-amber-300/90 bg-amber-50/25' : ''}`}>
           <div className="flex items-center justify-between gap-1.5">
-            <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-medium whitespace-nowrap">
+            <span className="text-[9px] sm:text-[11px] font-mono text-slate-500 uppercase tracking-normal sm:tracking-wider font-medium whitespace-nowrap">
               {isEn ? 'CYCLE 5 STAGE' : '周期 5 进度'}
             </span>
             {radar.isUncertainPhase && (
@@ -175,8 +175,8 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
               </span>
             )}
           </div>
-          <div className="mt-1.5 flex items-baseline gap-1.5 whitespace-nowrap">
-            <span className="text-2xl font-mono font-bold text-slate-900">Day {radar.currentCycleDay}</span>
+          <div className="mt-1 sm:mt-1.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+            <span className="text-[19px] sm:text-2xl font-mono font-bold text-slate-900">Day {radar.currentCycleDay}</span>
             <span className="text-xs font-mono text-slate-400">/ 100</span>
             {radar.isUncertainPhase && (
               <span className="text-[11px] font-mono font-semibold text-amber-700">
@@ -184,7 +184,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
               </span>
             )}
           </div>
-          <div className="text-[11px] font-mono text-slate-600 mt-1 leading-tight">
+          <div className="text-[9px] sm:text-[11px] font-mono text-slate-600 mt-0.5 sm:mt-1 leading-tight">
             {radar.isUncertainPhase ? (
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span className="text-emerald-700 font-semibold whitespace-nowrap">
@@ -202,13 +202,13 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
         </BentoCard>
 
         {/* EMA15 Anchor */}
-        <BentoCard className="p-4 flex flex-col justify-between">
-          <div className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-medium whitespace-nowrap">
+        <BentoCard className="p-2.5 sm:p-4 flex flex-col justify-between">
+          <div className="text-[9px] sm:text-[11px] font-mono text-slate-500 uppercase tracking-normal sm:tracking-wider font-medium whitespace-nowrap">
             {isEn ? 'EMA15 LINE' : 'EMA15 轨道'}
           </div>
-          <div className="mt-1.5 text-xl font-mono font-bold text-slate-900 flex items-baseline gap-1.5 whitespace-nowrap">
-            <span>${radar.ema15Price.toLocaleString()}</span>
-            <span className={`text-xs font-semibold ${emaDiff >= 0 ? 'text-emerald-600' : 'text-amber-700'}`}>
+          <div className="mt-1 sm:mt-1.5 text-[16px] sm:text-xl font-mono font-bold text-slate-900 flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-1.5">
+            <span className="whitespace-nowrap">${radar.ema15Price.toLocaleString()}</span>
+            <span className={`text-[11px] sm:text-xs font-semibold whitespace-nowrap ${emaDiff >= 0 ? 'text-emerald-600' : 'text-amber-700'}`}>
               ({emaDiff >= 0 ? '+' : ''}{emaDiff.toFixed(1)}%)
             </span>
           </div>
@@ -228,8 +228,8 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
         </BentoCard>
 
         {/* Stop Loss (ATR Dynamic Moat) */}
-        <BentoCard className="p-4 flex flex-col justify-between border-slate-200 bg-white group relative">
-          <div className="text-[11px] font-mono text-slate-600 uppercase tracking-wider font-semibold flex items-center justify-between gap-1.5">
+        <BentoCard className="p-2.5 sm:p-4 flex flex-col justify-between border-slate-200 bg-white group relative">
+          <div className="text-[9px] sm:text-[11px] font-mono text-slate-600 uppercase tracking-normal sm:tracking-wider font-semibold flex items-center justify-between gap-1.5">
             <span className="whitespace-nowrap">{isEn ? 'ATR MOAT FLOOR' : 'ATR 动态防守线'}</span>
             <div className="relative group/tip cursor-help shrink-0">
               <HelpCircle className="w-3.5 h-3.5 text-slate-400 hover:text-slate-700" />
@@ -243,24 +243,24 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
               </div>
             </div>
           </div>
-          <div className="mt-1.5 text-xl font-mono font-bold text-slate-900 whitespace-nowrap">
+          <div className="mt-1 sm:mt-1.5 text-[16px] sm:text-xl font-mono font-bold text-slate-900 whitespace-nowrap">
             ${(radar.atrDefenseFloor || radar.invalidationPrice).toLocaleString()}
           </div>
-          <div className="text-[11px] font-mono text-slate-500 mt-1 leading-tight">
+          <div className="text-[9px] sm:text-[11px] font-mono text-slate-500 mt-0.5 sm:mt-1 leading-tight">
             {isEn ? `-$${radar.atr14?.toLocaleString() || '---'} Volatility Buffer` : `扣减 $${radar.atr14?.toLocaleString() || '---'} 允许洗盘冗余`}
           </div>
         </BentoCard>
 
         {/* Derivatives Crowdedness / Microstructure Alert */}
-        <BentoCard className="p-4 flex flex-col justify-between">
-          <div className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-medium flex items-center justify-between gap-1.5">
+        <BentoCard className="p-2.5 sm:p-4 flex flex-col justify-between">
+          <div className="text-[9px] sm:text-[11px] font-mono text-slate-500 uppercase tracking-normal sm:tracking-wider font-medium flex items-center justify-between gap-1.5">
             <span className="whitespace-nowrap">{isEn ? 'DERIVATIVES OI' : '全网持仓 / 费率'}</span>
             <span className={`w-2 h-2 rounded-full shrink-0 ${microstructure?.leverageRiskLevel === 'extreme' ? 'bg-amber-500 animate-ping' : microstructure?.leverageRiskLevel === 'overheated' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
           </div>
-          <div className="mt-1.5 text-xl font-mono font-bold text-slate-900 whitespace-nowrap">
+          <div className="mt-1 sm:mt-1.5 text-[16px] sm:text-xl font-mono font-bold text-slate-900 whitespace-nowrap">
             ${microstructure?.openInterestUsd ? `${microstructure.openInterestUsd}M` : '$3,296M'}
           </div>
-          <div className="text-[11px] font-mono text-slate-600 mt-1 leading-tight flex flex-wrap items-center gap-x-1">
+          <div className="text-[9px] sm:text-[11px] font-mono text-slate-600 mt-0.5 sm:mt-1 leading-tight flex flex-wrap items-center gap-x-1">
             <span className="whitespace-nowrap">{isEn ? 'Funding APR:' : '年化费率:'}</span>
             <span className="font-bold text-slate-900 whitespace-nowrap">
               {microstructure?.fundingAnnualized !== undefined ? `${microstructure.fundingAnnualized}%` : '1.37%'}

@@ -930,65 +930,88 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
         <div ref={containerRef} className="relative z-10 w-full h-full" />
       </div>
 
-      {/* 3. 1-CLICK CYCLE ZOOM CONTROLLER (swipeable pill rail, native scrollbar hidden) */}
-      <div className="flex items-center gap-2 pt-2 pb-0.5 border-t border-slate-100 text-[11px]">
-
-        {/* Left Label */}
-        <div className="flex items-center gap-1.5 text-slate-500 shrink-0">
-          <Compass className="w-3.5 h-3.5 text-slate-600" />
-          <span className="hidden md:inline font-medium text-slate-800">{isEn ? 'Quick Zoom:' : '一键定位周期:'}</span>
-        </div>
-
-        {/* Cycle Navigation Buttons — one-finger swipeable, no visible scroll thumb */}
-        <div className="relative flex-1 min-w-0">
-          <div className="overflow-x-auto md:overflow-visible no-scrollbar overscroll-x-contain">
-            <div className="flex w-max md:w-full md:flex-wrap items-center gap-1.5 pr-1 md:justify-end">
-
+      {/* 3. CYCLE SWITCHER — mobile gets a fully visible 3x2 grid, desktop a wrapping pill rail */}
+      <div className="md:hidden grid grid-cols-3 gap-1.5 pt-2 pb-0.5 border-t border-slate-100 text-[11px]">
+        <button
+          onClick={() => zoomToCycle('all')}
+          className={`h-[36px] rounded-full border flex items-center justify-center active:scale-95 transition-all duration-200 cursor-pointer ${
+            activeCycleTab === 'all'
+              ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
+              : 'bg-slate-100 border-slate-200 text-slate-600'
+          }`}
+        >
+          {isEn ? 'All' : '全景'}
+        </button>
+        {cycleBands.map((c) => {
+          const isActive = activeCycleTab === c.id;
+          const shortName = c.name.replace(/\s*\(.*?\)\s*/g, '');
+          return (
             <button
-              onClick={() => zoomToCycle('all')}
-              className={`shrink-0 whitespace-nowrap min-h-[36px] sm:min-h-[32px] px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1 active:scale-95 ${
-                activeCycleTab === 'all'
+              key={c.id}
+              onClick={() => zoomToCycle(c.id)}
+              className={`h-[36px] px-0.5 rounded-full border flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 transition-all duration-200 cursor-pointer ${
+                isActive
                   ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
-                  : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
+                  : c.isCurrent
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                  : 'bg-slate-100 border-slate-200 text-slate-600'
               }`}
             >
-              <span className="sm:hidden">{isEn ? 'All' : '全景'}</span>
-              <span className="hidden sm:inline">{isEn ? 'All Cycles' : '全景总览'}</span>
+              {c.isCurrent && <span className="w-1 h-1 rounded-full bg-emerald-500 shrink-0"></span>}
+              <span className="font-bold text-[10px]">{shortName}</span>
+              <span className={`text-[9px] ${isActive ? 'text-slate-300' : c.isCurrent ? 'text-emerald-700' : 'text-slate-400'}`}>
+                {c.gain}
+              </span>
             </button>
+          );
+        })}
+      </div>
 
-            {cycleBands.map((c) => {
-              const isActive = activeCycleTab === c.id;
-              const shortName = c.name.replace(/\s*\(.*?\)\s*/g, '');
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => zoomToCycle(c.id)}
-                  className={`shrink-0 whitespace-nowrap min-h-[36px] sm:min-h-[32px] px-2.5 sm:px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                    isActive
-                      ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
-                      : c.isCurrent
-                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100/80'
-                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
-                  }`}
-                  title={`${isEn ? 'Zoom to' : '点击平滑缩放聚焦至'} ${c.name} (${c.start} ~ ${c.end})`}
-                >
-                  {c.isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>}
-                  <span className="font-bold">
-                    <span className="sm:hidden">{shortName}</span>
-                    <span className="hidden sm:inline">{c.name}</span>
-                  </span>
-                  <span className={`text-[10px] ${isActive ? 'text-slate-300' : c.isCurrent ? 'text-emerald-700' : 'text-slate-400'}`}>
-                    {c.gain}
-                  </span>
-                </button>
-              );
-            })}
-            </div>
-          </div>
-          {/* Right-edge fade: hints the rail is swipeable on narrow screens */}
-          <div className="md:hidden pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent"></div>
+      <div className="hidden md:flex items-center gap-2 pt-2 pb-0.5 border-t border-slate-100 text-[11px]">
+        <div className="flex items-center gap-1.5 text-slate-500 shrink-0">
+          <Compass className="w-3.5 h-3.5 text-slate-600" />
+          <span className="font-medium text-slate-800">{isEn ? 'Quick Zoom:' : '一键定位周期:'}</span>
         </div>
 
+        <div className="flex-1 min-w-0">
+          <div className="overflow-visible">
+            <div className="flex w-full flex-wrap items-center gap-1.5 pr-1 justify-end">
+              <button
+                onClick={() => zoomToCycle('all')}
+                className={`shrink-0 whitespace-nowrap min-h-[32px] px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1 active:scale-95 ${
+                  activeCycleTab === 'all'
+                    ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
+                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
+                }`}
+              >
+                {isEn ? 'All Cycles' : '全景总览'}
+              </button>
+              {cycleBands.map((c) => {
+                const isActive = activeCycleTab === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => zoomToCycle(c.id)}
+                    className={`shrink-0 whitespace-nowrap min-h-[32px] px-2.5 py-1.5 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-95 ${
+                      isActive
+                        ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
+                        : c.isCurrent
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100/80'
+                        : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
+                    }`}
+                    title={`${isEn ? 'Zoom to' : '点击平滑缩放聚焦至'} ${c.name} (${c.start} ~ ${c.end})`}
+                  >
+                    {c.isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>}
+                    <span className="font-bold">{c.name}</span>
+                    <span className={`text-[10px] ${isActive ? 'text-slate-300' : c.isCurrent ? 'text-emerald-700' : 'text-slate-400'}`}>
+                      {c.gain}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
