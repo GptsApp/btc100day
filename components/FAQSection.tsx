@@ -92,8 +92,8 @@ const contentData = {
         a: "The BTC 100-Day Cycle Theory defines an empirical pattern: when Bitcoin initiates a single-sided parabolic bull wave above daily EMA15, momentum persists for ~100 trading days (historical spans: 99 to 101 days) before entering exhaustion. Rooted in sociological narrative diffusion, investor sentiment fatigue, and market liquidity exhaustion."
       },
       {
-        q: "What are the empirical backtest findings across Cycle 1, 2, and 3?",
-        a: "Our empirical Binance backtest verifies: 1) Span: Cycle 1 was 101 days (+82.4%), Cycle 2 was 99 days (+86.5%), Cycle 3 was 101 days (+99.0%). 2) EMA15 Dominance: Bitcoin stays above daily EMA15 for 72% - 83% of each cycle. 3) Unbroken Streaks: Every cycle exhibits a sustained 30-50 day streak without deep breaks. 4) Space Ceiling: Total cycle gain consistently caps at +80% ~ +100%, and win-rate collapses past Day 70."
+        q: "What are the empirical backtest findings across Cycle 1, 2, 3, and 4?",
+        a: "Our empirical Binance backtest verifies: 1) Span: Cycle 1 was 101 days (+82.4%), Cycle 2 was 99 days (+86.5%), Cycle 3 was 101 days (+99.0%), Cycle 4 (Apr-Jul 2025) was 100 days (+61.4%). 2) EMA15 Dominance: Bitcoin stays above daily EMA15 for 72% - 83% of each cycle. 3) Unbroken Streaks: Every cycle exhibits a sustained 30-50 day streak without deep breaks. 4) Space Ceiling: Total cycle gain caps at +60% ~ +100%, and win-rate collapses past Day 70."
       },
       {
         q: "How does the 3-Filter Engine protect against shakeouts like Sept 10-18?",
@@ -101,7 +101,7 @@ const contentData = {
       },
       {
         q: "How do 'Fast Start, Slow End' vs 'Slow Start, Fast End' dictate trade plans?",
-        a: "Cycle 2 was 'Fast Start, Slow End' (surged +75% in first 50 days, then spent 50 days in wide chop). Cycle 3 was 'Slow Start, Fast End' (grinded near EMA15 for 30 days (+15%), then accelerated vertically to $107k (+99%)). Identifying rotation patterns prevents chasing late moves."
+        a: "Cycle 2 was 'Fast Start, Slow End' (surged +75% in first 50 days, then spent 50 days in wide chop). Cycle 3 was 'Slow Start, Fast End' (grinded near EMA15 for 30 days (+15%), then accelerated vertically to $107k (+99%)). Cycle 4 (2025) was 'Fast Start, Chop, Late Blow-off' (+41% by Day 50, then ~40 days of high-level chop before a final push to $123k). Identifying rotation patterns prevents chasing late moves."
       },
       {
         q: "What is the ironclad Invalidation Level?",
@@ -113,7 +113,7 @@ const contentData = {
       },
       {
         q: "How does the chart display invalidated cycles? What is the rationale for the 10-day ATR moat tolerance?",
-        a: "1) Empirical backtests across Cycles 1-3 show consolidations frequently grind near EMA15 for 9-11 trading days. The ATR moat buffer is dynamically calibrated to 10 days—as long as price holds above EMA15 - 1.0 ATR, a bullish reclaim confirms a Spring Reclaim and seamlessly connects the cycle. 2) If the ATR moat is pierced for 48 hours or the wash exceeds 10 days, the cycle is invalidated: pre-breakdown history is permanently preserved in emerald green, while the remainder of the 100-day path renders as a prominent red dashed line to Day 100, annotated with '⚠️ INVALIDATED (Day X)'. The top bar allows instantaneous toggling between Dynamic Moat and Breakdown Red Line scenarios."
+        a: "1) Empirical backtests across Cycles 1-4 show consolidations frequently grind near EMA15 for 9-11 trading days. The ATR moat buffer is dynamically calibrated to 10 days—as long as price holds above EMA15 - 1.0 ATR, a bullish reclaim confirms a Spring Reclaim and seamlessly connects the cycle. 2) If the ATR moat is pierced for 48 hours or the wash exceeds 10 days, the cycle is invalidated: pre-breakdown history is permanently preserved in emerald green, while the remainder of the 100-day path renders as a prominent red dashed line to Day 100, annotated with '⚠️ INVALIDATED (Day X)'. The top bar allows instantaneous toggling between Dynamic Moat and Breakdown Red Line scenarios."
       }
     ]
   },
@@ -125,8 +125,8 @@ const contentData = {
         a: "BTC 100天周期理论揭示了一个客观规律：当比特币进入单边快速主升浪（价格稳定踩在日线 EMA15 上方）时，爆发性动能通常持续约 100 天（历史实测为 99 至 101 天）见顶，随后进入休整期。其本质是行为心理学、传播学与市场杠杆博弈的情绪周期极限。"
       },
       {
-        q: "Cycle 1、Cycle 2、Cycle 3 的真实量化回测证据是什么？",
-        a: "我们调取币安完整日线数据回测证实：1) 周期跨度极度严格：Cycle 1 为 101天(+82.4%)，Cycle 2 为 99天(+86.5%)，Cycle 3 为 101天(+99.0%)。2) EMA15上方天数占比高达 72% ~ 83%，说明主升浪绝大多数时间不破线。3) 黄金连涨波段：每轮必然存在一段 30~50 天几乎不破线的极强单边。4) 空间天花板效应：累积涨幅触及 +80%~+100% 或日历来到 Day 70 之后，盈亏比断崖式恶化。"
+        q: "Cycle 1、Cycle 2、Cycle 3、Cycle 4 的真实量化回测证据是什么？",
+        a: "我们调取币安完整日线数据回测证实：1) 周期跨度极度严格：Cycle 1 为 101天(+82.4%)，Cycle 2 为 99天(+86.5%)，Cycle 3 为 101天(+99.0%)，Cycle 4（2025年4月8日 - 7月17日）为 100天(+61.4%)。2) EMA15上方天数占比高达 72% ~ 83%，说明主升浪绝大多数时间不破线。3) 黄金连涨波段：每轮必然存在一段 30~50 天几乎不破线的极强单边。4) 空间天花板效应：累积涨幅触及 +60%~+100% 或日历来到 Day 70 之后，盈亏比断崖式恶化。"
       },
       {
         q: "面对 9.10 - 9.18 类型的均线跌破诱空，系统如何精准过滤？",
@@ -134,7 +134,7 @@ const contentData = {
       },
       {
         q: "前快后慢和前慢后快在实战中如何指导开单？",
-        a: "前快后慢（如 Cycle 2）：前 50 天暴涨 +75%，透支了后半场空间，后 50 天在高位巨幅洗盘震荡；前慢后快（如 Cycle 3）：前 30 天贴着 EMA15 磨盘洗盘仅涨 +15%，第 40 天开始主升浪垂直加速拉升至 +99%。识别当前周期的节奏，能彻底避免在后半段追高被套。"
+        a: "前快后慢（如 Cycle 2）：前 50 天暴涨 +75%，透支了后半场空间，后 50 天在高位巨幅洗盘震荡；前慢后快（如 Cycle 3）：前 30 天贴着 EMA15 磨盘洗盘仅涨 +15%，第 40 天开始主升浪垂直加速拉升至 +99%；前快后横后冲（如 Cycle 4，2025年4-7月）：前 50 天先涨 +41%，随后约 40 天在 EMA15 上方高位横盘，尾段二次冲顶至 12.3 万美元。识别当前周期的节奏，能彻底避免在后半段追高被套。"
       },
       {
         q: "交易员必须恪守的理论硬失效防守线是什么？",
@@ -146,7 +146,7 @@ const contentData = {
       },
       {
         q: "若周期不幸跌破，系统如何展示走势？动态护城河 10 天容错的逻辑是什么？",
-        a: "1) 历史三大周期回测证实，中途良性洗盘震荡普遍持续 9~11 个交易日，因此系统将 ATR 护城河内的容错窗口放宽至 10 天，只要不击穿 EMA15 - 1.0 ATR 防守线，大阳反包即确认 Spring Reclaim 并无缝接续周期；2) 若收盘有效跌破护城河达 48 小时或洗盘超 10 天，系统触发硬失效：已走过的历史走势永久保留为绿色实线，破位后的剩余天数全线切换为红色虚线贯穿至 Day 100，并在破位点显著标注'⚠️ 已跌破 (第XX天)'，看板顶栏支持一键切换'动态护城河'与'跌破红线情景'。"
+        a: "1) 历史四大周期回测证实，中途良性洗盘震荡普遍持续 9~11 个交易日，因此系统将 ATR 护城河内的容错窗口放宽至 10 天，只要不击穿 EMA15 - 1.0 ATR 防守线，大阳反包即确认 Spring Reclaim 并无缝接续周期；2) 若收盘有效跌破护城河达 48 小时或洗盘超 10 天，系统触发硬失效：已走过的历史走势永久保留为绿色实线，破位后的剩余天数全线切换为红色虚线贯穿至 Day 100，并在破位点显著标注'⚠️ 已跌破 (第XX天)'，看板顶栏支持一键切换'动态护城河'与'跌破红线情景'。"
       }
     ]
   }

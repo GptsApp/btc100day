@@ -162,11 +162,11 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
           </div>
         </BentoCard>
 
-        {/* Cycle 4 Progress */}
+        {/* Cycle 5 Progress */}
         <BentoCard className={`p-4 flex flex-col justify-between ${radar.isUncertainPhase ? 'border-amber-300/90 bg-amber-50/25' : ''}`}>
           <div className="flex items-center justify-between gap-1.5">
             <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-medium whitespace-nowrap">
-              {isEn ? 'CYCLE 4 STAGE' : '周期 4 进度'}
+              {isEn ? 'CYCLE 5 STAGE' : '周期 5 进度'}
             </span>
             {radar.isUncertainPhase && (
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-mono font-bold text-amber-800 shrink-0 whitespace-nowrap">
@@ -752,8 +752,8 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                                 : `破位失效 (< $${radar.invalidationPrice.toLocaleString()} 或洗盘超10天)：`}
                             </strong>
                             {isEn
-                              ? 'ATR moat pierced or wash exceeds 10d, Cycle 4 switches to red line and marks as invalidated.'
-                              : '护城河击穿或洗盘超10天，周期判定失效，曲线4剩余天数切为红线标注。'}
+                              ? 'ATR moat pierced or wash exceeds 10d, Cycle 5 switches to red line and marks as invalidated.'
+                              : '护城河击穿或洗盘超10天，周期判定失效，当前周期曲线剩余天数切为红线标注。'}
                           </span>
                         </div>
                       </div>

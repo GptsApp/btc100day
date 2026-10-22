@@ -96,6 +96,7 @@ export interface NormalizedCyclePoint {
   cycle1?: number; // Gain %
   cycle2?: number;
   cycle3?: number;
+  cycle4?: number;
   current?: number;
   currentBroken?: number; // Red line segment after breakdown extending to day 100
   isBreakdownPoint?: boolean; // Marker where the cycle was invalidated

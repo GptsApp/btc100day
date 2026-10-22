@@ -233,7 +233,7 @@ test('Uncertain Phase: preserves cycle streak during 3-day EMA15 dip & rebound w
 });
 
 test('Dynamic Moat & Curve 4 Red Line: 7-day shallow dip preserves streak, and breakdown draws red line to Day 100', () => {
-  // Build a test series simulating Cycle 4 launched on 2026-08-17
+  // Build a test series simulating Cycle 5 launched on 2026-08-17
   const startMs = new Date('2026-08-17').getTime();
   const candles: CandleData[] = Array.from({ length: 70 }, (_, i) => {
     const t = startMs + i * 86400000;
@@ -268,7 +268,7 @@ test('Dynamic Moat & Curve 4 Red Line: 7-day shallow dip preserves streak, and b
 });
 
 test('Spring Reclaim: when a 7-day dip in ATR moat reclaims EMA15, streak bridges full cycle instead of resetting to 1', () => {
-  // Build a test series simulating Cycle 4 launched on 2026-08-17
+  // Build a test series simulating Cycle 5 launched on 2026-08-17
   const startMs = new Date('2026-08-17').getTime();
   const candles: CandleData[] = Array.from({ length: 57 }, (_, i) => {
     const t = startMs + i * 86400000;

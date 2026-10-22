@@ -128,6 +128,12 @@ const App = () => {
   // Verified cycles
   const highlightPeriods: HighlightPeriod[] = useMemo(() => {
     const isEn = lang === 'en';
+    const c5StartMs = new Date('2026-08-17').getTime();
+    const c5Idx = liveCandles.findIndex((c) => Math.abs(c.time - c5StartMs) < 36 * 3600 * 1000);
+    const c5Base = c5Idx >= 0 ? liveCandles[c5Idx].close : 0;
+    const c5LastClose = liveCandles[liveCandles.length - 1]?.close || 0;
+    const c5Gain = c5Base > 0 ? ((c5LastClose - c5Base) / c5Base) * 100 : 0;
+    const c5Days = c5Idx >= 0 ? liveCandles.length - 1 - c5Idx : 0;
     return [
       {
         label: isEn ? "Cycle 1" : "周期 1",
@@ -151,14 +157,25 @@ const App = () => {
         characteristics: isEn ? "Grinding near EMA15 then vertical parabolic surge" : "前30天贴线蓄力洗盘，后半程垂直加速爆拉"
       },
       {
-        label: isEn ? "Cycle 4 (Active)" : "周期 4 (当前运行)",
+        label: isEn ? "Cycle 4" : "周期 4",
+        startDate: "2025-04-08",
+        endDate: "2025-07-17",
+        description: isEn ? "Fast Start / Chop / Late Blow-off (+61.4%)" : "前快后横型 (+61.4%)",
+        characteristics: isEn
+          ? "Surged +41% by Day 50, chopped 40 days near EMA15, then a late blow-off to the cycle top"
+          : "前50天急拉+41%，中段约40天在EMA15上方高位横盘，尾段二次冲顶收尾",
+      },
+      {
+        label: isEn ? "Cycle 5 (Active)" : "周期 5 (当前运行)",
         startDate: "2026-08-17",
         endDate: "2026-11-25",
-        description: isEn ? "Active Bull Wave (+32.2%)" : "当前单边主升浪 (+32.2%)",
-        characteristics: isEn ? "3-Filter confirmed spring reclaims, holding EMA15 for 49 days" : "三维过滤已确认诱空反包，稳健踩在EMA15上方达49天",
+        description: isEn ? `Active Bull Wave (+${c5Gain.toFixed(1)}%)` : `当前单边主升浪 (+${c5Gain.toFixed(1)}%)`,
+        characteristics: isEn
+          ? `3-Filter confirmed spring reclaims, now at Day ${c5Days}/100`
+          : `三维过滤已确认诱空反包，当前运行至 Day ${c5Days}/100`,
       }
     ];
-  }, [lang]);
+  }, [lang, liveCandles]);
 
   return (
     <Layout lang={lang} setLang={setLang}>

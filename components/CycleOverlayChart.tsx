@@ -73,11 +73,12 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
           <div className="space-y-1.5">
             {payload.map((entry: any, i: number) => {
               const nameMap: Record<string, string> = {
-                current: isEn ? 'Cycle 4 (Active)' : '周期 4 (当前运行)',
-                currentBroken: isEn ? 'Cycle 4 (Invalidated / Red)' : '周期 4 (已跌破区间)',
+                current: isEn ? 'Cycle 5 (Active)' : '周期 5 (当前运行)',
+                currentBroken: isEn ? 'Cycle 5 (Invalidated / Red)' : '周期 5 (已跌破区间)',
                 cycle1: isEn ? 'Cycle 1 (2023)' : '周期 1 (2023)',
                 cycle2: isEn ? 'Cycle 2 (2024 Sp)' : '周期 2 (2024春)',
                 cycle3: isEn ? 'Cycle 3 (2024 Au)' : '周期 3 (2024秋冬)',
+                cycle4: isEn ? 'Cycle 4 (2025)' : '周期 4 (2025春夏)',
                 avgBenchmark: isEn ? 'Historical Avg' : '历史均值基准',
                 coneP90: isEn ? 'Monte Carlo 90th% (High)' : '蒙特卡洛 90分位上限',
                 coneP10: isEn ? 'Monte Carlo 10th% (Low)' : '蒙特卡洛 10分位下限',
@@ -148,8 +149,8 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
             </div>
             <p className="text-xs text-slate-500 font-sans mt-0.5">
               {isEn
-                ? 'All historical cycles aligned to Day 0. Distinct colors for Cycles 1-3, Day 30-70 Golden Window, and Wall Street Monte Carlo probability envelope.'
-                : '历史全部周期对齐横轴 Day 0，前三周期多色对照，30-70 天高亮为黄金窗口，包含机构级蒙特卡洛路径置信带。'}
+                ? 'All historical cycles aligned to Day 0. Distinct colors for Cycles 1-4, Day 30-70 Golden Window, and Wall Street Monte Carlo probability envelope.'
+                : '历史全部周期对齐横轴 Day 0，前四周期多色对照，30-70 天高亮为黄金窗口，包含机构级蒙特卡洛路径置信带。'}
             </p>
           </div>
         </div>
@@ -206,10 +207,10 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
                 }`}
               >
                 {isBroken
-                  ? (isEn ? 'Cycle 4 (Broken):' : '周期 4 (已跌破):')
+                  ? (isEn ? 'Cycle 5 (Broken):' : '周期 5 (已跌破):')
                   : radar.isUncertainPhase
-                  ? (isEn ? 'Cycle 4 (Pending):' : '周期 4 (待定):')
-                  : (isEn ? 'Cycle 4:' : '周期 4:')}
+                  ? (isEn ? 'Cycle 5 (Pending):' : '周期 5 (待定):')
+                  : (isEn ? 'Cycle 5:' : '周期 5:')}
               </span>
               <span className="font-bold text-slate-900 whitespace-nowrap">Day {latestPoint.day}</span>
               <span
@@ -237,45 +238,51 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
       <div className="flex flex-wrap items-center justify-between gap-3 py-3.5 text-xs font-mono border-b border-slate-100">
         <div className="flex flex-wrap items-center gap-3 md:gap-6">
           
-          {/* Active Cycle 4 - Bold Emerald Green */}
+          {/* Active Cycle 5 - Bold Emerald Green */}
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full">
             <span className="w-3 h-1.5 bg-[#10b981] rounded-full"></span>
             <span className="font-bold text-emerald-800 text-xs">
-              {isEn ? 'Cycle 4 (Active)' : '周期 4 (当前运行)'}
+              {isEn ? 'Cycle 5 (Active)' : '周期 5 (当前运行)'}
             </span>
           </div>
 
-          {/* Cycle 4 Broken Line Representation */}
+          {/* Cycle 5 Broken Line Representation */}
           {isBroken && (
             <div className="flex items-center gap-2 bg-rose-50 border border-rose-200/80 px-3 py-1 rounded-full">
               <span className="w-3.5 h-0 border-t-2 border-dashed border-[#ef4444] inline-block"></span>
               <span className="font-bold text-rose-700 text-xs">
-                {isEn ? 'Cycle 4 (Broken · Red Line)' : '周期 4 (已跌破 · 红线)'}
+                {isEn ? 'Cycle 5 (Broken · Red Line)' : '周期 5 (已跌破 · 红线)'}
               </span>
             </div>
           )}
 
-          {/* Cycle 1 - Muted Slate */}
+          {/* Cycle 1 - Light Slate */}
           <div className="flex items-center gap-2 text-slate-700 text-xs font-medium">
-            <span className="w-3.5 h-1 bg-[#64748b] rounded-full"></span>
+            <span className="w-3.5 h-1 bg-[#94a3b8] rounded-full"></span>
             <span>{isEn ? 'Cycle 1 (+82%)' : '周期 1 (+82%)'}</span>
           </div>
 
-          {/* Cycle 2 - Deep Slate Ink */}
+          {/* Cycle 2 - Mid Slate */}
           <div className="flex items-center gap-2 text-slate-700 text-xs font-medium">
-            <span className="w-3.5 h-1 bg-[#0f172a] rounded-full"></span>
+            <span className="w-3.5 h-1 bg-[#475569] rounded-full"></span>
             <span>{isEn ? 'Cycle 2 (+86%)' : '周期 2 (+86%)'}</span>
           </div>
 
-          {/* Cycle 3 - Warm Amber Ochre */}
+          {/* Cycle 3 - Deep Slate Ink */}
+          <div className="flex items-center gap-2 text-slate-700 text-xs font-medium">
+            <span className="w-3.5 h-1 bg-[#0f172a] rounded-full"></span>
+            <span>{isEn ? 'Cycle 3 (+99%)' : '周期 3 (+99%)'}</span>
+          </div>
+
+          {/* Cycle 4 - Warm Amber Ochre */}
           <div className="flex items-center gap-2 text-slate-700 text-xs font-medium">
             <span className="w-3.5 h-1 bg-[#d97706] rounded-full"></span>
-            <span>{isEn ? 'Cycle 3 (+99%)' : '周期 3 (+99%)'}</span>
+            <span>{isEn ? 'Cycle 4 (+61%)' : '周期 4 (+61%)'}</span>
           </div>
 
           {/* Historical Avg - Explicit Dashed Line Representation */}
           <div className="flex items-center gap-2 text-slate-600 text-xs font-medium">
-            <span className="w-4 h-0 border-t-2 border-dashed border-[#94a3b8] inline-block"></span>
+            <span className="w-4 h-0 border-t-2 border-dashed border-[#cbd5e1] inline-block"></span>
             <span>{isEn ? 'Historical Avg (Dashed)' : '历史均值 (虚线)'}</span>
           </div>
 
@@ -368,32 +375,42 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
               isAnimationActive={false}
             />
 
-            {/* Cycle 1 Line (Muted Slate) */}
+            {/* Cycle 1 Line (Light Slate) */}
             <Line
               type="monotone"
               dataKey="cycle1"
-              stroke="#64748b"
+              stroke="#94a3b8"
               strokeWidth={1.6}
               dot={false}
               isAnimationActive={false}
             />
 
-            {/* Cycle 2 Line (Deep Slate Ink) */}
+            {/* Cycle 2 Line (Mid Slate) */}
             <Line
               type="monotone"
               dataKey="cycle2"
-              stroke="#0f172a"
+              stroke="#475569"
               strokeWidth={1.8}
               dot={false}
               isAnimationActive={false}
             />
 
-            {/* Cycle 3 Line (Warm Amber Ochre) */}
+            {/* Cycle 3 Line (Deep Slate Ink) */}
             <Line
               type="monotone"
               dataKey="cycle3"
-              stroke="#d97706"
+              stroke="#0f172a"
               strokeWidth={2}
+              dot={false}
+              isAnimationActive={false}
+            />
+
+            {/* Cycle 4 Line (Warm Amber Ochre) */}
+            <Line
+              type="monotone"
+              dataKey="cycle4"
+              stroke="#d97706"
+              strokeWidth={2.2}
               dot={false}
               isAnimationActive={false}
             />
@@ -402,14 +419,14 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
             <Line
               type="monotone"
               dataKey="avgBenchmark"
-              stroke="#94a3b8"
+              stroke="#cbd5e1"
               strokeDasharray="5 5"
               strokeWidth={1.8}
               dot={false}
               isAnimationActive={false}
             />
 
-            {/* Active Cycle 4 (Current) - Solid Bold Emerald Line with Keyframe Node */}
+            {/* Active Cycle 5 (Current) - Solid Bold Emerald Line with Keyframe Node */}
             <Line
               type="monotone"
               dataKey="current"
@@ -419,7 +436,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
               isAnimationActive={false}
             />
 
-            {/* Cycle 4 Broken Segment (Red Dashed Line Extended to Day 100) */}
+            {/* Cycle 5 Broken Segment (Red Dashed Line Extended to Day 100) */}
             <Line
               type="monotone"
               dataKey="currentBroken"
@@ -455,10 +472,22 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
       </div>
 
       {/* 4. Cycle Takeaway Cards (Clean Mobbin-style Pill-Border Cards) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-100 text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mt-4 pt-4 border-t border-slate-100 text-xs">
         <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
           <div className="text-slate-900 font-bold mb-1 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#0f172a]"></span>
+            <span className="w-2 h-2 rounded-full bg-[#94a3b8]"></span>
+            <span>{isEn ? 'CYCLE 1: UNIFORM' : '周期 1：均匀分布'}</span>
+          </div>
+          <p className="text-slate-600 leading-relaxed font-sans text-[11px]">
+            {isEn
+              ? 'Gains split evenly between both halves, 77% of days closed above EMA15. The textbook baseline cycle.'
+              : '前后半段均衡推进，77% 交易日收在 EMA15 上方，是教科书式的基准节奏。'}
+          </p>
+        </div>
+
+        <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
+          <div className="text-slate-900 font-bold mb-1 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#475569]"></span>
             <span>{isEn ? 'CYCLE 2: FRONT-RUNNING' : '周期 2：前快后慢'}</span>
           </div>
           <p className="text-slate-600 leading-relaxed font-sans text-[11px]">
@@ -470,13 +499,25 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
 
         <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
           <div className="text-slate-900 font-bold mb-1 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#d97706]"></span>
+            <span className="w-2 h-2 rounded-full bg-[#0f172a]"></span>
             <span>{isEn ? 'CYCLE 3: ACCELERATION' : '周期 3：前慢后快'}</span>
           </div>
           <p className="text-slate-600 leading-relaxed font-sans text-[11px]">
             {isEn
               ? 'Grinded near EMA15 for first 30 days (+15%), then launched into vertical acceleration from Day 40 to 90 (+99%).'
               : '前 30 天贴着 EMA15 充分蓄力仅涨 +15%，第 40 天开始主升浪垂直加速拉升至 10 万+。'}
+          </p>
+        </div>
+
+        <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
+          <div className="text-slate-900 font-bold mb-1 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#d97706]"></span>
+            <span>{isEn ? 'CYCLE 4: LATE BLOW-OFF' : '周期 4：前快后横后冲'}</span>
+          </div>
+          <p className="text-slate-600 leading-relaxed font-sans text-[11px]">
+            {isEn
+              ? 'April 2025 launch: +41% by Day 50, then 40 days of high-level chop near EMA15 before a final blow-off to $123K. Lowest gain (+61%) but the most punishing to chase.'
+              : '2025 年 4 月启动：前 50 天已涨 +41%，随后 40 天贴着 EMA15 高位横盘，尾段二次冲顶至 12.3 万美元。涨幅最低 (+61%)，但追高最容易被反复洗。'}
           </p>
         </div>
 
@@ -500,7 +541,7 @@ export const CycleOverlayChart: React.FC<CycleOverlayProps> = ({ candles, lang }
           <p className="text-emerald-800 leading-relaxed font-sans text-[11px]">
             {isEn
               ? '10,000 synthetic paths project active cycle trajectory within 10th-90th empirical percentile, preventing premature exit.'
-              : '基于前三轮对数收益率与历史波动率构建 10-90% 置信走廊，避免在健康中位数震荡中被无谓洗下车。'}
+              : '基于前四轮对数收益率与历史波动率构建 10-90% 置信走廊，避免在健康中位数震荡中被无谓洗下车。'}
           </p>
         </div>
       </div>

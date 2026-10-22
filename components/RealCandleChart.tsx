@@ -59,7 +59,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   const volSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
   const priceLinesRef = useRef<any[]>([]);
 
-  // Active view tab: 'all' or 'c1', 'c2', 'c3', 'c4'
+  // Active view tab: 'all' or 'c1', 'c2', 'c3', 'c4', 'c5'
   const [activeCycleTab, setActiveCycleTab] = useState<string>('all');
   const activeCycleTabRef = useRef<string>('all');
   activeCycleTabRef.current = activeCycleTab;
@@ -68,12 +68,13 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   // Whenever user pans or zooms, this is updated and NEVER overwritten by background polling!
   const currentLogicalRangeRef = useRef<{ from: number; to: number } | null>(null);
 
-  // References to the 4 cycle background shading DOM elements (direct zero-lag manipulation)
+  // References to the 5 cycle background shading DOM elements (direct zero-lag manipulation)
   const bandsMapRef = useRef<{ [key: string]: { p1: HTMLDivElement | null; p2: HTMLDivElement | null } }>({
     c1: { p1: null, p2: null },
     c2: { p1: null, p2: null },
     c3: { p1: null, p2: null },
     c4: { p1: null, p2: null },
+    c5: { p1: null, p2: null },
   });
 
   // Legend tooltip dynamic data
@@ -119,7 +120,19 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   const chartDatesRef = useRef<string[]>([]);
   chartDatesRef.current = chartDates;
 
-  // Defined 4 Major Cycles with exact 50d / 50d partitions
+  // Live gain of the active cycle (start close -> latest close), never stale
+  const currentCycleGain = useMemo(() => {
+    const startMs = new Date('2026-08-17').getTime();
+    const startIdx = chartData.findIndex((c) => Math.abs(c.time - startMs) < 36 * 3600 * 1000);
+    if (startIdx < 0 || chartData.length === 0) return '-';
+    const base = chartData[startIdx].close;
+    const last = chartData[chartData.length - 1]?.close ?? base;
+    if (!base) return '-';
+    const gain = ((last - base) / base) * 100;
+    return `${gain >= 0 ? '+' : ''}${gain.toFixed(1)}%`;
+  }, [chartData]);
+
+  // Defined 5 Major Cycles with exact 50d / 50d partitions
   const cycleBands: CycleDefinition[] = useMemo(() => [
     {
       id: 'c1',
@@ -150,15 +163,24 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
     },
     {
       id: 'c4',
-      name: isEn ? 'Cycle 4 (Active)' : '周期 4 (当前运行)',
+      name: isEn ? 'Cycle 4' : '周期 4',
       label: 'C4',
+      start: '2025-04-08',
+      mid: '2025-05-28',
+      end: '2025-07-17',
+      gain: '+61.4%',
+    },
+    {
+      id: 'c5',
+      name: isEn ? 'Cycle 5 (Active)' : '周期 5 (当前运行)',
+      label: 'C5',
       start: '2026-08-17',
       mid: '2026-10-06',
       end: '2026-11-25',
-      gain: '+32.2%',
+      gain: currentCycleGain,
       isCurrent: true,
     },
-  ], [isEn]);
+  ], [isEn, currentCycleGain]);
   const cycleBandsRef = useRef<CycleDefinition[]>([]);
   cycleBandsRef.current = cycleBands;
 
@@ -581,7 +603,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
     }
   }, [chartData, emaData, data, updateBandsCoords]);
 
-  // Draw Founder Orders Lines on Chart ONLY for Cycle 4 or when specifically looking at current cycle
+  // Draw Founder Orders Lines on Chart ONLY for Cycle 5 or when specifically looking at current cycle
   useEffect(() => {
     if (!candleSeriesRef.current) return;
 
@@ -590,12 +612,12 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
     });
     priceLinesRef.current = [];
 
-    // ONLY show founder orders when viewing Cycle 4 specifically!
-    const shouldShowForCycle = activeCycleTab === 'c4';
+    // ONLY show founder orders when viewing Cycle 5 specifically!
+    const shouldShowForCycle = activeCycleTab === 'c5';
 
-    // Update 3-month fill markers on candlestick series (visible in 'all' or 'c4')
+    // Update 3-month fill markers on candlestick series (visible in 'all' or 'c5')
     if (markersPluginRef.current) {
-      if (!showFounderLayers || (activeCycleTab !== 'all' && activeCycleTab !== 'c4') || !founderFills.length) {
+      if (!showFounderLayers || (activeCycleTab !== 'all' && activeCycleTab !== 'c5') || !founderFills.length) {
         markersPluginRef.current.setMarkers([]);
       } else {
         const availableDates = new Set(chartDates);
@@ -642,9 +664,9 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       }
     }
 
-    // Draw ATR Defense Floor price line when viewing c4 or all and latest close is below EMA15
+    // Draw ATR Defense Floor price line when viewing c5 or all and latest close is below EMA15
     if (
-      (activeCycleTab === 'c4' || activeCycleTab === 'all') &&
+      (activeCycleTab === 'c5' || activeCycleTab === 'all') &&
       latestBar &&
       latestBar.close < latestBar.ema &&
       atrDefenseFloor > 0
@@ -829,7 +851,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
-          {onToggleFounderLayers && (activeCycleTab === 'c4' || activeCycleTab === 'all') && (
+          {onToggleFounderLayers && (activeCycleTab === 'c5' || activeCycleTab === 'all') && (
             <button
               onClick={onToggleFounderLayers}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${

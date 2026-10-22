@@ -116,7 +116,7 @@ export const fetchCandleData = async (_days: string = 'max'): Promise<CandleData
       .sort((a: CandleData, b: CandleData) => a.time - b.time);
 
   try {
-    // Paginate from 2023-01-01 to cover Cycle 1, Cycle 2, Cycle 3 and Current Cycle
+    // Paginate from 2023-01-01 to cover historical Cycles 1-4 and the active Cycle 5
     const startTime2023 = new Date('2023-01-01').getTime();
     const batch1 = await fetchFirstSuccess([
       `${BINANCE_API}/klines?symbol=BTCUSDT&interval=1d&startTime=${startTime2023}&limit=1000`,

@@ -85,8 +85,19 @@ export const HISTORICAL_CYCLES_DEF = [
   },
   {
     id: 'cycle4',
-    labelEn: 'Cycle 4 (Active Cycle)',
-    labelZh: '周期 4 (当前运行)',
+    labelEn: 'Cycle 4 (2025 Spring-Summer)',
+    labelZh: '周期 4 (2025春夏)',
+    startDate: '2025-04-08',
+    endDate: '2025-07-17',
+    descriptionZh: '前快后横型 (急拉后高位横盘40天，尾段二次冲顶)',
+    descriptionEn: 'Front-loaded Surge, 40-Day Chop, Late Blow-off',
+    gain: '+61.4%',
+    days: 100,
+  },
+  {
+    id: 'cycle5',
+    labelEn: 'Cycle 5 (Active Cycle)',
+    labelZh: '周期 5 (当前运行)',
     startDate: '2026-08-17',
     endDate: '2026-11-25',
     descriptionZh: '均线贴合上扬，已完成诱空洗盘反包',
@@ -281,9 +292,9 @@ export const calculateStreakDetails = (
 
   const computedAtr = atrData && atrData.length === candles.length ? atrData : calculateATR(candles, 14);
 
-  // If candles span into Cycle 4 timeline (after 2026-08-01), anchor to Cycle 4 launch (2026-08-17)
-  const c4StartMs = new Date('2026-08-17').getTime();
-  const hasC4Timeline = candles.some(c => c.time >= c4StartMs - 7 * 86400000);
+  // If candles span into Cycle 5 timeline (after 2026-08-01), anchor to Cycle 5 launch (2026-08-17)
+  const c5StartMs = new Date('2026-08-17').getTime();
+  const hasC5Timeline = candles.some(c => c.time >= c5StartMs - 7 * 86400000);
 
   let streak = 0;
   let isUncertain = false;
@@ -295,7 +306,7 @@ export const calculateStreakDetails = (
 
   while (i >= 0) {
     const c = candles[i];
-    if (hasC4Timeline && c.time < c4StartMs - 36 * 3600 * 1000) {
+    if (hasC5Timeline && c.time < c5StartMs - 36 * 3600 * 1000) {
       break;
     }
     const emaVal = emaData[i]?.ema;
@@ -317,7 +328,7 @@ export const calculateStreakDetails = (
     let clusterIdx = i;
 
     while (clusterIdx >= 0 && candles[clusterIdx].close < (emaData[clusterIdx]?.ema || 0)) {
-      if (hasC4Timeline && candles[clusterIdx].time < c4StartMs - 36 * 3600 * 1000) break;
+      if (hasC5Timeline && candles[clusterIdx].time < c5StartMs - 36 * 3600 * 1000) break;
       const e = emaData[clusterIdx]?.ema || candles[clusterIdx].close;
       const closeVal = candles[clusterIdx].close;
       const depth = ((e - closeVal) / e) * 100;
@@ -855,66 +866,68 @@ export const buildNormalizedCycleData = (
   const c1Gains = extractCycleGain('2023-10-14', 100);
   const c2Gains = extractCycleGain('2024-01-22', 100);
   const c3Gains = extractCycleGain('2024-09-07', 100);
+  const c4Gains = extractCycleGain('2025-04-08', 100);
 
-  // Active Cycle (Cycle 4): Anchored to launch date 2026-08-17 (Day 0)
-  const c4StartMs = new Date('2026-08-17').getTime();
-  let c4StartIdx = candles.findIndex(c => Math.abs(c.time - c4StartMs) < 36 * 3600 * 1000);
-  if (c4StartIdx === -1) {
+  // Active Cycle (Cycle 5): Anchored to launch date 2026-08-17 (Day 0)
+  const c5StartMs = new Date('2026-08-17').getTime();
+  let c5StartIdx = candles.findIndex(c => Math.abs(c.time - c5StartMs) < 36 * 3600 * 1000);
+  if (c5StartIdx === -1) {
     const emaData = calculateEMA(candles, EMA_PERIOD);
     const streak = calculateConsecutiveAbove(candles, emaData);
-    if (streak > 0) c4StartIdx = candles.length - streak;
+    if (streak > 0) c5StartIdx = candles.length - streak;
   }
 
   const lastPrice = candles[candles.length - 1]?.close || 0;
   const radar = calculateTacticalRadar(candles, lastPrice);
 
   const isBroken = options?.isBroken !== undefined ? options.isBroken : (radar.isBroken || radar.state === 'true_breakdown');
-  const elapsedDays = c4StartIdx !== -1 ? Math.min(100, candles.length - 1 - c4StartIdx) : 0;
+  const elapsedDays = c5StartIdx !== -1 ? Math.min(100, candles.length - 1 - c5StartIdx) : 0;
   const breakdownDay = options?.breakdownDay ?? radar.breakdownDay ?? (isBroken ? Math.max(1, elapsedDays - (radar.activeDipDays || 2)) : undefined);
 
-  // Extract actual gains for Cycle 4
-  const c4ActualGains: (number | undefined)[] = [];
-  if (c4StartIdx !== -1) {
-    const basePrice = candles[c4StartIdx].close;
+  // Extract actual gains for Cycle 5
+  const c5ActualGains: (number | undefined)[] = [];
+  if (c5StartIdx !== -1) {
+    const basePrice = candles[c5StartIdx].close;
     for (let d = 0; d <= elapsedDays; d++) {
-      const idx = c4StartIdx + d;
+      const idx = c5StartIdx + d;
       if (idx < candles.length) {
         const gain = ((candles[idx].close - basePrice) / basePrice) * 100;
-        c4ActualGains.push(Number(gain.toFixed(1)));
+        c5ActualGains.push(Number(gain.toFixed(1)));
       }
     }
   }
 
-  const lastActualGain = c4ActualGains.length > 0 ? c4ActualGains[c4ActualGains.length - 1] : 0;
+  const lastActualGain = c5ActualGains.length > 0 ? c5ActualGains[c5ActualGains.length - 1] : 0;
 
   for (let day = 0; day <= 100; day++) {
     const c1 = c1Gains[day];
     const c2 = c2Gains[day];
     const c3 = c3Gains[day];
+    const c4 = c4Gains[day];
 
     let current: number | undefined = undefined;
     let currentBroken: number | undefined = undefined;
     let isBreakdownPoint = false;
     let breakdownLabel: string | undefined = undefined;
 
-    if (c4ActualGains.length > 0) {
+    if (c5ActualGains.length > 0) {
       if (!isBroken) {
         // Active mode: keep valid segment up to elapsedDays
         if (day <= elapsedDays) {
-          current = c4ActualGains[day];
+          current = c5ActualGains[day];
         }
       } else {
         // Invalidation mode: keep valid segment in green, rest in red to Day 100
         const bDay = breakdownDay !== undefined ? Math.min(breakdownDay, elapsedDays) : elapsedDays;
         if (day < bDay) {
-          current = c4ActualGains[day];
+          current = c5ActualGains[day];
         } else if (day === bDay) {
-          current = c4ActualGains[day] ?? lastActualGain;
-          currentBroken = c4ActualGains[day] ?? lastActualGain;
+          current = c5ActualGains[day] ?? lastActualGain;
+          currentBroken = c5ActualGains[day] ?? lastActualGain;
           isBreakdownPoint = true;
           breakdownLabel = `已跌破 (Day ${bDay})`;
         } else if (day <= elapsedDays) {
-          currentBroken = c4ActualGains[day];
+          currentBroken = c5ActualGains[day];
         } else {
           // Project remaining 100 days as a red line
           currentBroken = lastActualGain;
@@ -922,7 +935,7 @@ export const buildNormalizedCycleData = (
       }
     }
 
-    const validPast = [c1, c2, c3].filter((x): x is number => typeof x === 'number');
+    const validPast = [c1, c2, c3, c4].filter((x): x is number => typeof x === 'number');
     const avgBenchmark = validPast.length > 0 ? Number((validPast.reduce((a, b) => a + b, 0) / validPast.length).toFixed(1)) : undefined;
 
     // Wall Street Monte Carlo Confidence Cone
@@ -952,6 +965,7 @@ export const buildNormalizedCycleData = (
       cycle1: c1,
       cycle2: c2,
       cycle3: c3,
+      cycle4: c4,
       current,
       currentBroken,
       isBreakdownPoint,

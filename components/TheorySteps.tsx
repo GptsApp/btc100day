@@ -350,7 +350,7 @@ export const TheorySteps: React.FC<MethodologyGuideProps> = ({ lang }) => {
                   <tr className="hover:bg-slate-50/50">
                     <td className="p-3.5 font-bold text-amber-700">{isEn ? 'Daily close below EMA15 - 1.0 ATR for 48 hours' : '日线收盘价低于 EMA15 - 1.0 ATR 达 48 小时'}</td>
                     <td className="p-3.5 font-medium">{isEn ? 'True Breakdown' : '趋势硬失效 (True Breakdown)'}</td>
-                    <td className="p-3.5 font-bold text-slate-900">{isEn ? '100% stop loss; curve switches to red line' : '100% 清仓市价止损，曲线4切换为红线标注'}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{isEn ? '100% stop loss; curve switches to red line' : '100% 清仓市价止损，当前周期曲线切换为红线标注'}</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50">
                     <td className="p-3.5 font-bold text-amber-700">{isEn ? 'Chop below EMA15 exceeding 10 trading days' : '连续收在 EMA15 下方超过 10 个交易日'}</td>
