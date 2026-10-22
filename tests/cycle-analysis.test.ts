@@ -9,6 +9,7 @@ import {
   calculateStreakDetails,
   calculateTacticalRadar,
   buildNormalizedCycleData,
+  HISTORICAL_CYCLES_DEF,
 } from '../services/cycleAnalysis.ts';
 
 const makeFixture = (): CandleData[] => {
@@ -321,3 +322,34 @@ test('Spring Reclaim: when a 7-day dip in ATR moat reclaims EMA15, streak bridge
 });
 
 
+
+
+test('Cycle registry integrity: sequential ids, 100d spans, and no silently skipped cycle', () => {
+  const cycles = HISTORICAL_CYCLES_DEF;
+  assert.ok(cycles.length >= 5, 'Must register all four historical cycles plus the active one');
+
+  // Ids must be cycle1..cycleN in chronological order with exactly one active (current) cycle
+  cycles.forEach((c, i) => {
+    assert.equal(c.id, `cycle${i + 1}`, `Cycle at position ${i} must be cycle${i + 1}, got ${c.id}`);
+  });
+  assert.equal(cycles.filter((c) => c.isCurrent).length, 1, 'Exactly one cycle may be flagged as current');
+  assert.equal(cycles[cycles.length - 1].isCurrent, true, 'The active cycle must be the last entry');
+
+  // Each cycle must start before it ends and span ~100 days
+  cycles.forEach((c) => {
+    const start = new Date(c.startDate).getTime();
+    const end = new Date(c.endDate).getTime();
+    assert.ok(end > start, `${c.id} endDate must be after startDate`);
+    const span = (end - start) / 86400000;
+    assert.ok(span >= 95 && span <= 105, `${c.id} span must stay near 100 days, got ${span.toFixed(1)}`);
+  });
+
+  // Regression guard: consecutive cycle launches must never be more than 500 days apart.
+  // The skipped 2025 bull run left a 709-day hole between Cycle 3 and the active cycle.
+  for (let i = 1; i < cycles.length; i++) {
+    const prev = new Date(cycles[i - 1].startDate).getTime();
+    const cur = new Date(cycles[i].startDate).getTime();
+    const gap = (cur - prev) / 86400000;
+    assert.ok(gap > 0 && gap <= 500, `Gap between ${cycles[i - 1].id} and ${cycles[i].id} is ${gap.toFixed(0)} days — a cycle was likely skipped`);
+  }
+});
