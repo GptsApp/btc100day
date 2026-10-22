@@ -50,7 +50,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="md:hidden p-1.5 -ml-1 text-slate-500 hover:text-slate-900 rounded transition-colors"
+                className="md:hidden w-9 h-9 -ml-1.5 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
                 aria-label="Menu"
               >
                 <Menu className="w-5 h-5" />
@@ -131,7 +131,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                   type="button"
                   onClick={() => setLang('zh')}
                   aria-label="切换至中文"
-                  className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 min-h-[32px] rounded-full transition-all cursor-pointer ${
                     lang === 'zh'
                       ? 'bg-white text-slate-900 font-bold shadow-xs'
                       : 'text-slate-500 hover:text-slate-900'
@@ -143,7 +143,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                   type="button"
                   onClick={() => setLang('en')}
                   aria-label="Switch to English"
-                  className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 min-h-[32px] rounded-full transition-all cursor-pointer ${
                     lang === 'en'
                       ? 'bg-white text-slate-900 font-bold shadow-xs'
                       : 'text-slate-500 hover:text-slate-900'
@@ -172,7 +172,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                   <button
                     type="button"
                     onClick={() => setLang('zh')}
-                    className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                    className={`px-4 py-2 min-h-[38px] rounded-full transition-all cursor-pointer ${
                       lang === 'zh' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600'
                     }`}
                   >
@@ -181,7 +181,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, lang, setLang }) => {
                   <button
                     type="button"
                     onClick={() => setLang('en')}
-                    className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                    className={`px-4 py-2 min-h-[38px] rounded-full transition-all cursor-pointer ${
                       lang === 'en' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600'
                     }`}
                   >

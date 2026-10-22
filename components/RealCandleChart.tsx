@@ -292,7 +292,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
 
     const chart = createChart(containerRef.current, {
       width: containerRef.current.clientWidth,
-      height: 520,
+      height: containerRef.current.clientHeight || 520,
       layout: {
         background: { color: 'transparent' },
         textColor: '#64748b',
@@ -386,11 +386,16 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       if (containerRef.current && chartRef.current) {
         chartRef.current.applyOptions({
           width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight || 520,
         });
         updateBandsCoords();
       }
     };
     window.addEventListener('resize', handleResize);
+    // Responsive height (mobile 360px -> desktop 520px): keep the canvas in sync with its container
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(handleResize) : null;
+    if (resizeObserver && containerRef.current) resizeObserver.observe(containerRef.current);
 
     // Crosshair Subscriber
     chart.subscribeCrosshairMove((param) => {
@@ -400,7 +405,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
         param.point.x < 0 ||
         param.point.x > containerRef.current!.clientWidth ||
         param.point.y < 0 ||
-        param.point.y > 520
+        param.point.y > (containerRef.current?.clientHeight || 520)
       ) {
         setCrosshairData(null);
         return;
@@ -445,6 +450,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      resizeObserver?.disconnect();
       markersPluginRef.current = null;
       if (chartRef.current) {
         chartRef.current.remove();
@@ -809,19 +815,19 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
   const priceChangePct = activeDisplay && activeDisplay.open > 0 ? (priceChange / activeDisplay.open * 100) : 0;
 
   return (
-    <div className="flex flex-col h-[640px] font-mono text-xs select-none relative">
+    <div className="flex flex-col h-[560px] sm:h-[600px] lg:h-[640px] font-mono text-xs select-none relative">
       
       {/* 1. TOOLBAR (strict single-line fixed height, zero layout jitter) */}
-      <div className="h-[38px] min-h-[38px] max-h-[38px] flex items-center justify-between gap-2 px-1 mb-1 border-b border-slate-100 text-slate-500 overflow-hidden">
+      <div className="h-[42px] min-h-[42px] max-h-[42px] flex items-center justify-between gap-1.5 sm:gap-2 px-1 mb-1 border-b border-slate-100 text-slate-500 overflow-hidden">
         
         {/* Left: O/H/L/C numbers + EMA15 + Single Line Tag */}
         {activeDisplay && (
-          <div className="flex items-center gap-2 text-[11px] min-w-0 overflow-hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] min-w-0 flex-1 overflow-x-auto no-scrollbar">
             <span className="text-slate-900 font-bold shrink-0 whitespace-nowrap">{activeDisplay.time}</span>
             <div className="flex items-center gap-1.5 font-mono shrink-0 whitespace-nowrap">
-              <span>O:<strong className="text-slate-900 ml-0.5">${Math.round(activeDisplay.open).toLocaleString()}</strong></span>
-              <span>H:<strong className="text-emerald-600 ml-0.5">${Math.round(activeDisplay.high).toLocaleString()}</strong></span>
-              <span>L:<strong className="text-slate-700 ml-0.5">${Math.round(activeDisplay.low).toLocaleString()}</strong></span>
+              <span className="hidden sm:inline">O:<strong className="text-slate-900 ml-0.5">${Math.round(activeDisplay.open).toLocaleString()}</strong></span>
+              <span className="hidden sm:inline">H:<strong className="text-emerald-600 ml-0.5">${Math.round(activeDisplay.high).toLocaleString()}</strong></span>
+              <span className="hidden sm:inline">L:<strong className="text-slate-700 ml-0.5">${Math.round(activeDisplay.low).toLocaleString()}</strong></span>
               <span>C:<strong className={`ml-0.5 ${isUp ? 'text-emerald-600' : 'text-slate-700'}`}>${Math.round(activeDisplay.close).toLocaleString()}</strong></span>
               <span className={`font-semibold ${isUp ? 'text-emerald-600' : 'text-slate-700'}`}>
                 ({isUp ? '+' : ''}{priceChangePct.toFixed(1)}%)
@@ -832,7 +838,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
 
             <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
               <span className="w-2 h-0.5 bg-slate-900 rounded-full"></span>
-              <span className="text-slate-600">EMA15:<strong className="text-slate-900 ml-1">${activeDisplay.ema.toLocaleString()}</strong></span>
+              <span className="text-slate-600 whitespace-nowrap">EMA15:<strong className="text-slate-900 ml-1">${activeDisplay.ema.toLocaleString()}</strong></span>
             </div>
 
             {!crosshairData && latestBar && latestBar.close < latestBar.ema && atrDefenseFloor > 0 ? (
@@ -854,20 +860,20 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
           {onToggleFounderLayers && (activeCycleTab === 'c5' || activeCycleTab === 'all') && (
             <button
               onClick={onToggleFounderLayers}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`flex items-center gap-1 px-2 sm:px-2.5 min-h-[32px] py-1 rounded-full text-[11px] border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                 showFounderLayers
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-300 font-bold'
                   : 'bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-900'
               }`}
             >
               {showFounderLayers ? <Eye className="w-3 h-3 shrink-0" /> : <EyeOff className="w-3 h-3 shrink-0" />}
-              <span>{isEn ? '@Paulwei Rails' : '魏神挂单轨'}</span>
+              <span className="hidden sm:inline">{isEn ? '@Paulwei Rails' : '魏神挂单轨'}</span>
             </button>
           )}
 
           <button
             onClick={() => zoomToCycle('all')}
-            className="p-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer shrink-0"
+            className="w-[32px] h-[32px] flex items-center justify-center rounded-full bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer shrink-0"
             title={isEn ? 'Reset Zoom (All)' : '重置全景视图'}
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -877,7 +883,7 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
       </div>
 
       {/* 2. CHART VIEWPORT WITH PRECISE 50D/50D CYCLE BACKGROUND OVERLAYS */}
-      <div className="relative flex-1 w-full overflow-hidden rounded-xl bg-white" style={{ height: '520px' }}>
+      <div className="relative flex-1 w-full min-h-0 overflow-hidden rounded-xl bg-white">
         
         {/* Cycle 50d/50d Colored Background Shading Zones (Zero-lag direct DOM styling) */}
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" style={{ bottom: '26px' }}>
@@ -924,52 +930,63 @@ export const RealCandleChart: React.FC<RealCandleChartProps> = ({
         <div ref={containerRef} className="relative z-10 w-full h-full" />
       </div>
 
-      {/* 3. 1-CLICK CYCLE ZOOM CONTROLLER */}
-      <div className="h-[46px] min-h-[46px] max-h-[46px] flex items-center justify-between gap-2 pt-2 border-t border-slate-100 text-[11px] overflow-x-auto no-scrollbar">
-        
+      {/* 3. 1-CLICK CYCLE ZOOM CONTROLLER (swipeable pill rail, native scrollbar hidden) */}
+      <div className="flex items-center gap-2 pt-2 pb-0.5 border-t border-slate-100 text-[11px]">
+
         {/* Left Label */}
-        <div className="flex items-center gap-1.5 text-slate-500 shrink-0 pr-1">
+        <div className="flex items-center gap-1.5 text-slate-500 shrink-0">
           <Compass className="w-3.5 h-3.5 text-slate-600" />
-          <span className="hidden sm:inline font-medium text-slate-800">{isEn ? 'Quick Zoom:' : '一键定位周期:'}</span>
+          <span className="hidden md:inline font-medium text-slate-800">{isEn ? 'Quick Zoom:' : '一键定位周期:'}</span>
         </div>
 
-        {/* Cycle Navigation Buttons (Mobbin Stadium Pill Style) */}
-        <div className="flex items-center gap-1.5 shrink-0 flex-1 justify-start md:justify-end">
-          
-          <button
-            onClick={() => zoomToCycle('all')}
-            className={`px-3 py-1 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1 active:scale-95 ${
-              activeCycleTab === 'all'
-                ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
-                : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
-            }`}
-          >
-            <span>{isEn ? 'All (Full View)' : '全景总览 (2023-2026)'}</span>
-          </button>
+        {/* Cycle Navigation Buttons — one-finger swipeable, no visible scroll thumb */}
+        <div className="relative flex-1 min-w-0">
+          <div className="overflow-x-auto md:overflow-visible no-scrollbar overscroll-x-contain">
+            <div className="flex w-max md:w-full md:flex-wrap items-center gap-1.5 pr-1 md:justify-end">
 
-          {cycleBands.map((c) => {
-            const isActive = activeCycleTab === c.id;
-            return (
-              <button
-                key={c.id}
-                onClick={() => zoomToCycle(c.id)}
-                className={`px-3 py-1 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                  isActive
-                    ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
-                    : c.isCurrent
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100/80'
-                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
-                }`}
-                title={`点击平滑缩放聚焦至 ${c.name} (${c.start} ~ ${c.end})`}
-              >
-                {c.isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>}
-                <span className="font-bold">{c.name}</span>
-                <span className={`text-[10px] ${isActive ? 'text-slate-300' : c.isCurrent ? 'text-emerald-700' : 'text-slate-400'}`}>
-                  {c.gain}
-                </span>
-              </button>
-            );
-          })}
+            <button
+              onClick={() => zoomToCycle('all')}
+              className={`shrink-0 whitespace-nowrap min-h-[36px] sm:min-h-[32px] px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1 active:scale-95 ${
+                activeCycleTab === 'all'
+                  ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
+                  : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
+              }`}
+            >
+              <span className="sm:hidden">{isEn ? 'All' : '全景'}</span>
+              <span className="hidden sm:inline">{isEn ? 'All Cycles' : '全景总览'}</span>
+            </button>
+
+            {cycleBands.map((c) => {
+              const isActive = activeCycleTab === c.id;
+              const shortName = c.name.replace(/\s*\(.*?\)\s*/g, '');
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => zoomToCycle(c.id)}
+                  className={`shrink-0 whitespace-nowrap min-h-[36px] sm:min-h-[32px] px-2.5 sm:px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-95 ${
+                    isActive
+                      ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm'
+                      : c.isCurrent
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100/80'
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
+                  }`}
+                  title={`${isEn ? 'Zoom to' : '点击平滑缩放聚焦至'} ${c.name} (${c.start} ~ ${c.end})`}
+                >
+                  {c.isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>}
+                  <span className="font-bold">
+                    <span className="sm:hidden">{shortName}</span>
+                    <span className="hidden sm:inline">{c.name}</span>
+                  </span>
+                  <span className={`text-[10px] ${isActive ? 'text-slate-300' : c.isCurrent ? 'text-emerald-700' : 'text-slate-400'}`}>
+                    {c.gain}
+                  </span>
+                </button>
+              );
+            })}
+            </div>
+          </div>
+          {/* Right-edge fade: hints the rail is swipeable on narrow screens */}
+          <div className="md:hidden pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent"></div>
         </div>
 
       </div>

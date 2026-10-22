@@ -311,49 +311,49 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
               <div className="grid grid-cols-4 gap-1 bg-slate-100/90 p-1 rounded-full border border-slate-200/80 w-full">
                 <button
                   onClick={() => setActiveTab('founder')}
-                  className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                  className={`px-1.5 sm:px-2 py-2.5 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                     activeTab === 'founder'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Layers className="w-3 h-3 shrink-0" />
+                  <Layers className="w-3 h-3 shrink-0 hidden sm:block" />
                   <span>@Paulwei</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('tactical')}
-                  className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                  className={`px-1.5 sm:px-2 py-2.5 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                     activeTab === 'tactical'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Zap className="w-3 h-3 shrink-0" />
+                  <Zap className="w-3 h-3 shrink-0 hidden sm:block" />
                   <span>{isEn ? 'Radar' : '雷达'}</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('calculator')}
-                  className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                  className={`px-1.5 sm:px-2 py-2.5 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                     activeTab === 'calculator'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Calculator className="w-3 h-3 shrink-0" />
+                  <Calculator className="w-3 h-3 shrink-0 hidden sm:block" />
                   <span>{isEn ? 'Sizer' : '仓位计算'}</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('microstructure')}
-                  className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                  className={`px-1.5 sm:px-2 py-2.5 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                     activeTab === 'microstructure'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Activity className="w-3 h-3 shrink-0" />
+                  <Activity className="w-3 h-3 shrink-0 hidden sm:block" />
                   <span>{isEn ? 'Micro' : '微观流'}</span>
                 </button>
               </div>
@@ -380,7 +380,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                       </div>
                       <div>
                         <span className="text-slate-500 block whitespace-nowrap">{isEn ? 'LEVERAGE' : '总杠杆'}</span>
-                        <span className="text-slate-900 font-bold whitespace-nowrap">{isEn ? '1.18x (Spot-Equiv)' : '1.18x (现货级)'}</span>
+                        <span className="text-slate-900 font-bold text-[10px] sm:text-[11px] leading-tight">{isEn ? '1.18x (Spot-Equiv)' : '1.18x (现货级)'}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block whitespace-nowrap">{isEn ? 'LIQ PRICE' : '强平价'}</span>
@@ -398,7 +398,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                 <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs">
                   <button
                     onClick={() => setFounderSubView('orders')}
-                    className={`py-1.5 px-2.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    className={`py-2 sm:py-1.5 px-2.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       founderSubView === 'orders'
                         ? 'bg-white text-slate-900 shadow-xs'
                         : 'text-slate-500 hover:text-slate-900'
@@ -411,7 +411,7 @@ export const TradingCockpit: React.FC<TradingCockpitProps> = ({
                   </button>
                   <button
                     onClick={() => setFounderSubView('fills')}
-                    className={`py-1.5 px-2.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    className={`py-2 sm:py-1.5 px-2.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       founderSubView === 'fills'
                         ? 'bg-white text-slate-900 shadow-xs'
                         : 'text-slate-500 hover:text-slate-900'

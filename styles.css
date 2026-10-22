@@ -4,3 +4,27 @@
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
 }
+
+/* Hide native scrollbars on horizontal pill rails (keeps swipe/scroll behaviour) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Snappier, less accidental-highlight touch behaviour on mobile */
+@media (hover: none) {
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Keep anchored sections clear of the sticky header on mobile */
+[id] {
+  scroll-margin-top: 76px;
+}
